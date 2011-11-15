@@ -15,17 +15,30 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <stdio.h>
 
-#include <percona_playback/percona_playback.h>
+#include "percona_playback/percona_playback.h"
 
-/**
- * @TODO Actually write a real test suite here
- */
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  (void)argc; (void)argv;
-  percona_playback_st *the_percona_playback= percona_playback_create("test_Percona Playback");
-  assert(the_percona_playback);
-  return 0;
+  int exit_code= 0;
+
+  percona_playback_st *the_percona_playback= percona_playback_create("Percona Playback");
+  printf("%s\n", percona_playback_get_name(the_percona_playback));
+
+  int r= percona_playback_argv(the_percona_playback, argc, argv);
+  if (r > 0)
+    goto exit;
+  if (r < 0)
+  {
+    exit_code= r;
+    goto exit;
+  }
+
+  r= percona_playback_run_all(the_percona_playback);
+  exit_code= r;
+
+ exit:
+  percona_playback_destroy(&the_percona_playback);
+  return exit_code;
 }

@@ -42,6 +42,15 @@ void percona_playback_destroy(percona_playback_st **the_percona_playback);
 PERCONA_PLAYBACK_API
 const char *percona_playback_get_name(const percona_playback_st *the_percona_playback);
 
+PERCONA_PLAYBACK_API
+int percona_playback_argv(percona_playback_st *the_percona_playback,
+			  int argc, char** argv);
+
+PERCONA_PLAYBACK_API
+int percona_playback_run(const percona_playback_st *the_percona_playback);
+
+PERCONA_PLAYBACK_API
+int percona_playback_run_all(const percona_playback_st *the_percona_playback);
 
 #ifdef __cplusplus
 }
