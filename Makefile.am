@@ -62,6 +62,7 @@ libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES}
 check_PROGRAMS += \
   percona_playback/test/help
 
+percona_playback_test_help_SOURCES= percona_playback/test/help.cc
 percona_playback_test_help_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 #
