@@ -55,8 +55,9 @@ libpercona_playback_la_CXXFLAGS = \
 	$(AM_CXXFLAGS) \
 	-DBUILDING_PERCONA_PLAYBACK
 
-libpercona_playback_la_LIBADD = $(LIBDL_LIBS) $(BOOST_LIBS) $(TBB_LIBS) $(pandora_plugin_libs)
+libpercona_playback_la_LIBADD = $(LIBDL_LIBS) $(BOOST_LIBS) $(TBB_LIBS)
 libpercona_playback_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBPERCONA_PLAYBACK_VERSION) $(BOOST_LIBS) $(TBB_LIBS) $(pandora_plugin_libs)
+libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES}
 
 check_PROGRAMS += \
   percona_playback/test/basic
