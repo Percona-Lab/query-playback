@@ -53,6 +53,7 @@ PANDORA_REQUIRE_LIBMYSQLCLIENT
 PANDORA_REQUIRE_BOOST
 PANDORA_REQUIRE_BOOST_PROGRAM_OPTIONS
 PANDORA_REQUIRE_BOOST_THREAD
+PANDORA_REQUIRE_TBB
 
 PANDORA_PLUGINS
 
@@ -77,7 +78,7 @@ echo "   * Coverage enabled:          $ac_coverage"
 echo "   * Warnings as errors:        $ac_cv_warnings_as_errors"
 echo "   * Configured modules:"
 echo ""
-
+echo $PANDORA_PLUGIN_LIST
 for module in `echo $PANDORA_PLUGIN_LIST | sed 's/_/::/g' | tr ',' '\n' | sort`
 do
   echo "     - $module"

@@ -36,6 +36,7 @@ EXTRA_DIST = \
   docs/header.html.in \
   test_run.sh
 
+include config/pandora-plugin.am
 
 #
 # libpercona_playback
@@ -44,20 +45,18 @@ EXTRA_DIST = \
 lib_LTLIBRARIES += libpercona_playback.la
 
 libpercona_playback_la_SOURCES = \
-  percona_playback/percona_playback.cc \
-  percona_playback/query_log.cc
+  percona_playback/percona_playback.cc
 
 nobase_include_HEADERS += \
   percona_playback/percona_playback.h \
-  percona_playback/query_log.h \
   percona_playback/visibility.h
 
 libpercona_playback_la_CXXFLAGS = \
 	$(AM_CXXFLAGS) \
 	-DBUILDING_PERCONA_PLAYBACK
 
-libpercona_playback_la_LIBADD = $(LIBDL_LIBS) $(BOOST_LIBS)
-libpercona_playback_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBPERCONA_PLAYBACK_VERSION) $(BOOST_LIBS)
+libpercona_playback_la_LIBADD = $(LIBDL_LIBS) $(BOOST_LIBS) $(TBB_LIBS) $(pandora_plugin_libs)
+libpercona_playback_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBPERCONA_PLAYBACK_VERSION) $(BOOST_LIBS) $(TBB_LIBS) $(pandora_plugin_libs)
 
 check_PROGRAMS += \
   percona_playback/test/basic
@@ -68,9 +67,7 @@ check_PROGRAMS += \
 
 bin_PROGRAMS += bin/percona_playback
 bin_percona_playback_SOURCES = bin/percona_playback.cc
-bin_percona_playback_LDADD= $(BOOST_LIBS) $(LDADD) -ltbb $(MYSQL_LIBS)
-
-include config/pandora-plugin.am
+bin_percona_playback_LDADD= $(BOOST_LIBS) $(LDADD) $(TBB_LIBS) $(MYSQL_LIBS) $(pandora_plugin_libs) $(PANDORA_DYNAMIC_LDADDS)
 
 TESTS = $(check_PROGRAMS)
 

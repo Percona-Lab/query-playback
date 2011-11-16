@@ -22,7 +22,7 @@
 #include <fstream>
 #include <assert.h>
 #include "percona_playback.h"
-#include "query_log.h"
+#include "query_log/query_log.h"
 
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
