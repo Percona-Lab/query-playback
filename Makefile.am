@@ -32,8 +32,8 @@ CLEANFILES =
 DISTCLEANFILES = \
   config/top.h
 EXTRA_DIST = \
-  docs/Doxyfile \
-  docs/header.html.in \
+  LICENSE \
+  README \
   test_run.sh
 
 include config/pandora-plugin.am
@@ -73,6 +73,8 @@ bin_PROGRAMS += bin/percona_playback
 bin_percona_playback_SOURCES = bin/percona_playback.cc
 bin_percona_playback_LDADD= $(BOOST_LIBS) $(LDADD) $(TBB_LIBS) $(MYSQL_LIBS) $(pandora_plugin_libs) $(PANDORA_DYNAMIC_LDADDS)
 
+include docs/include.am
+
 TESTS = $(check_PROGRAMS)
 
 TESTS_ENVIRONMENT = ${top_srcdir}/test_run.sh
@@ -100,13 +102,3 @@ check-strace:
 
 check-truss:
 	@PERCONA_PLAYBACK_TEST_PREFIX="truss -c" make check
-
-docs: all
-	@echo "/**" > docs/mainpage.h
-	@echo "@mainpage README" >> docs/mainpage.h
-	@echo "<pre>" >> docs/mainpage.h
-	@cat ${top_srcdir}/README >> docs/mainpage.h
-	@echo "</pre>" >> docs/mainpage.h
-	@echo "*/" >> docs/mainpage.h
-	${DOXYGEN} ${top_srcdir}/docs/Doxyfile
-	@rm docs/mainpage.h

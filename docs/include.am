@@ -1,0 +1,17 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= docs/Doxyfile \
+	     docs/header.html.in
+
+docs: all
+	@echo "/**" > docs/mainpage.h
+	@echo "@mainpage README" >> docs/mainpage.h
+	@echo "<pre>" >> docs/mainpage.h
+	@cat ${top_srcdir}/README >> docs/mainpage.h
+	@echo "</pre>" >> docs/mainpage.h
+	@echo "*/" >> docs/mainpage.h
+	${DOXYGEN} ${top_srcdir}/docs/Doxyfile
+	@rm docs/mainpage.h
+
