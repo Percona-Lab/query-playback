@@ -47,6 +47,8 @@ percona_playback_st *percona_playback_create(const char *name)
     static_cast<percona_playback_st *>(malloc(sizeof(percona_playback_st)));
   assert(the_percona_playback);
   the_percona_playback->name= name;
+  the_percona_playback->slow_query_log_files= NULL;
+  the_percona_playback->query_log_file_read_count= 0;
   return the_percona_playback;
 }
 
@@ -98,6 +100,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     std::cerr << options_description << std::endl;
     return 1;
   }
+
   if (vm.count("version"))
   {
     std::cerr << PACKAGE << " Version: " PACKAGE_VERSION

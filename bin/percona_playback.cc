@@ -28,7 +28,9 @@ int main(int argc, char** argv)
 
   int r= percona_playback_argv(the_percona_playback, argc, argv);
   if (r > 0)
+  {
     goto exit;
+  }
   if (r < 0)
   {
     exit_code= r;
