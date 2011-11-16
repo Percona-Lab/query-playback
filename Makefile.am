@@ -60,7 +60,9 @@ libpercona_playback_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBPERCONA_PLAYBA
 libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES}
 
 check_PROGRAMS += \
-  percona_playback/test/basic
+  percona_playback/test/help
+
+percona_playback_test_help_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 #
 # Simple percona_playback application
