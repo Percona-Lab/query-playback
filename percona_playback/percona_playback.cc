@@ -95,7 +95,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   po::store(po::parse_command_line(argc, argv, options_description), vm);
   po::notify(vm);
 
-  if (vm.count("help"))
+  if (vm.count("help") || argc==1)
   {
     std::cerr << options_description << std::endl;
     return 1;
