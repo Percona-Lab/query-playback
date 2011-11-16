@@ -1,0 +1,8 @@
+Percona Playback
+----------------
+(C) 2011 Percona Inc.
+See LICENSE for full text of the GPL.
+
+Percona Playback is a tool for replaying the load of one database server to another.
+
+see ./bin/percona-playback --help for details
