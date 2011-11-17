@@ -110,6 +110,8 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     version();
     std::cerr << std::endl;
     std::cerr << options_description << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "Bugs: " << PACKAGE_BUGREPORT << std::endl;
     return 1;
   }
 
