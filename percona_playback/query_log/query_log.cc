@@ -36,6 +36,10 @@
 
 #include <mysql/mysql.h>
 
+#include <percona_playback/db_thread.h>
+#include <percona_playback/mysql_client/mysql_client.h>
+#include <percona_playback/query_log/query_log.h>
+
 //! Holds a slice of text.
 /** Instances *must* be allocated/freed using methods herein, because the C++ declaration
     represents only the header of a much larger object in memory. */
@@ -135,78 +139,6 @@ void* LineFileInputFilter::operator()(void*) {
   }
 }
 
-class QueryLogEntry {
-private:
-  uint64_t thread_id;
-  std::vector<std::string> info;
-  std::vector<std::string> query;
-  bool shutdown;
-public:
-
-  QueryLogEntry() : thread_id(0), shutdown(false) {};
-
-  void set_shutdown() { shutdown= true; }
-
-  bool is_shutdown() { return shutdown; }
-
-  uint64_t getThreadId() { return thread_id; }
-
-  void add_line(const std::string &s, tbb::atomic<uint64_t> *queries)
-  {
-    size_t location= s.find("Thread_id: ");
-    if (location != std::string::npos)
-    {
-      thread_id = strtoull(s.c_str() + location + strlen("Thread_Id: "), NULL, 10);
-    }
-    if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
-      info.push_back(s);
-    else
-    {
-      query.push_back(s);
-      (*queries)++;
-    }
-  }
-
-  void display()
-  {
-    std::vector<std::string>::iterator it;
-
-    for ( it=query.begin() ; it < query.end(); it++ )
-      std::cerr << "    " << *it << std::endl;
-  }
-
-  bool is_quit()
-  {
-    return query.size() &&
-      (query[0].compare("# administrator command: Quit;") == 0
-       || (query.size()>1 && query[1].compare("# administrator command: Quit;") == 0));
-  }
-
-  bool execute(MYSQL* handle)
-  {
-    std::vector<std::string>::iterator it;
-
-    for ( it=query.begin() ; it < query.end(); it++ )
-    {
-      const std::string timestamp_query("SET timestamp=");
-      if((*it).compare(0, timestamp_query.length(), timestamp_query) == 0)
-	continue;
-      /*      std::cerr << "thread " << getThreadId()
-	      << " running query " << (*it) << std::endl;*/
-      if(mysql_real_query(handle, (*it).c_str(), (*it).length()) > 0)
-      {
-	// FIXME: error handling
-      }
-      else
-      {
-	MYSQL_RES* mysql_res= NULL;
-	mysql_res= mysql_store_result(handle);
-	mysql_free_result(mysql_res);
-      }
-    }
-  }
-};
-
 // ParseQueryLogFunc
 class ParseQueryLogFunc: public tbb::filter {
 public:
@@ -282,93 +214,38 @@ void* ParseQueryLogFunc::operator() (void* input_)  {
   return entries;
 }
 
-class DBThread;
-void RunDBThread(DBThread* dbt, uint64_t thread_id);
-
-class DBThread {
-private:
-  MYSQL handle;
-  boost::thread *thread;
-  uint64_t thread_id;
-public:
-  tbb::concurrent_bounded_queue<QueryLogEntry> queries;
-
-  DBThread(uint64_t _thread_id) : thread_id(_thread_id) {
-    queries.set_capacity(1);
-  }
-
-  ~DBThread() {
-    delete thread;
-  }
-
-  void join()
-  {
-    thread->join();
-  }
-
-  void connect()
-  {
-    mysql_init(&handle);
-    mysql_real_connect(&handle,
-		       "127.0.0.1",
-		       "root",
-		       "",
-		       "test",
-		       13010,
-		       "",
-		       0);
-  }
-
-  void disconnect()
-  {
-    mysql_close(&handle);
-  }
-
-  bool run()
-  {
-    connect();
-
-    QueryLogEntry query;
-    while (true)
-    {
-      queries.pop(query);
-      if (query.is_shutdown())
-      {
-	disconnect();
-	return true;
-      }
-      if (query.is_quit())
-	/*	if(queries.empty())
-	  break;
-	  else*/
-	{ disconnect(); connect(); continue;}
-
-      query.execute(&handle);
-    }
-
-    disconnect();
-    return false;
-  }
-
-  void start_thread()
-  {
-    thread= new boost::thread(RunDBThread, this, thread_id);
-  }
-};
-
-typedef tbb::concurrent_hash_map<uint64_t, DBThread*> DBExecutorsTable;
-
-DBExecutorsTable db_executors;
-
-void RunDBThread(DBThread* dbt, uint64_t thread_id)
+void QueryLogEntry::execute(DBThread *t)
 {
-  if (dbt->run() == false)
+  std::vector<std::string>::iterator it;
+
+  for ( it=query.begin() ; it < query.end(); it++ )
   {
-    db_executors.erase(thread_id);
-    delete dbt;
+    const std::string timestamp_query("SET timestamp=");
+    if((*it).compare(0, timestamp_query.length(), timestamp_query) == 0)
+      continue;
+    /*      std::cerr << "thread " << getThreadId()
+	    << " running query " << (*it) << std::endl;*/
+
+    t->execute_query(*it);
   }
-  std::cerr << "end thread " << thread_id << std::endl;
 }
+
+void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *queries)
+{
+  size_t location= s.find("Thread_id: ");
+  if (location != std::string::npos)
+  {
+    thread_id = strtoull(s.c_str() + location + strlen("Thread_Id: "), NULL, 10);
+  }
+  if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
+    info.push_back(s);
+  else
+  {
+    query.push_back(s);
+    (*queries)++;
+  }
+}
+
 
 void* dispatch (void *input_)
 {
@@ -381,7 +258,7 @@ void* dispatch (void *input_)
 	DBExecutorsTable::accessor a;
 	if (db_executors.insert( a, thread_id ))
 	{
-	  DBThread *db_thread= new DBThread(thread_id);
+	  DBThread *db_thread= new MySQLDBThread(thread_id);
 	  a->second= db_thread;
 	  db_thread->start_thread();
 	  std::cerr << "new thread " << thread_id << std::endl;

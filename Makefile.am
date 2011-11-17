@@ -45,10 +45,12 @@ include config/pandora-plugin.am
 lib_LTLIBRARIES += libpercona_playback.la
 
 libpercona_playback_la_SOURCES = \
-  percona_playback/percona_playback.cc
+  percona_playback/percona_playback.cc \
+  percona_playback/db_thread.cc
 
 nobase_include_HEADERS += \
   percona_playback/percona_playback.h \
+  percona_playback/db_thread.h \
   percona_playback/visibility.h
 
 libpercona_playback_la_CXXFLAGS = \
