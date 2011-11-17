@@ -288,11 +288,11 @@ AS_IF([test "x$with_%(name)s_plugin" = "xyes"],
     plugin_ac.write("""
         AS_IF([test "x$enable_%(name)s_plugin" = "xyes"],[
           pandora_builtin_load_list="%(module_name)s,${pandora_builtin_load_list}"
-          pandora_builtin_load_symbols_list="_drizzled_%(module_name)s_plugin_,${pandora_builtin_load_symbols_list}"
+          pandora_builtin_load_symbols_list="_percona_playback_%(module_name)s_plugin_,${pandora_builtin_load_symbols_list}"
           PANDORA_PLUGIN_DEP_LIBS="${PANDORA_PLUGIN_DEP_LIBS} %(plugin_dep_libs)s"
         ])
         pandora_builtin_list="%(module_name)s,${pandora_builtin_list}"
-        pandora_builtin_symbols_list="_drizzled_%(module_name)s_plugin_,${pandora_builtin_symbols_list}"
+        pandora_builtin_symbols_list="_percona_playback_%(module_name)s_plugin_,${pandora_builtin_symbols_list}"
         pandora_plugin_libs="${pandora_plugin_libs} \${top_builddir}/%(root_plugin_dir)s/%(libname)s.la"
     """ % plugin)
 
