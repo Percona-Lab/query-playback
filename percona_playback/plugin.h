@@ -17,6 +17,8 @@
 #define PERCONA_PLAYBACK_PLUGIN_H
 
 #include <stdint.h>
+#include <vector>
+#include <string>
 #include <percona_playback/visibility.h>
 #include <percona_playback/version.h>
 
@@ -34,7 +36,11 @@ class plugin
     const char* title;
     const char* license;
   } definition;
+
 };
+
+extern std::vector<std::string> loaded_plugin_names;
+void load_plugins();
 
 #define PERCONA_PLAYBACK_QUOTE(s) #s
 #define PERCONA_PLAYBACK_QUOTE_VALUE(s) PERCONA_PLAYBACK_QUOTE(s)

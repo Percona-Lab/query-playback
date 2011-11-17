@@ -53,7 +53,7 @@ PANDORA_REQUIRE_BOOST_PROGRAM_OPTIONS
 PANDORA_REQUIRE_BOOST_THREAD
 PANDORA_REQUIRE_TBB
 
-PANDORA_PLUGINS
+PANDORA_PLUGINS([percona_playback/plugin_load_list.h])
 
 AC_DEFINE_UNQUOTED([PERCONA_PLAYBACK_MODULE_EXT], ["$acl_cv_shlibext"],
                    [Extension to use for modules.])

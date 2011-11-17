@@ -29,6 +29,9 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/foreach.hpp>
+
+#include <percona_playback/plugin.h>
 
 #include <vector>
 
@@ -82,6 +85,8 @@ static void version()
 int percona_playback_argv(percona_playback_st *the_percona_playback,
 			  int argc, char** argv)
 {
+  percona_playback::load_plugins();
+
   po::options_description general_options("General options");
   general_options.add_options()
     ("help",    "Display this message")
@@ -112,6 +117,12 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     std::cerr << options_description << std::endl;
     std::cerr << std::endl;
     std::cerr << "Bugs: " << PACKAGE_BUGREPORT << std::endl;
+    std::cerr << "Loaded plugins: ";
+    BOOST_FOREACH(const std::string &plugin_name, percona_playback::loaded_plugin_names)
+    {
+      std::cerr << plugin_name << " ";
+    }
+    std::cerr << std::endl;
     return 1;
   }
 
@@ -141,7 +152,6 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   }
   else
     the_percona_playback->query_log_file_read_count= 1;
-
 
   return 0;
 }
