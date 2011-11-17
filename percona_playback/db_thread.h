@@ -28,14 +28,14 @@ extern "C"
 {
 #endif
 
-class PERCONA_PLAYBACK_API DBThread;
+class DBThread;
 void RunDBThread(DBThread* dbt, uint64_t thread_id);
 
 typedef tbb::concurrent_hash_map<uint64_t, DBThread*> DBExecutorsTable;
 
 extern DBExecutorsTable db_executors;
 
-class PERCONA_PLAYBACK_API DBThread {
+class DBThread {
 private:
   boost::thread *thread;
   uint64_t thread_id;

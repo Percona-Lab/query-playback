@@ -1,7 +1,7 @@
 
 #include <percona_playback/db_thread.h>
 
-class PERCONA_PLAYBACK_API MySQLDBThread : public DBThread
+class MySQLDBThread : public DBThread
 {
  private:
   MYSQL handle;
