@@ -38,6 +38,7 @@ EXTRA_DIST = \
 
 include config/pandora-plugin.am
 
+nobase_dist_pkginclude_HEADERS= percona_playback/version.h
 #
 # libpercona_playback
 #
