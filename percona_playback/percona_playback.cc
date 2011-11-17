@@ -22,6 +22,7 @@
 #include <fstream>
 #include <assert.h>
 #include "percona_playback.h"
+#include "version.h"
 #include "query_log/query_log.h"
 
 #include <boost/program_options.hpp>
@@ -69,6 +70,15 @@ const char *percona_playback_get_name(const percona_playback_st *the_percona_pla
   return NULL;
 }
 
+static void version()
+{
+  std::cerr << PACKAGE << std::endl
+	    << "Version: " PACKAGE_VERSION
+	    << "-" << PERCONA_PLAYBACK_VERSION_ID
+	    << "-" << PERCONA_PLAYBACK_RELEASE_COMMENT
+	    << std::endl;
+}
+
 int percona_playback_argv(percona_playback_st *the_percona_playback,
 			  int argc, char** argv)
 {
@@ -97,14 +107,15 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 
   if (vm.count("help") || argc==1)
   {
+    version();
+    std::cerr << std::endl;
     std::cerr << options_description << std::endl;
     return 1;
   }
 
   if (vm.count("version"))
   {
-    std::cerr << PACKAGE << " Version: " PACKAGE_VERSION
-	      << std::endl;
+    version();
     return 2;
   }
   if (vm.count("loop"))

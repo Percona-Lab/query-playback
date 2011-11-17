@@ -13,33 +13,13 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  * END LICENSE */
 
-#include "config.h"
+#ifndef PERCONA_PLAYBACK_VERSION_H
+#define PERCONA_PLAYBACK_VERSION_H
 
-#include <stdio.h>
+/* Machine comsumable version number. */
+#define PERCONA_PLAYBACK_VERSION_ID @PANDORA_RELEASE_ID@
 
-#include "percona_playback/percona_playback.h"
+/* A release comment about the branch that was built */
+#define PERCONA_PLAYBACK_RELEASE_COMMENT "@PANDORA_RELEASE_COMMENT@"
 
-int main(int argc, char** argv)
-{
-  int exit_code= 0;
-
-  percona_playback_st *the_percona_playback= percona_playback_create("Percona Playback");
-
-  int r= percona_playback_argv(the_percona_playback, argc, argv);
-  if (r > 0)
-  {
-    goto exit;
-  }
-  if (r < 0)
-  {
-    exit_code= r;
-    goto exit;
-  }
-
-  r= percona_playback_run_all(the_percona_playback);
-  exit_code= r;
-
- exit:
-  percona_playback_destroy(&the_percona_playback);
-  return exit_code;
-}
+#endif /* PERCONA_PLAYBACK_VERSION_H */

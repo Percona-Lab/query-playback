@@ -13,7 +13,7 @@ AC_CONFIG_SRCDIR([percona_playback/percona_playback.h])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 
-PANDORA_CANONICAL_TARGET(warnings-always-on)
+PANDORA_CANONICAL_TARGET(warnings-always-on, require-cxx, version-from-vc)
 
 # Increment if interfaces have been added, removed, or changed.
 LIBPERCONA_PLAYBACK_VERSION_CURRENT=0
@@ -58,7 +58,9 @@ PANDORA_PLUGINS
 AC_DEFINE_UNQUOTED([PERCONA_PLAYBACK_MODULE_EXT], ["$acl_cv_shlibext"],
                    [Extension to use for modules.])
 AM_CXXFLAGS="${NO_EFF_CXX}"
-AC_CONFIG_FILES(Makefile docs/header.html)
+AC_CONFIG_FILES(Makefile dnl
+ percona_playback/version.h dnl
+ docs/header.html)
 
 AC_OUTPUT
 
