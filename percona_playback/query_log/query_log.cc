@@ -140,8 +140,14 @@ private:
   uint64_t thread_id;
   std::vector<std::string> info;
   std::vector<std::string> query;
+  bool shutdown;
 public:
-  QueryLogEntry() : thread_id(0) {};
+
+  QueryLogEntry() : thread_id(0), shutdown(false) {};
+
+  void set_shutdown() { shutdown= true; }
+
+  bool is_shutdown() { return shutdown; }
 
   uint64_t getThreadId() { return thread_id; }
 
@@ -152,32 +158,13 @@ public:
     {
       thread_id = strtoull(s.c_str() + location + strlen("Thread_Id: "), NULL, 10);
     }
-    /*    if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
+    if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
       info.push_back(s);
-      else*/
-    if (s[0]!='#')
+    else
     {
       query.push_back(s);
       (*queries)++;
     }
-  }
-
-  void process()
-  {
-    std::vector<std::string>::iterator it;
-
-    for ( it=info.begin() ; it < info.end(); it++ )
-    {
-      size_t location= (*it).find("Thread_id: ");
-      if (location != std::string::npos)
-      {
-	thread_id = strtoull((*it).c_str() + location + strlen("Thread_Id: "), NULL, 10);
-	assert(thread_id);
-	break;
-      }
-    }
-
-    info.resize(0);
   }
 
   void display()
@@ -204,6 +191,8 @@ public:
       const std::string timestamp_query("SET timestamp=");
       if((*it).compare(0, timestamp_query.length(), timestamp_query) == 0)
 	continue;
+      /*      std::cerr << "thread " << getThreadId()
+	      << " running query " << (*it) << std::endl;*/
       if(mysql_real_query(handle, (*it).c_str(), (*it).length()) > 0)
       {
 	// FIXME: error handling
@@ -293,32 +282,28 @@ void* ParseQueryLogFunc::operator() (void* input_)  {
   return entries;
 }
 
-class ProcessQueryLogFunc: public tbb::filter {
-public:
-  ProcessQueryLogFunc()
-    : tbb::filter(false)
-  {};
-
-  void* operator() (void* input_)
-  {
-    std::vector<QueryLogEntry> *input= static_cast<std::vector<QueryLogEntry>*>(input_);
-    for (int i=0; i< input->size(); i++)
-    {
-      (*input)[i].process();
-    }
-    return input_;
-  };
-private:
-};
+class DBThread;
+void RunDBThread(DBThread* dbt, uint64_t thread_id);
 
 class DBThread {
 private:
   MYSQL handle;
+  boost::thread *thread;
+  uint64_t thread_id;
 public:
   tbb::concurrent_bounded_queue<QueryLogEntry> queries;
 
-  DBThread() {
-    queries.set_capacity(1000);
+  DBThread(uint64_t _thread_id) : thread_id(_thread_id) {
+    queries.set_capacity(1);
+  }
+
+  ~DBThread() {
+    delete thread;
+  }
+
+  void join()
+  {
+    thread->join();
   }
 
   void connect()
@@ -329,7 +314,7 @@ public:
 		       "root",
 		       "",
 		       "test",
-		       13000,
+		       13010,
 		       "",
 		       0);
   }
@@ -339,7 +324,7 @@ public:
     mysql_close(&handle);
   }
 
-  void run()
+  bool run()
   {
     connect();
 
@@ -347,16 +332,27 @@ public:
     while (true)
     {
       queries.pop(query);
+      if (query.is_shutdown())
+      {
+	disconnect();
+	return true;
+      }
       if (query.is_quit())
 	/*	if(queries.empty())
 	  break;
 	  else*/
-	  { disconnect(); connect(); continue; }
+	{ disconnect(); connect(); continue;}
 
       query.execute(&handle);
     }
 
     disconnect();
+    return false;
+  }
+
+  void start_thread()
+  {
+    thread= new boost::thread(RunDBThread, this, thread_id);
   }
 };
 
@@ -366,10 +362,12 @@ DBExecutorsTable db_executors;
 
 void RunDBThread(DBThread* dbt, uint64_t thread_id)
 {
-  dbt->run();
-  db_executors.erase(thread_id);
+  if (dbt->run() == false)
+  {
+    db_executors.erase(thread_id);
+    delete dbt;
+  }
   std::cerr << "end thread " << thread_id << std::endl;
-  delete dbt;
 }
 
 void* dispatch (void *input_)
@@ -379,23 +377,14 @@ void* dispatch (void *input_)
     {
       //      usleep(10);
       uint64_t thread_id= (*input)[i].getThreadId();
-      if(thread_id == 0)
-	{
-	  // Means we have a bug in parsing :(
-	}
-      else
       {
-	DBThread *db_thread= new DBThread();
 	DBExecutorsTable::accessor a;
 	if (db_executors.insert( a, thread_id ))
 	{
+	  DBThread *db_thread= new DBThread(thread_id);
 	  a->second= db_thread;
-	  boost::thread thread(RunDBThread, db_thread, thread_id);
+	  db_thread->start_thread();
 	  std::cerr << "new thread " << thread_id << std::endl;
-	}
-	else
-        {
-	  delete db_thread;
 	}
 	a->second->queries.push((*input)[i]);
       }
@@ -433,13 +422,29 @@ void LogReaderThread(FILE* input_file, unsigned int run_count)
 
   LineFileInputFilter f1(input_file, run_count);
   ParseQueryLogFunc f2(&entries, &queries);
-  ProcessQueryLogFunc f3;
   DispatchQueriesFunc f4;
   p.add_filter(f1);
   p.add_filter(f2);
-  p.add_filter(f3);
   p.add_filter(f4);
   p.run(2);
+
+  QueryLogEntry shutdown_command;
+  shutdown_command.set_shutdown();
+
+  while(db_executors.size())
+  {
+    uint64_t thread_id;
+    DBThread *t;
+    {
+      DBExecutorsTable::const_iterator iter= db_executors.begin();
+      thread_id= (*iter).first;
+      t= (*iter).second;
+    }
+    db_executors.erase(thread_id);
+    t->queries.push(shutdown_command);
+    t->join();
+    delete t;
+  }
 
   std::cout << "Processed " << entries << " entries" << std::endl;
   std::cout << "Processed " << queries << " queries" << std::endl;
