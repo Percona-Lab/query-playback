@@ -13,6 +13,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  * END LICENSE */
 
+#include <percona_playback/plugin.h>
 #include <percona_playback/mysql_client/mysql_client.h>
 
 void MySQLDBThread::connect()
@@ -46,3 +47,5 @@ void MySQLDBThread::execute_query(const std::string &query)
     mysql_free_result(mysql_res);
   }
 }
+
+PERCONA_PLAYBACK_PLUGIN();

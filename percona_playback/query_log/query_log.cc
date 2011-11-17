@@ -36,6 +36,7 @@
 
 #include <mysql/mysql.h>
 
+#include <percona_playback/plugin.h>
 #include <percona_playback/db_thread.h>
 #include <percona_playback/mysql_client/mysql_client.h>
 #include <percona_playback/query_log/query_log.h>
@@ -340,3 +341,5 @@ int run_query_log(const std::string &log_file, unsigned int run_count)
 
   return 0;
 }
+
+PERCONA_PLAYBACK_PLUGIN();
