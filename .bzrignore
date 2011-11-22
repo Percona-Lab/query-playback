@@ -34,3 +34,5 @@ aclocal.m4
 autom4te.cache
 config/top.h
 bin/percona_playback
+percona_playback/test/basic
+percona_playback/test/help

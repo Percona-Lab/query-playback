@@ -34,6 +34,7 @@ DISTCLEANFILES = \
 EXTRA_DIST = \
   LICENSE \
   README \
+  percona_playback/test/basic-slow.log \
   test_run.sh
 
 include config/pandora-plugin.am
@@ -66,10 +67,14 @@ libpercona_playback_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBPERCONA_PLAYBA
 libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES}
 
 check_PROGRAMS += \
+  percona_playback/test/basic \
   percona_playback/test/help
 
 percona_playback_test_help_SOURCES= percona_playback/test/help.cc
 percona_playback_test_help_LDADD= $(LDADD) $(MYSQL_LIBS)
+
+percona_playback_test_basic_SOURCES= percona_playback/test/basic.cc
+percona_playback_test_basic_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 #
 # Simple percona_playback application

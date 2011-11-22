@@ -1,0 +1,86 @@
+# Time: 110206 22:41:49
+# User@Host: root[root] @ localhost []
+# Query_time: 0.002335  Lock_time: 0.000000 Rows_sent: 0  Rows_examined: 0
+use a;
+SET timestamp=1297024909;
+set global slow_query_log=ON;
+# Time: 110206 22:42:01
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000204  Lock_time: 0.000000 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1297024921;
+INSERT INTO t VALUES(0,a);
+# Time: 110206 22:42:06
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000156  Lock_time: 0.000000 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1297024926;
+INSERT INTO t VALUES(0,'a');
+# Time: 110206 22:42:10
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000518  Lock_time: 0.000368 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1297024930;
+INSERT INTO a VALUES(0,'a');
+# Time: 110206 22:42:16
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000222  Lock_time: 0.000085 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1297024936;
+INSERT INTO a VALUES(1,'b');
+# Time: 110206 22:42:19
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000210  Lock_time: 0.000093 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1297024939;
+INSERT INTO a VALUES(2,'c');
+# Time: 110206 22:42:22
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000215  Lock_time: 0.000084 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1297024942;
+INSERT INTO a VALUES(3,'d');
+# Time: 110206 22:42:36
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000086  Lock_time: 0.000000 Rows_sent: 0  Rows_examined: 0
+SET timestamp=1297024956;
+INSERT INTO a VALUES SELECT * from a;
+# Time: 110206 22:42:40
+# User@Host: root[root] @ localhost []
+# Query_time: 0.001403  Lock_time: 0.000212 Rows_sent: 0  Rows_examined: 5
+SET timestamp=1297024960;
+INSERT INTO a SELECT * from a;
+# Time: 110206 22:42:57
+# User@Host: root[root] @ localhost []
+# Query_time: 0.011915  Lock_time: 0.003464 Rows_sent: 0  Rows_examined: 5
+SET timestamp=1297024977;
+INSERT INTO a (SELECT id + (select max(id) from a),name from a);
+# Time: 110206 22:43:03
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000526  Lock_time: 0.000169 Rows_sent: 0  Rows_examined: 8
+SET timestamp=1297024983;
+INSERT INTO a (SELECT id + (select max(id) from a)+1, name from a);
+# Time: 110206 22:43:04
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000607  Lock_time: 0.000148 Rows_sent: 0  Rows_examined: 16
+SET timestamp=1297024984;
+INSERT INTO a (SELECT id + (select max(id) from a)+1, name from a);
+# Time: 110206 22:43:05
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000528  Lock_time: 0.000137 Rows_sent: 0  Rows_examined: 32
+SET timestamp=1297024985;
+INSERT INTO a (SELECT id + (select max(id) from a)+1, name from a);
+# Time: 110206 22:43:06
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000619  Lock_time: 0.000144 Rows_sent: 0  Rows_examined: 64
+SET timestamp=1297024986;
+INSERT INTO a (SELECT id + (select max(id) from a)+1, name from a);
+# Time: 110206 22:43:07
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000671  Lock_time: 0.000145 Rows_sent: 0  Rows_examined: 128
+SET timestamp=1297024987;
+INSERT INTO a (SELECT id + (select max(id) from a)+1, name from a);
+# Time: 110206 22:43:12
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000263  Lock_time: 0.000075 Rows_sent: 128  Rows_examined: 128
+SET timestamp=1297024992;
+select * from a;
+# Time: 110206 22:43:14
+# User@Host: root[root] @ localhost []
+# Query_time: 0.000006  Lock_time: 0.000000 Rows_sent: 128  Rows_examined: 128
+SET timestamp=1297024994;
+# administrator command: Quit;
