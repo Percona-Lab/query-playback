@@ -46,8 +46,16 @@ PERCONA_PLAYBACK_API
 int percona_playback_argv(percona_playback_st *the_percona_playback,
 			  int argc, char** argv);
 
+struct percona_playback_run_result {
+  int err;
+  const char *db_plugin_name;
+  const char *query_log_file;
+  uint64_t n_log_entries;
+  uint64_t n_queries;
+};
+
 PERCONA_PLAYBACK_API
-int percona_playback_run(const percona_playback_st *the_percona_playback);
+struct percona_playback_run_result *percona_playback_run(const percona_playback_st *the_percona_playback);
 
 PERCONA_PLAYBACK_API
 int percona_playback_run_all(const percona_playback_st *the_percona_playback);

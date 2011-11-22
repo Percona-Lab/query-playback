@@ -36,6 +36,7 @@
 
 #include <mysql/mysql.h>
 
+#include <percona_playback/percona_playback.h>
 #include <percona_playback/plugin.h>
 #include <percona_playback/db_thread.h>
 #include <percona_playback/mysql_client/mysql_client.h>
@@ -291,7 +292,7 @@ public:
  * dispatch (in order)
  */
 
-void LogReaderThread(FILE* input_file, unsigned int run_count)
+void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_playback_run_result *r)
 {
   tbb::pipeline p;
   tbb::atomic<uint64_t> entries;
@@ -325,17 +326,20 @@ void LogReaderThread(FILE* input_file, unsigned int run_count)
     delete t;
   }
 
+  r->n_log_entries= entries;
+  r->n_queries= queries;
+
   std::cout << "Processed " << entries << " entries" << std::endl;
   std::cout << "Processed " << queries << " queries" << std::endl;
 }
 
-int run_query_log(const std::string &log_file, unsigned int run_count)
+int run_query_log(const std::string &log_file, unsigned int run_count, struct percona_playback_run_result *r)
 {
   FILE* input_file = fopen(log_file.c_str(),"r");
   if (input_file == NULL)
     return -1;
 
-  boost::thread log_reader_thread(LogReaderThread,input_file, run_count);
+  boost::thread log_reader_thread(LogReaderThread,input_file, run_count, r);
 
   log_reader_thread.join();
   fclose(input_file);

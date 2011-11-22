@@ -190,21 +190,27 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   return 0;
 }
 
-int percona_playback_run(const percona_playback_st *the_percona_playback)
+struct percona_playback_run_result *percona_playback_run(const percona_playback_st *the_percona_playback)
 {
+  struct percona_playback_run_result *r= static_cast<struct percona_playback_run_result *>(malloc(sizeof(struct percona_playback_run_result)));
+  r->db_plugin_name= g_dbclient_plugin->name.c_str();
+  r->query_log_file= (*the_percona_playback->slow_query_log_files)[0].c_str();
+
   std::cerr << "Database Plugin: " << g_dbclient_plugin->name << std::endl;
   std::cerr << " Running..." << std::endl;
   std::cerr << "  Query Log File: "
 	    << (*the_percona_playback->slow_query_log_files)[0]
 	    << std::endl;
 
-  return run_query_log((*the_percona_playback->slow_query_log_files)[0],
-		       the_percona_playback->query_log_file_read_count);
+  r->err= run_query_log((*the_percona_playback->slow_query_log_files)[0],
+			the_percona_playback->query_log_file_read_count, r);
+
+  return r;
 }
 
 int percona_playback_run_all(const percona_playback_st *the_percona_playback)
 {
-  int r=0;
+  struct percona_playback_run_result *r;
 
   for(unsigned int run=0; run < the_percona_playback->loop; run++)
   {
@@ -213,8 +219,12 @@ int percona_playback_run_all(const percona_playback_st *the_percona_playback)
       fprintf(stderr, "Run %u of %u\n", run+1, the_percona_playback->loop);
     }
     r= percona_playback_run(the_percona_playback);
-    if (r != 0)
+    if (r->err != 0)
+    {
+      free(r);
       return -1;
+    }
+    free(r);
   }
 
   return 0;
