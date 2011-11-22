@@ -128,7 +128,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     }
   }
   else
-    g_dbclient_plugin= percona_playback::PluginRegistry::singleton().dbclient_plugins["libmysqlclient_mysql_client"];
+    g_dbclient_plugin= percona_playback::PluginRegistry::singleton().dbclient_plugins["libmysqlclient"];
 
   if (vm.count("help") || argc==1)
   {

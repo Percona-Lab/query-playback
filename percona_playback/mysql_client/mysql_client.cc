@@ -60,8 +60,7 @@ public:
 
 static void init_plugin(percona_playback::PluginRegistry &r)
 {
-  r.add("libmysqlclient_mysql_client", new MySQLDBClientPlugin("libmysqlclient_mysql_client"));
-  r.add("libmysqlclient_drizzle_client", new MySQLDBClientPlugin("libmysqlclient_drizzle_client"));
+  r.add("libmysqlclient", new MySQLDBClientPlugin("libmysqlclient"));
 }
 
 PERCONA_PLAYBACK_PLUGIN(init_plugin);
