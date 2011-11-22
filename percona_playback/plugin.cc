@@ -16,21 +16,66 @@
 #include <config.h>
 
 #include <vector>
+#include <cstdio>
 #include <string>
+#include <map>
+#include <dlfcn.h>
+
+#include <boost/foreach.hpp>
 #include <percona_playback/plugin.h>
 #include <percona_playback/plugin_load_list.h>
 #include <percona_playback/tokenize.h>
 
-namespace percona_playback {
+/* plugin definition symbols */
+typedef percona_playback::plugin::definition plugin_builtin_list[];
+extern plugin_builtin_list PANDORA_BUILTIN_SYMBOLS_LIST;
+extern plugin_builtin_list PANDORA_BUILTIN_LOAD_SYMBOLS_LIST;
 
-std::vector<std::string> loaded_plugin_names;
+/* lists of things we have, and to load */
+percona_playback::plugin::definition *builtin_plugins[]= { PANDORA_BUILTIN_SYMBOLS_LIST, NULL };
+percona_playback::plugin::definition *builtin_load_plugins[]= { PANDORA_BUILTIN_LOAD_SYMBOLS_LIST, NULL };
+
+namespace percona_playback {
 
 void load_plugins()
 {
   std::vector<std::string> builtin_load_list;
   tokenize(PANDORA_BUILTIN_LOAD_LIST, builtin_load_list, ",", true);
 
-  loaded_plugin_names= builtin_load_list;
+  /* load builtin plugins */
+  BOOST_FOREACH(const std::string& plugin_name, builtin_load_list)
+  {
+    void *dl_handle= NULL;
+    dl_handle= dlopen(NULL, RTLD_NOW|RTLD_LOCAL);
+    if (dl_handle == NULL)
+    {
+      const char *errmsg= dlerror();
+      fprintf(stderr,"Error loading plugin: %s\n\n", errmsg);
+      abort();
+      return;
+    }
+
+    std::string plugin_decl_sym("_percona_playback_");
+    plugin_decl_sym.append(plugin_name);
+    plugin_decl_sym.append("_plugin_");
+
+    void *sym= dlsym(dl_handle, plugin_decl_sym.c_str());
+    if (sym == NULL)
+    {
+      const char *errmsg= dlerror();
+      fprintf(stderr,"Error loading plugin: %s\n\n", errmsg);
+      abort();
+      return;
+    }
+
+    const percona_playback::plugin::definition *def=
+      static_cast<percona_playback::plugin::definition *>(sym);
+
+    if (def)
+      def->init(percona_playback::PluginRegistry::singleton());
+
+    PluginRegistry::singleton().loaded_plugin_names.push_back(plugin_name);
+  }
 }
 
 } /* namespace percona_playback */

@@ -19,10 +19,37 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
+#include <map>
 #include <percona_playback/visibility.h>
 #include <percona_playback/version.h>
 
+class DBThread;
+
 namespace percona_playback {
+
+class DBClientPlugin;
+
+class PluginRegistry
+{
+ public:
+  static PluginRegistry& singleton()
+  {
+    static PluginRegistry *registry= new PluginRegistry();
+    return *registry;
+  }
+
+  std::vector<std::string> loaded_plugin_names;
+
+  typedef std::map<std::string, DBClientPlugin*> DBClientPluginMap;
+  typedef std::pair<std::string, DBClientPlugin*> DBClientPluginPair;
+
+  DBClientPluginMap dbclient_plugins;
+
+  void add(std::string name, DBClientPlugin* dbclient)
+  {
+    dbclient_plugins.insert(DBClientPluginPair(name, dbclient));
+  }
+};
 
 class plugin
 {
@@ -35,8 +62,19 @@ class plugin
     const char* author;
     const char* title;
     const char* license;
+    void (*init)(PluginRegistry &r);
   } definition;
 
+};
+
+class DBClientPlugin : public plugin
+{
+ public:
+  std::string name;
+
+  DBClientPlugin(std::string _name) : name(_name) {};
+
+  virtual DBThread *create(uint64_t _thread_id)=0;
 };
 
 extern std::vector<std::string> loaded_plugin_names;
@@ -48,7 +86,7 @@ void load_plugins();
 #define PANDORA_CPP_NAME(x) _percona_playback_ ## x ## _plugin_
 #define PANDORA_PLUGIN_NAME(x) PANDORA_CPP_NAME(x)
 
-#define PERCONA_PLAYBACK_PLUGIN()			    \
+#define PERCONA_PLAYBACK_PLUGIN(init)			    \
   PERCONA_PLAYBACK_API percona_playback::plugin::definition	\
     PANDORA_PLUGIN_NAME(PANDORA_MODULE_NAME) =			\
     {							    \
@@ -57,7 +95,8 @@ void load_plugins();
       PANDORA_MODULE_VERSION,				    \
       PANDORA_MODULE_AUTHOR,				    \
       PANDORA_MODULE_TITLE,				    \
-      PERCONA_PLAYBACK_QUOTE_VALUE(PANDORA_MODULE_LICENSE)  \
+      PERCONA_PLAYBACK_QUOTE_VALUE(PANDORA_MODULE_LICENSE), \
+      init						    \
     }
 
 } /* namespace percona_playback */

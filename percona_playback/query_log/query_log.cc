@@ -247,6 +247,7 @@ void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *querie
   }
 }
 
+extern percona_playback::DBClientPlugin *g_dbclient_plugin;
 
 void* dispatch (void *input_)
 {
@@ -259,7 +260,7 @@ void* dispatch (void *input_)
 	DBExecutorsTable::accessor a;
 	if (db_executors.insert( a, thread_id ))
 	{
-	  DBThread *db_thread= new MySQLDBThread(thread_id);
+	  DBThread *db_thread= g_dbclient_plugin->create(thread_id);
 	  a->second= db_thread;
 	  db_thread->start_thread();
 	  std::cerr << "new thread " << thread_id << std::endl;
@@ -342,4 +343,8 @@ int run_query_log(const std::string &log_file, unsigned int run_count)
   return 0;
 }
 
-PERCONA_PLAYBACK_PLUGIN();
+void init(percona_playback::PluginRegistry&)
+{
+}
+
+PERCONA_PLAYBACK_PLUGIN(init);

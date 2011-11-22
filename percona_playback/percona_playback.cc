@@ -37,6 +37,8 @@
 
 namespace po= boost::program_options;
 
+percona_playback::DBClientPlugin *g_dbclient_plugin;
+
 struct percona_playback_st
 {
   const char *name;
@@ -100,15 +102,33 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     ("file-read-count", po::value<unsigned int>(), "Query log file read count (how many times to read query log file)")
     ;
 
+  po::options_description db_options("Database Options");
+  db_options.add_options()
+    ("db-plugin", po::value<std::string>(), "Database plugin")
+    ;
+
   std::string basic_usage;
   basic_usage= "USAGE: " + std::string(PACKAGE) + " [General Options]";
   po::options_description options_description(basic_usage);
   options_description.add(general_options);
   options_description.add(query_log_options);
+  options_description.add(db_options);
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, options_description), vm);
   po::notify(vm);
+
+  if (vm.count("db-plugin"))
+  {
+    g_dbclient_plugin= percona_playback::PluginRegistry::singleton().dbclient_plugins[vm["db-plugin"].as<std::string>()];
+    if (g_dbclient_plugin == NULL)
+    {
+      std::cerr << "Invalid DB Plugin" << std::endl;
+      return -1;
+    }
+  }
+  else
+    g_dbclient_plugin= percona_playback::PluginRegistry::singleton().dbclient_plugins["libmysqlclient_mysql_client"];
 
   if (vm.count("help") || argc==1)
   {
@@ -118,11 +138,25 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     std::cerr << std::endl;
     std::cerr << "Bugs: " << PACKAGE_BUGREPORT << std::endl;
     std::cerr << "Loaded plugins: ";
-    BOOST_FOREACH(const std::string &plugin_name, percona_playback::loaded_plugin_names)
+    BOOST_FOREACH(const std::string &plugin_name, percona_playback::PluginRegistry::singleton().loaded_plugin_names)
     {
       std::cerr << plugin_name << " ";
     }
+
     std::cerr << std::endl;
+
+    std::cerr << std::endl << "Loaded DB Plugins: ";
+    for(percona_playback::PluginRegistry::DBClientPluginMap::iterator it= percona_playback::PluginRegistry::singleton().dbclient_plugins.begin();
+	it != percona_playback::PluginRegistry::singleton().dbclient_plugins.end();
+	it++)
+    {
+      std::cerr << it->first << " ";
+    }
+    std::cerr << std::endl;
+    std::cerr << std::endl;
+
+    std::cerr << "Selected DB Plugin: " << g_dbclient_plugin->name << std::endl;
+
     return 1;
   }
 
@@ -158,6 +192,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 
 int percona_playback_run(const percona_playback_st *the_percona_playback)
 {
+  std::cerr << "Database Plugin: " << g_dbclient_plugin->name << std::endl;
   std::cerr << " Running..." << std::endl;
   std::cerr << "  Query Log File: "
 	    << (*the_percona_playback->slow_query_log_files)[0]

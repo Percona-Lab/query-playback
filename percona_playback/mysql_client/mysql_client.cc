@@ -48,4 +48,20 @@ void MySQLDBThread::execute_query(const std::string &query)
   }
 }
 
-PERCONA_PLAYBACK_PLUGIN();
+class MySQLDBClientPlugin : public percona_playback::DBClientPlugin
+{
+public:
+  MySQLDBClientPlugin(std::string _name) : DBClientPlugin(_name) {};
+
+  virtual DBThread* create(uint64_t _thread_id) {
+    return new MySQLDBThread(_thread_id);
+  }
+};
+
+static void init_plugin(percona_playback::PluginRegistry &r)
+{
+  r.add("libmysqlclient_mysql_client", new MySQLDBClientPlugin("libmysqlclient_mysql_client"));
+  r.add("libmysqlclient_drizzle_client", new MySQLDBClientPlugin("libmysqlclient_drizzle_client"));
+}
+
+PERCONA_PLAYBACK_PLUGIN(init_plugin);
