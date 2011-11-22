@@ -40,7 +40,10 @@ int main(int argc, char **argv)
   char *dbplugin= new char[null_dbplugin.length()+1];
   strcpy(dbplugin, null_dbplugin.c_str());
 
-  std::string querylog_str("--slow-query-log-file=./percona_playback/test/basic-slow.log");
+  std::string querylog_str("--slow-query-log-file=");
+  querylog_str.append(SRCDIR);
+  querylog_str.append("/percona_playback/test/basic-slow.log");
+
   char *querylog= new char[querylog_str.length()+1];
   strcpy(querylog, querylog_str.c_str());
 

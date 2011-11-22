@@ -70,6 +70,8 @@ check_PROGRAMS += \
   percona_playback/test/basic \
   percona_playback/test/help
 
+percona_playback_test_basic_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+
 percona_playback_test_help_SOURCES= percona_playback/test/help.cc
 percona_playback_test_help_LDADD= $(LDADD) $(MYSQL_LIBS)
 
