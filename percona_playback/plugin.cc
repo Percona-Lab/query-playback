@@ -37,16 +37,10 @@ percona_playback::plugin::definition *builtin_load_plugins[]= { PANDORA_BUILTIN_
 
 namespace percona_playback {
 
-void load_plugins()
+static void load_plugin(const char *so_file, const std::string &plugin_name)
 {
-  std::vector<std::string> builtin_load_list;
-  tokenize(PANDORA_BUILTIN_LOAD_LIST, builtin_load_list, ",", true);
-
-  /* load builtin plugins */
-  BOOST_FOREACH(const std::string& plugin_name, builtin_load_list)
-  {
     void *dl_handle= NULL;
-    dl_handle= dlopen(NULL, RTLD_NOW|RTLD_LOCAL);
+    dl_handle= dlopen(so_file, RTLD_NOW|RTLD_LOCAL);
     if (dl_handle == NULL)
     {
       const char *errmsg= dlerror();
@@ -75,6 +69,17 @@ void load_plugins()
       def->init(percona_playback::PluginRegistry::singleton());
 
     PluginRegistry::singleton().loaded_plugin_names.push_back(plugin_name);
+}
+
+void load_plugins()
+{
+  std::vector<std::string> builtin_load_list;
+  tokenize(PANDORA_BUILTIN_LOAD_LIST, builtin_load_list, ",", true);
+
+  /* load builtin plugins */
+  BOOST_FOREACH(const std::string& plugin_name, builtin_load_list)
+  {
+    load_plugin(NULL, plugin_name);
   }
 }
 
