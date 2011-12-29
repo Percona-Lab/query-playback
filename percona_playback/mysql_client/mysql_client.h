@@ -11,7 +11,10 @@ class MySQLDBThread : public DBThread
   MySQLOptions *options;
 
  public:
-  MySQLDBThread(uint64_t _thread_id, MySQLOptions *opt) : DBThread(_thread_id) {
+  MySQLDBThread(uint64_t _thread_id, MySQLOptions *opt) :
+    DBThread(_thread_id),
+    options(opt)
+  {
   }
 
   void connect();
