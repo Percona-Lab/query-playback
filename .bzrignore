@@ -36,3 +36,4 @@ config/top.h
 bin/percona_playback
 percona_playback/test/basic
 percona_playback/test/help
+percona_playback/test/basic-queue-depth

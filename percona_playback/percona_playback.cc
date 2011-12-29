@@ -38,6 +38,7 @@
 namespace po= boost::program_options;
 
 percona_playback::DBClientPlugin *g_dbclient_plugin;
+unsigned int g_db_thread_queue_depth;
 
 struct percona_playback_st
 {
@@ -99,6 +100,10 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   po::options_description db_options("Database Options");
   db_options.add_options()
     ("db-plugin", po::value<std::string>(), "Database plugin")
+    ("queue-depth", po::value<unsigned int>(),
+     "Queue depth for DB executor (thread). The larger this number the"
+     " greater the played-back workload can deviate from the original workload"
+     " as some connections may be up to queue-depth behind. (default 1)")
     ;
 
   std::string basic_usage;
@@ -180,6 +185,13 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   }
   else
     the_percona_playback->loop= 1;
+
+  if (vm.count("queue-depth"))
+  {
+    g_db_thread_queue_depth= vm["queue-depth"].as<unsigned int>();
+  }
+  else
+    g_db_thread_queue_depth= 1;
 
   if (vm.count("slow-query-log-file"))
   {

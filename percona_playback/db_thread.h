@@ -34,6 +34,7 @@ void RunDBThread(DBThread* dbt, uint64_t thread_id);
 typedef tbb::concurrent_hash_map<uint64_t, DBThread*> DBExecutorsTable;
 
 extern DBExecutorsTable db_executors;
+extern unsigned int g_db_thread_queue_depth;
 
 class QueryResult;
 
@@ -45,7 +46,7 @@ public:
   tbb::concurrent_bounded_queue<QueryLogEntry> queries;
 
   DBThread(uint64_t _thread_id) : thread_id(_thread_id) {
-    queries.set_capacity(1);
+    queries.set_capacity(g_db_thread_queue_depth);
   }
 
   ~DBThread() {
