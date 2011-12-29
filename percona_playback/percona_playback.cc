@@ -114,9 +114,25 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   options_description.add(query_log_options);
   options_description.add(db_options);
 
+  BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair pp,
+		percona_playback::PluginRegistry::singleton().all_plugins)
+  {
+    po::options_description *plugin_opts= pp.second->getProgramOptions();
+
+    if (plugin_opts != NULL)
+      options_description.add(*plugin_opts);
+  }
+
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, options_description), vm);
   po::notify(vm);
+
+  BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair pp,
+		percona_playback::PluginRegistry::singleton().all_plugins)
+  {
+    pp.second->processOptions(vm);
+  }
+
 
   if (vm.count("db-plugin"))
   {

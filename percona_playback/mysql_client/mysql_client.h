@@ -2,14 +2,16 @@
 #include <percona_playback/db_thread.h>
 
 class QueryResult;
+class MySQLOptions;
 
 class MySQLDBThread : public DBThread
 {
  private:
   MYSQL handle;
+  MySQLOptions *options;
 
  public:
-  MySQLDBThread(uint64_t _thread_id) : DBThread(_thread_id) {
+  MySQLDBThread(uint64_t _thread_id, MySQLOptions *opt) : DBThread(_thread_id) {
   }
 
   void connect();

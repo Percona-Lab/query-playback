@@ -17,15 +17,37 @@
 #include <percona_playback/mysql_client/mysql_client.h>
 #include <percona_playback/query_result.h>
 
+#include <boost/program_options.hpp>
+namespace po= boost::program_options;
+
+class MySQLOptions
+{
+public:
+  MySQLOptions() :
+    host("127.0.0.1"),
+    user("root"),
+    password(""),
+    schema("test"),
+    port(3306)
+  {
+  }
+
+  std::string host;
+  std::string user;
+  std::string password;
+  std::string schema;
+  unsigned int port;
+};
+
 void MySQLDBThread::connect()
 {
   mysql_init(&handle);
   mysql_real_connect(&handle,
-		     "127.0.0.1",
-		     "root",
-		     "",
-		     "test",
-		     13010,
+		     options->host.c_str(),
+		     options->user.c_str(),
+		     options->password.c_str(),
+		     options->schema.c_str(),
+		     options->port,
 		     "",
 		     0);
 }
@@ -56,12 +78,58 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r)
 
 class MySQLDBClientPlugin : public percona_playback::DBClientPlugin
 {
+private:
+  MySQLOptions options;
+
 public:
   MySQLDBClientPlugin(std::string _name) : DBClientPlugin(_name) {};
 
   virtual DBThread* create(uint64_t _thread_id) {
-    return new MySQLDBThread(_thread_id);
+    return new MySQLDBThread(_thread_id, &options);
   }
+
+  virtual boost::program_options::options_description* getProgramOptions() {
+    static po::options_description mysql_options("MySQL Client Options");
+    mysql_options.add_options()
+    ("mysql-host", po::value<std::string>(), "Hostname of MySQL server")
+    ("mysql-username", po::value<std::string>(), "Username to connect to MySQL")
+    ("mysql-password", po::value<std::string>(), "Password for MySQL user")
+    ("mysql-schema", po::value<std::string>(), "MySQL Schema to connect to")
+    ("mysql-port", po::value<unsigned int>(), "MySQL port number")
+    ;
+
+    return &mysql_options;
+  }
+
+  virtual int processOptions(boost::program_options::variables_map &vm) {
+    if (vm.count("mysql-host"))
+    {
+      options.host= vm["mysql-host"].as<std::string>();
+    }
+
+    if (vm.count("mysql-username"))
+    {
+      options.user= vm["mysql-username"].as<std::string>();
+    }
+
+    if (vm.count("mysql-password"))
+    {
+      options.password= vm["mysql-password"].as<std::string>();
+    }
+
+    if (vm.count("mysql-schema"))
+    {
+      options.schema= vm["mysql-schema"].as<std::string>();
+    }
+
+    if (vm.count("mysql-port"))
+    {
+      options.port= vm["mysql-port"].as<unsigned int>();
+    }
+
+    return 0;
+  }
+
 };
 
 static void init_plugin(percona_playback::PluginRegistry &r)
