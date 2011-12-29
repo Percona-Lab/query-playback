@@ -43,6 +43,9 @@
 #include <percona_playback/query_log/query_log.h>
 #include <percona_playback/query_result.h>
 
+#include <boost/program_options.hpp>
+namespace po= boost::program_options;
+
 //! Holds a slice of text.
 /** Instances *must* be allocated/freed using methods herein, because the C++ declaration
     represents only the header of a much larger object in memory. */
@@ -368,8 +371,33 @@ int run_query_log(const std::string &log_file, unsigned int run_count, struct pe
   return 0;
 }
 
-void init(percona_playback::PluginRegistry&)
+class QueryLogPlugin : public percona_playback::plugin
 {
+private:
+
+public:
+  QueryLogPlugin(std::string _name) {};
+
+  virtual boost::program_options::options_description* getProgramOptions() {
+    static po::options_description query_log_options("Query Log Options");
+    query_log_options.add_options()
+      ("slow-query-log-file", po::value<std::string>(), "Query log file")
+      ("file-read-count", po::value<unsigned int>(), "Query log file read count (how many times to read query log file)")
+      ;
+
+    return &query_log_options;
+  }
+
+  virtual int processOptions(boost::program_options::variables_map &vm) {
+    // FIXME: move this from percona_playback.cc
+    return 0;
+  }
+
+};
+
+void init(percona_playback::PluginRegistry&r)
+{
+  r.add("query_log", new QueryLogPlugin("query_log"));
 }
 
 PERCONA_PLAYBACK_PLUGIN(init);

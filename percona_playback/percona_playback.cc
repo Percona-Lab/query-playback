@@ -96,12 +96,6 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     ("loop", po::value<unsigned int>(), "Do the whole run N times")
     ;
 
-  po::options_description query_log_options("Query Log Options");
-  query_log_options.add_options()
-    ("slow-query-log-file", po::value<std::string>(), "Query log file")
-    ("file-read-count", po::value<unsigned int>(), "Query log file read count (how many times to read query log file)")
-    ;
-
   po::options_description db_options("Database Options");
   db_options.add_options()
     ("db-plugin", po::value<std::string>(), "Database plugin")
@@ -111,7 +105,6 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   basic_usage= "USAGE: " + std::string(PACKAGE) + " [General Options]";
   po::options_description options_description(basic_usage);
   options_description.add(general_options);
-  options_description.add(query_log_options);
   options_description.add(db_options);
 
   BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair pp,
