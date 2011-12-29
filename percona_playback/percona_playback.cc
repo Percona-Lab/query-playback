@@ -85,6 +85,34 @@ static void version()
 	    << std::endl;
 }
 
+static void help(po::options_description &options_description)
+{
+    version();
+    std::cerr << std::endl;
+    std::cerr << options_description << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "Bugs: " << PACKAGE_BUGREPORT << std::endl;
+    std::cerr << "Loaded plugins: ";
+    BOOST_FOREACH(const std::string &plugin_name, percona_playback::PluginRegistry::singleton().loaded_plugin_names)
+    {
+      std::cerr << plugin_name << " ";
+    }
+
+    std::cerr << std::endl;
+
+    std::cerr << std::endl << "Loaded DB Plugins: ";
+    for(percona_playback::PluginRegistry::DBClientPluginMap::iterator it= percona_playback::PluginRegistry::singleton().dbclient_plugins.begin();
+	it != percona_playback::PluginRegistry::singleton().dbclient_plugins.end();
+	it++)
+    {
+      std::cerr << it->first << " ";
+    }
+    std::cerr << std::endl;
+    std::cerr << std::endl;
+
+    std::cerr << "Selected DB Plugin: " << g_dbclient_plugin->name << std::endl;
+}
+
 int percona_playback_argv(percona_playback_st *the_percona_playback,
 			  int argc, char** argv)
 {
@@ -146,31 +174,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 
   if (vm.count("help") || argc==1)
   {
-    version();
-    std::cerr << std::endl;
-    std::cerr << options_description << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "Bugs: " << PACKAGE_BUGREPORT << std::endl;
-    std::cerr << "Loaded plugins: ";
-    BOOST_FOREACH(const std::string &plugin_name, percona_playback::PluginRegistry::singleton().loaded_plugin_names)
-    {
-      std::cerr << plugin_name << " ";
-    }
-
-    std::cerr << std::endl;
-
-    std::cerr << std::endl << "Loaded DB Plugins: ";
-    for(percona_playback::PluginRegistry::DBClientPluginMap::iterator it= percona_playback::PluginRegistry::singleton().dbclient_plugins.begin();
-	it != percona_playback::PluginRegistry::singleton().dbclient_plugins.end();
-	it++)
-    {
-      std::cerr << it->first << " ";
-    }
-    std::cerr << std::endl;
-    std::cerr << std::endl;
-
-    std::cerr << "Selected DB Plugin: " << g_dbclient_plugin->name << std::endl;
-
+    help(options_description);
     return 1;
   }
 
@@ -199,7 +203,13 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     the_percona_playback->slow_query_log_files->push_back(vm["slow-query-log-file"].as<std::string>());
   }
   else
-    the_percona_playback->slow_query_log_files= NULL;
+  {
+    std::cerr << "ERROR: --slow-query-log-file is a required option."
+	      << std::endl << std::endl;
+    help(options_description);
+    return 3;
+  }
+
 
   if (vm.count("file-read-count"))
   {
