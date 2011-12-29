@@ -35,6 +35,8 @@ typedef tbb::concurrent_hash_map<uint64_t, DBThread*> DBExecutorsTable;
 
 extern DBExecutorsTable db_executors;
 
+class QueryResult;
+
 class DBThread {
 private:
   boost::thread *thread;
@@ -58,7 +60,7 @@ public:
   virtual void connect()= 0;
 
   virtual void disconnect()= 0;
-  virtual void execute_query(const std::string &query)= 0;
+  virtual void execute_query(const std::string &query, QueryResult *r)= 0;
 
   bool run();
 

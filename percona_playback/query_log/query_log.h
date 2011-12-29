@@ -39,6 +39,8 @@ class DBThread;
 class QueryLogEntry {
 private:
   uint64_t thread_id;
+  uint64_t rows_sent;
+  uint64_t rows_examined;
   std::vector<std::string> info;
   std::vector<std::string> query;
   bool shutdown;

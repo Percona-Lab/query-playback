@@ -41,6 +41,7 @@
 #include <percona_playback/db_thread.h>
 #include <percona_playback/mysql_client/mysql_client.h>
 #include <percona_playback/query_log/query_log.h>
+#include <percona_playback/query_result.h>
 
 //! Holds a slice of text.
 /** Instances *must* be allocated/freed using methods herein, because the C++ declaration
@@ -219,6 +220,7 @@ void* ParseQueryLogFunc::operator() (void* input_)  {
 void QueryLogEntry::execute(DBThread *t)
 {
   std::vector<std::string>::iterator it;
+  QueryResult r;
 
   for ( it=query.begin() ; it < query.end(); it++ )
   {
@@ -228,17 +230,36 @@ void QueryLogEntry::execute(DBThread *t)
     /*      std::cerr << "thread " << getThreadId()
 	    << " running query " << (*it) << std::endl;*/
 
-    t->execute_query(*it);
+    t->execute_query(*it, &r);
   }
 }
 
 void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *queries)
 {
-  size_t location= s.find("Thread_id: ");
-  if (location != std::string::npos)
   {
-    thread_id = strtoull(s.c_str() + location + strlen("Thread_Id: "), NULL, 10);
+    size_t location= s.find("Thread_id: ");
+    if (location != std::string::npos)
+    {
+      thread_id = strtoull(s.c_str() + location + strlen("Thread_Id: "), NULL, 10);
+    }
   }
+
+  {
+    size_t location= s.find("Rows_sent: ");
+    if (location != std::string::npos)
+    {
+      rows_sent = strtoull(s.c_str() + location + strlen("Rows_sent: "), NULL, 10);
+    }
+  }
+
+  {
+    size_t location= s.find("Rows_Examined: ");
+    if (location != std::string::npos)
+    {
+      rows_sent = strtoull(s.c_str() + location + strlen("Rows_examined: "), NULL, 10);
+    }
+  }
+
   if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
     info.push_back(s);
   else

@@ -54,6 +54,7 @@ libpercona_playback_la_SOURCES = \
 nobase_include_HEADERS += \
   percona_playback/percona_playback.h \
   percona_playback/db_thread.h \
+  percona_playback/query_result.h \
   percona_playback/plugin.h \
   percona_playback/tokenize.h \
   percona_playback/visibility.h

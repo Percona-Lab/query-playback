@@ -15,6 +15,7 @@
 
 #include <percona_playback/plugin.h>
 #include <percona_playback/mysql_client/mysql_client.h>
+#include <percona_playback/query_result.h>
 
 void MySQLDBThread::connect()
 {
@@ -34,15 +35,20 @@ void MySQLDBThread::disconnect()
   mysql_close(&handle);
 }
 
-void MySQLDBThread::execute_query(const std::string &query)
+void MySQLDBThread::execute_query(const std::string &query, QueryResult *r)
 {
-  if(mysql_real_query(&handle, query.c_str(), query.length()) > 0)
+  int mr= mysql_real_query(&handle, query.c_str(), query.length());
+  if(mr != 0)
   {
-    // FIXME: error handling
+    r->setError(mr);
   }
   else
   {
     MYSQL_RES* mysql_res= NULL;
+
+    //    r->setAffectedRows(mysql_affected_rows(&handle));
+    r->setError(mr);
+
     mysql_res= mysql_store_result(&handle);
     mysql_free_result(mysql_res);
   }

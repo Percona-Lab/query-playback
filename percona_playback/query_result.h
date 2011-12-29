@@ -13,33 +13,48 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  * END LICENSE */
 
-#include <percona_playback/plugin.h>
-#include <percona_playback/db_thread.h>
+#ifndef PERCONA_PLAYBACK_QUERY_RESULT_H
+#define PERCONA_PLAYBACK_QUERY_RESULT_H
 
-class NULLDBThread : public DBThread
+#include "percona_playback/visibility.h"
+
+#ifdef __cplusplus
+extern "C"
 {
+#endif
+
+class QueryResult {
+ private:
+  uint64_t _rows_sent;
+  uint64_t _rows_examined;
+  int _error;
  public:
-  NULLDBThread(uint64_t _thread_id) : DBThread(_thread_id) {
+   QueryResult() : _rows_sent(0), _rows_examined(0), _error(0) { }
+
+  void setRowsSent(const uint64_t &rows) {
+    _rows_sent= rows;
   }
 
-  void connect() {};
-  void disconnect() {};
-  void execute_query(const std::string &, QueryResult *) {};
-};
-
-class NULLDBClientPlugin : public percona_playback::DBClientPlugin
-{
-public:
-  NULLDBClientPlugin(std::string _name) : DBClientPlugin(_name) {};
-
-  virtual DBThread* create(uint64_t _thread_id) {
-    return new NULLDBThread(_thread_id);
+  void setRowsExamined(const uint64_t &rows) {
+    _rows_examined= rows;
   }
+
+  void setError(int e) {
+    _error= e;
+  }
+
+  uint64_t getRowsSent() {
+    return _rows_sent;
+  }
+
+  uint64_t getRowsExamined() {
+    return _rows_examined;
+  }
+
 };
 
-static void init_plugin(percona_playback::PluginRegistry &r)
-{
-  r.add("null", new NULLDBClientPlugin("null"));
+#ifdef __cplusplus
 }
+#endif
 
-PERCONA_PLAYBACK_PLUGIN(init_plugin);
+#endif /* PERCONA_PLAYBACK_QUERY_RESULT_H */

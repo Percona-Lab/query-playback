@@ -1,6 +1,8 @@
 
 #include <percona_playback/db_thread.h>
 
+class QueryResult;
+
 class MySQLDBThread : public DBThread
 {
  private:
@@ -12,5 +14,5 @@ class MySQLDBThread : public DBThread
 
   void connect();
   void disconnect();
-  void execute_query(const std::string &query);
+  void execute_query(const std::string &query, QueryResult *r);
 };
