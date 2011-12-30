@@ -35,6 +35,7 @@ EXTRA_DIST = \
   LICENSE \
   README \
   percona_playback/test/basic-slow.log \
+  percona_playback/test/crashme-slow.log \
   test_run.sh
 
 include config/pandora-plugin.am
@@ -70,10 +71,12 @@ libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES}
 check_PROGRAMS += \
   percona_playback/test/basic \
   percona_playback/test/basic-queue-depth \
+  percona_playback/test/crashme-slow \
   percona_playback/test/help
 
 percona_playback_test_basic_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_basic_queue_depth_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_crashme_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 
 percona_playback_test_help_SOURCES= percona_playback/test/help.cc
 percona_playback_test_help_LDADD= $(LDADD) $(MYSQL_LIBS)
@@ -83,6 +86,9 @@ percona_playback_test_basic_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 percona_playback_test_basic_queue_depth_SOURCES= percona_playback/test/basic-queue-depth.cc
 percona_playback_test_basic_queue_depth_LDADD= $(LDADD) $(MYSQL_LIBS)
+
+percona_playback_test_crashme_slow_SOURCES= percona_playback/test/crashme-slow.cc
+percona_playback_test_crashme_slow_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 
 #
