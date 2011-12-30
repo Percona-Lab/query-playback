@@ -37,6 +37,7 @@ EXTRA_DIST = \
   percona_playback/test/basic-slow.log \
   percona_playback/test/crashme-slow.log \
   percona_playback/test/sqlbench-transactions-slow.log \
+  percona_playback/test/sysbench-slow.log \
   test_run.sh
 
 include config/pandora-plugin.am
@@ -74,12 +75,14 @@ check_PROGRAMS += \
   percona_playback/test/basic-queue-depth \
   percona_playback/test/crashme-slow \
   percona_playback/test/sqlbench-transactions-slow \
+  percona_playback/test/sysbench-slow \
   percona_playback/test/help
 
 percona_playback_test_basic_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_basic_queue_depth_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_crashme_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_sqlbench_transactions_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_sysbench_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 
 percona_playback_test_help_SOURCES= percona_playback/test/help.cc
 percona_playback_test_help_LDADD= $(LDADD) $(MYSQL_LIBS)
@@ -95,6 +98,9 @@ percona_playback_test_crashme_slow_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 percona_playback_test_sqlbench_transactions_slow_SOURCES= percona_playback/test/sqlbench-transactions-slow.cc
 percona_playback_test_sqlbench_transactions_slow_LDADD= $(LDADD) $(MYSQL_LIBS)
+
+percona_playback_test_sysbench_slow_SOURCES= percona_playback/test/sysbench-slow.cc
+percona_playback_test_sysbench_slow_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 
 #
