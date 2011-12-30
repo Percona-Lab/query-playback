@@ -233,7 +233,14 @@ void QueryLogEntry::execute(DBThread *t)
     /*      std::cerr << "thread " << getThreadId()
 	    << " running query " << (*it) << std::endl;*/
 
-    t->execute_query(*it, &r);
+    QueryResult expected_result;
+    expected_result.setRowsSent(rows_sent);
+    expected_result.setRowsExamined(rows_examined);
+    expected_result.setError(0);
+
+    t->execute_query(*it, &r, expected_result);
+    if (r.getRowsSent() != expected_result.getRowsSent())
+      std::cerr << "Rows sent: " << r.getRowsSent() << " != expected " << expected_result.getRowsSent() << std::endl;
   }
 }
 

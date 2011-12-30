@@ -57,7 +57,8 @@ void MySQLDBThread::disconnect()
   mysql_close(&handle);
 }
 
-void MySQLDBThread::execute_query(const std::string &query, QueryResult *r)
+void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
+				  const QueryResult &expected_result)
 {
   int mr= mysql_real_query(&handle, query.c_str(), query.length());
   if(mr != 0)
@@ -68,10 +69,10 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r)
   {
     MYSQL_RES* mysql_res= NULL;
 
-    //    r->setAffectedRows(mysql_affected_rows(&handle));
     r->setError(mr);
 
     mysql_res= mysql_store_result(&handle);
+    r->setRowsSent(mysql_num_rows(mysql_res));
     mysql_free_result(mysql_res);
   }
 }

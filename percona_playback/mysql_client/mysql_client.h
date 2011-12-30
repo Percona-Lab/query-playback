@@ -19,5 +19,6 @@ class MySQLDBThread : public DBThread
 
   void connect();
   void disconnect();
-  void execute_query(const std::string &query, QueryResult *r);
+  void execute_query(const std::string &query, QueryResult *r,
+		     const QueryResult &expected_result);
 };

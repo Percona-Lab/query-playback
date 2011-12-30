@@ -15,6 +15,7 @@
 
 #include <percona_playback/plugin.h>
 #include <percona_playback/db_thread.h>
+#include <percona_playback/query_result.h>
 
 class NULLDBThread : public DBThread
 {
@@ -24,7 +25,10 @@ class NULLDBThread : public DBThread
 
   void connect() {};
   void disconnect() {};
-  void execute_query(const std::string &, QueryResult *) {};
+  void execute_query(const std::string &, QueryResult *r,
+		     const QueryResult &expected_result) {
+    *r= expected_result;
+  };
 };
 
 class NULLDBClientPlugin : public percona_playback::DBClientPlugin

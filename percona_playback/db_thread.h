@@ -61,7 +61,9 @@ public:
   virtual void connect()= 0;
 
   virtual void disconnect()= 0;
-  virtual void execute_query(const std::string &query, QueryResult *r)= 0;
+  virtual void execute_query(const std::string &query,
+			     QueryResult *r,
+			     const QueryResult &expected_result)= 0;
 
   bool run();
 
