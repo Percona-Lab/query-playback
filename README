@@ -6,3 +6,8 @@ See LICENSE for full text of the GPL.
 Percona Playback is a tool for replaying the load of one database server to another.
 
 see ./bin/percona-playback --help for details
+
+
+Capturing everything in the slow log
+------------------------------------
+--slow-query-log --log-slow-admin-statements --log-slow-verbosity=microtime --long-query-time=0
