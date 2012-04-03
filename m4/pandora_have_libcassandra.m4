@@ -39,6 +39,6 @@ AC_DEFUN([PANDORA_HAVE_LIBCASSANDRA],[
 AC_DEFUN([PANDORA_REQUIRE_LIBCASSANDRA],[
   AC_REQUIRE([PANDORA_HAVE_LIBCASSANDRA])
   AS_IF([test "x$ac_cv_libcassandra" = "xno"],[
-      PANDORA_MSG_ERROR([libcassandra is required for ${PACKAGE}])
+      AC_MSG_ERROR([libcassandra is required for ${PACKAGE}])
   ])
 ])

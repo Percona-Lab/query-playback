@@ -76,7 +76,7 @@ AC_DEFUN([PANDORA_PYTHON3_DEVEL],[
   	AC_PATH_PROG([PYTHON3],[python[$PYTHON3_VERSION]])
   ])
 	AS_IF([test -z "$PYTHON3"],[
-	  PANDORA_MSG_ERROR([Cannot find python$PYTHON3_VERSION in your system path])
+	  AC_MSG_ERROR([Cannot find python$PYTHON3_VERSION in your system path])
 	  PYTHON3_VERSION=""
   ])
 
@@ -92,7 +92,7 @@ AC_DEFUN([PANDORA_PYTHON3_DEVEL],[
 	   	   AC_MSG_RESULT([yes])
 		else
 			AC_MSG_RESULT([no])
-			PANDORA_MSG_ERROR([this package requires Python $1.
+			AC_MSG_ERROR([this package requires Python $1.
 If you have it installed, but it isn't the default Python
 interpreter in your system path, please pass the PYTHON3_VERSION
 variable to configure. See ``configure --help'' for reference.
@@ -110,7 +110,7 @@ variable to configure. See ``configure --help'' for reference.
 		AC_MSG_RESULT([yes])
 	else
 		AC_MSG_RESULT([no])
-		PANDORA_MSG_ERROR([cannot import Python3 module "distutils".
+		AC_MSG_ERROR([cannot import Python3 module "distutils".
 Please check your Python3 installation. The error was:
 $ac_python3_distutils_result])
 		PYTHON3_VERSION=""

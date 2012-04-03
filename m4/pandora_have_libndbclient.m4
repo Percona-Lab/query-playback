@@ -75,6 +75,6 @@ AC_DEFUN([PANDORA_HAVE_LIBNDBCLIENT],[
 AC_DEFUN([PANDORA_REQUIRE_LIBNDBCLIENT],[
   AC_REQUIRE([PANDORA_HAVE_LIBNDBCLIENT])
   AS_IF([test "x${ac_cv_libndbclient}" = "xno"],
-      PANDORA_MSG_ERROR([libndbclient is required for ${PACKAGE}]))
+      AC_MSG_ERROR([libndbclient is required for ${PACKAGE}]))
 ])
 

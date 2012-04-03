@@ -38,5 +38,5 @@ AC_DEFUN([PANDORA_HAVE_LIBSQLITE3],[
 AC_DEFUN([PANDORA_REQUIRE_LIBSQLITE3],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBSQLITE3])
   AS_IF([test "x${ac_cv_libsqlite3}" = "xno"],
-    PANDORA_MSG_ERROR([libsqlite3 is required for ${PACKAGE}]))
+    AC_MSG_ERROR([libsqlite3 is required for ${PACKAGE}]))
 ])

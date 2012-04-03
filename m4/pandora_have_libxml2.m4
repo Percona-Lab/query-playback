@@ -48,5 +48,5 @@ AC_DEFUN([PANDORA_HAVE_LIBXML2],[
 AC_DEFUN([PANDORA_REQUIRE_LIBXML2],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBXML2])
   AS_IF([test "x${ac_cv_libxml2}" = "xno"],
-    PANDORA_MSG_ERROR([libxml2 is required for ${PACKAGE}. On Debian systems this is found in libxml2-dev. On RedHat, libxml2-devel.]))
+    AC_MSG_ERROR([libxml2 is required for ${PACKAGE}. On Debian systems this is found in libxml2-dev. On RedHat, libxml2-devel.]))
 ])

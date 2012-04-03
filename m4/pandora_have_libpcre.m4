@@ -61,7 +61,7 @@ AC_DEFUN([_PANDORA_REQUIRE_LIBPCRE],[
   _PANDORA_SEARCH_LIBPCRE
 
   AS_IF([test x$ac_cv_libpcre = xno],[
-    PANDORA_MSG_ERROR([libpcre is required for ${PACKAGE}. On Debian this can be found in libpcre3-dev. On RedHat this can be found in pcre-devel.])
+    AC_MSG_ERROR([libpcre is required for ${PACKAGE}. On Debian this can be found in libpcre3-dev. On RedHat this can be found in pcre-devel.])
   ],[
     AC_DEFINE_UNQUOTED(PCRE_HEADER,[${ac_cv_pcre_location}],
                        [Location of pcre header])

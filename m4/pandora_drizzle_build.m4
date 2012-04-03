@@ -74,9 +74,4 @@ AC_DEFUN([PANDORA_DRIZZLE_BUILD],[
   PANDORA_REQUIRE_BOOST_FILESYSTEM
   PANDORA_REQUIRE_BOOST_IOSTREAMS
 
-  LIBDRIZZLE_CPPFLAGS="-I\${top_builddir}/libdrizzle-2.0 -I\${top_srcdir}/libdrizzle-2.0"
-  OLDLIBDRIZZLE_CPPFLAGS="-I\${top_builddir}/libdrizzle-1.0 -I\${top_srcdir}/libdrizzle-1.0"
-  AC_SUBST([LIBDRIZZLE_CPPFLAGS])
-  AC_SUBST([OLDLIBDRIZZLE_CPPFLAGS])
-
 ])

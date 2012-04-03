@@ -37,5 +37,5 @@ AC_DEFUN([PANDORA_HAVE_LIBGEARMAN],[
 AC_DEFUN([PANDORA_REQUIRE_LIBGEARMAN],[
   AC_REQUIRE([PANDORA_HAVE_LIBGEARMAN])
   AS_IF([test "x${ac_cv_libgearman}" = "xno"],
-      PANDORA_MSG_ERROR([At least version 0.10 of libgearman is required for ${PACKAGE}]))
+      AC_MSG_ERROR([At least version 0.10 of libgearman is required for ${PACKAGE}]))
 ])

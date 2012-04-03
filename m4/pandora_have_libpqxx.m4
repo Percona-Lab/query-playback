@@ -39,6 +39,6 @@ AC_DEFUN([PANDORA_HAVE_LIBPQXX],[
 AC_DEFUN([PANDORA_REQUIRE_LIBPQXX],[
   AC_REQUIRE([PANDORA_HAVE_LIBPQXX])
   AS_IF([test "x$ac_cv_libpqxx" = "xno"],[
-      PANDORA_MSG_ERROR([libpqxx is required for ${PACKAGE}])
+      AC_MSG_ERROR([libpqxx is required for ${PACKAGE}])
   ])
 ])

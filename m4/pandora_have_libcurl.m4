@@ -32,14 +32,10 @@ AC_DEFUN([_PANDORA_SEARCH_LIBCURL],[
      AC_COMPILE_IFELSE([
        AC_LANG_PROGRAM(
          [[
-           #include <curl/curl.h>
-         ]],
-         [[
-           CURL *curl_handle=curl_easy_init();
-           CURLcode rv= curl_easy_setopt(curl_handle, CURLOPT_USERNAME, "foo");
-           (void)rv;
-         ]])
-       ],
+           CURL *handle;
+           handle=curl_easy_init();
+           rv= curl_easy_setopt(curl_handle, CURLOPT_USERNAME, "foo");
+         ]])],
        [pandora_cv_curl_have_username=yes],
        [pandora_cv_curl_have_username=no])
      ])
@@ -61,6 +57,6 @@ AC_DEFUN([PANDORA_HAVE_LIBCURL],[
 AC_DEFUN([PANDORA_REQUIRE_LIBCURL],[
   PANDORA_HAVE_LIBCURL($1)
   AS_IF([test "x${ac_cv_libcurl}" = "xno"],[
-    PANDORA_MSG_ERROR([libcurl is required for ${PACKAGE}])
+    AC_MSG_ERROR([libcurl is required for ${PACKAGE}])
   ])
 ])

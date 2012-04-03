@@ -37,7 +37,7 @@ AC_DEFUN([PANDORA_HAVE_LIBDRIZZLE],[
 AC_DEFUN([PANDORA_REQUIRE_LIBDRIZZLE],[
   AC_REQUIRE([PANDORA_HAVE_LIBDRIZZLE])
   AS_IF([test "x${ac_cv_libdrizzle}" = "xno"],[
-    PANDORA_MSG_ERROR([libdrizzle is required for ${PACKAGE}])
+    AC_MSG_ERROR([libdrizzle is required for ${PACKAGE}])
   ],[
     dnl We need at least 0.8 on Solaris non-sparc
     AS_IF([test "$target_cpu" != "sparc" -a "x${TARGET_SOLARIS}" = "xtrue"],[
@@ -56,6 +56,6 @@ drizzle_con_options_t foo= DRIZZLE_CON_EXPERIMENTAL;
     [pandora_cv_libdrizzle_recent=yes],
     [pandora_cv_libdrizzle_recent=no])])
   AS_IF([test "$pandora_cv_libdrizzle_recent" = "no"],[
-    PANDORA_MSG_ERROR([Your version of libdrizzle is too old. ${PACKAGE} requires at least version 0.8])
+    AC_MSG_ERROR([Your version of libdrizzle is too old. ${PACKAGE} requires at least version 0.8])
   ])
 ])

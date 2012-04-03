@@ -231,7 +231,7 @@ AC_DEFUN([_PANDORA_REQUIRE_LIBREADLINE],[
   _PANDORA_SEARCH_LIBREADLINE
 
   AS_IF([test "x$ac_cv_libreadline" = "xno"],
-    PANDORA_MSG_ERROR([libreadline is required for ${PACKAGE}. On Debian this can be found in libreadline5-dev. On RedHat this can be found in readline-devel.]))
+    AC_MSG_ERROR([libreadline is required for ${PACKAGE}. On Debian this can be found in libreadline5-dev. On RedHat this can be found in readline-devel.]))
 
 ])
 

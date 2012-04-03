@@ -44,6 +44,6 @@ AC_DEFUN([PANDORA_REQUIRE_BOOST_IOSTREAMS],[
   PANDORA_REQUIRE_BOOST($1)
   _PANDORA_SEARCH_BOOST_IOSTREAMS($1)
   AS_IF([test "x${ac_cv_libboost_iostreams}" = "xno" -a "x${ac_cv_libboost_iostreams_mt}" = "xno"],
-      PANDORA_MSG_ERROR([Boost.Iostreams is required for ${PACKAGE}]))
+      AC_MSG_ERROR([Boost.Iostreams is required for ${PACKAGE}]))
 ])
 

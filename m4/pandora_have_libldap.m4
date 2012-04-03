@@ -61,7 +61,7 @@ AC_DEFUN([_PANDORA_REQUIRE_LIBLDAP],[
   _PANDORA_SEARCH_LIBLDAP
 
   AS_IF([test x$ac_cv_libldap = xno],[
-    PANDORA_MSG_ERROR([libldap is required for ${PACKAGE}. On Debian this can be found in libldap2-dev. On RedHat this can be found in openldap-devel.])
+    AC_MSG_ERROR([libldap is required for ${PACKAGE}. On Debian this can be found in libldap2-dev. On RedHat this can be found in openldap-devel.])
   ],[
     AC_DEFINE_UNQUOTED(LDAP_HEADER,[${ac_cv_ldap_location}],
                        [Location of ldap header])

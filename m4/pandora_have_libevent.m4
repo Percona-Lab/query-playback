@@ -57,7 +57,7 @@ AC_DEFUN([_PANDORA_REQUIRE_LIBEVENT],[
   _PANDORA_SEARCH_LIBEVENT
 
   AS_IF([test x$ac_cv_libevent = xno],[
-    PANDORA_MSG_ERROR([libevent is required for ${PACKAGE}. On Debian this can be found in libevent-dev. On RedHat this can be found in libevent-devel.])
+    AC_MSG_ERROR([libevent is required for ${PACKAGE}. On Debian this can be found in libevent-dev. On RedHat this can be found in libevent-devel.])
   ])
 ])
 

@@ -29,7 +29,6 @@ _ACEOF
         AS_IF([test $? -eq 0],[ac_cv_dtrace_works=yes],
           [ac_cv_dtrace_works=no])
         rm -f conftest.h conftest.d
-        AS_IF([test "$TARGET_OSX"],[ac_cv_dtrace_works=no])
       ])
       AS_IF([test "x$ac_cv_dtrace_works" = "xyes"],[
         AC_DEFINE([HAVE_DTRACE], [1], [Enables DTRACE Support])

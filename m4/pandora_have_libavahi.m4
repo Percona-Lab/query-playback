@@ -37,5 +37,5 @@ AC_DEFUN([PANDORA_HAVE_LIBAVAHI],[
 AC_DEFUN([PANDORA_REQUIRE_LIBAVAHI],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBAVAHI])
   AS_IF([test "x${ac_cv_libavahi}" = "xno"],
-    PANDORA_MSG_ERROR([libavahi is required for ${PACKAGE}]))
+    AC_MSG_ERROR([libavahi is required for ${PACKAGE}]))
 ])

@@ -42,7 +42,7 @@ AC_DEFUN([_PANDORA_REQUIRE_LIBZ],[
   _PANDORA_SEARCH_LIBZ
 
   AS_IF([test x$ac_cv_libz = xno],[
-    PANDORA_MSG_ERROR([libz is required for ${PACKAGE}. On Debian this can be found in zlib1g-dev. On RedHat this can be found in zlib-devel.])
+    AC_MSG_ERROR([libz is required for ${PACKAGE}. On Debian this can be found in zlib1g-dev. On RedHat this can be found in zlib-devel.])
   ])
 ])
 

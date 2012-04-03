@@ -28,6 +28,6 @@ AC_DEFUN([PANDORA_HAVE_BISON],[
 AC_DEFUN([PANDORA_REQUIRE_BISON],[
   AC_REQUIRE([PANDORA_HAVE_BISON])
   AS_IF([test "x${pandora_have_bison}" = "xno" -a "$pandora_building_from_bzr" = "yes"],
-      PANDORA_MSG_ERROR(["bison is required for ${PACKAGE} to build from a bzr branch"])
+      AC_MSG_ERROR(["bison is required for ${PACKAGE} to build from a bzr branch"])
       )
 ])

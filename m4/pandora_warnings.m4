@@ -75,11 +75,8 @@ AC_DEFUN([PANDORA_WARNINGS],[
 
 
 	 
-    AS_IF([test "$ac_cv_warnings_as_errors" = "yes"],[
-      W_FAIL="-Werror"
-      SPHINX_WARNINGS="-W"
-      INTLTOOL_WARNINGS="yes"
-    ])
+    AS_IF([test "$ac_cv_warnings_as_errors" = "yes"],
+          [W_FAIL="-Werror"])
 
     AC_CACHE_CHECK([whether it is safe to use -fdiagnostics-show-option],
       [ac_cv_safe_to_use_fdiagnostics_show_option_],
@@ -130,7 +127,7 @@ AC_DEFUN([PANDORA_WARNINGS],[
       
     ],[
       m4_if(PW_LESS_WARNINGS,[no],[
-        BASE_WARNINGS_FULL="${W_CONVERSION} -Wstrict-aliasing -Wswitch-enum "
+        BASE_WARNINGS_FULL="${W_CONVERSION} -Wstrict-aliasing"
         CC_WARNINGS_FULL="-Wswitch-default -Wswitch-enum -Wwrite-strings"
         CXX_WARNINGS_FULL="-Weffc++ -Wold-style-cast"
         NO_OLD_STYLE_CAST="-Wno-old-style-cast"
@@ -375,7 +372,6 @@ inline const EnumDescriptor* GetEnumDescriptor<Table_TableOptions_RowType>() {
       PROTOSKIP_WARNINGS="-Wno-effc++ -Wno-shadow -Wno-missing-braces ${NO_ATTRIBUTES}"
       NO_WERROR="-Wno-error"
       PERMISSIVE_WARNINGS="-Wno-error -Wno-unused-function -fpermissive"
-      PERMISSIVE_C_WARNINGS="-Wno-error -Wno-redundant-decls"
       AS_IF([test "$host_vendor" = "apple"],[
         BOOSTSKIP_WARNINGS="-Wno-uninitialized"
       ])
@@ -438,10 +434,7 @@ inline const EnumDescriptor* GetEnumDescriptor<Table_TableOptions_RowType>() {
   AC_SUBST(INNOBASE_SKIP_WARNINGS)
   AC_SUBST(BOOSTSKIP_WARNINGS)
   AC_SUBST(PERMISSIVE_WARNINGS)
-  AC_SUBST(PERMISSIVE_C_WARNINGS)
   AC_SUBST(NO_WERROR)
   AC_SUBST([GCOV_LIBS])
-  AC_SUBST([SPHINX_WARNINGS])
-  AC_SUBST([INTLTOOL_WARNINGS])
 
 ])

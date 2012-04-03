@@ -254,5 +254,5 @@ AC_DEFUN([PANDORA_HAVE_PTHREAD],[
 AC_DEFUN([PANDORA_REQUIRE_PTHREAD],[
   AC_REQUIRE([PANDORA_HAVE_PTHREAD])
   AS_IF([test "x$acx_pthread_ok" != "xyes"],[
-    PANDORA_MSG_ERROR(could not find libpthread)])
+    AC_MSG_ERROR(could not find libpthread)])
 ])

@@ -88,6 +88,6 @@ AC_DEFUN([PANDORA_HAVE_BOOST],[
 AC_DEFUN([PANDORA_REQUIRE_BOOST],[
   PANDORA_HAVE_BOOST($1)
   AS_IF([test x$ac_cv_boost = xno],
-      PANDORA_MSG_ERROR([boost is required for ${PACKAGE}]))
+      AC_MSG_ERROR([boost is required for ${PACKAGE}]))
 ])
 

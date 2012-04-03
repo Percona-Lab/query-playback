@@ -46,7 +46,7 @@ AC_DEFUN([_PANDORA_REQUIRE_LIBUUID],[
   ac_enable_libuuid="yes"
   _PANDORA_SEARCH_LIBUUID
   AS_IF([test "x$ac_cv_header_uuid_uuid_h" = "xno"],[
-    PANDORA_MSG_ERROR([Couldn't find uuid/uuid.h. On Debian this can be found in uuid-dev. On RHEL 4 this can be found in e2fsprogs-devel and Fedora/RHEL 6 in libuuid-devel.])
+    AC_MSG_ERROR([Couldn't find uuid/uuid.h. On Debian this can be found in uuid-dev. On Redhat this can be found in e2fsprogs-devel.])
   ])
 ])
 

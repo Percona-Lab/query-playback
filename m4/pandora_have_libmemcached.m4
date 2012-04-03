@@ -96,11 +96,11 @@ AC_DEFUN([PANDORA_HAVE_LIBMEMCACHED],[
 AC_DEFUN([PANDORA_REQUIRE_LIBMEMCACHED],[
   PANDORA_HAVE_LIBMEMCACHED($1)
   AS_IF([test "x{$pandora_cv_recent_libmemcached}" = "xno"],
-      PANDORA_MSG_ERROR([libmemcached is required for ${PACKAGE}]))
+      AC_MSG_ERROR([libmemcached is required for ${PACKAGE}]))
 ])
 
 AC_DEFUN([PANDORA_REQUIRE_LIBMEMCACHEDPROTOCOL],[
   PANDORA_HAVE_LIBMEMCACHED($1)
   AS_IF([test x$ac_cv_libmemcachedprotocol = xno],
-      PANDORA_MSG_ERROR([libmemcachedprotocol is required for ${PACKAGE}]))
+      AC_MSG_ERROR([libmemcachedprotocol is required for ${PACKAGE}]))
 ])

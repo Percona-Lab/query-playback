@@ -36,5 +36,5 @@ AC_DEFUN([PANDORA_HAVE_LIBBDB],[
 AC_DEFUN([PANDORA_REQUIRE_LIBBDB],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBBDB])
   AS_IF([test "x${ac_cv_libbdb}" = "xno"],
-    PANDORA_MSG_ERROR([libbdb is required for ${PACKAGE}]))
+    AC_MSG_ERROR([libbdb is required for ${PACKAGE}]))
 ])

@@ -50,5 +50,5 @@ AC_DEFUN([PANDORA_HAVE_LIBTOKYOCABINET],[
 AC_DEFUN([PANDORA_REQUIRE_LIBTOKYOCABINET],[
   AC_REQUIRE([_PANDORA_SEARCH_LIBTOKYOCABINET])
   AS_IF([test "x${ac_cv_libtokyocabinet}" = "xno"],
-    PANDORA_MSG_ERROR([libtokyocabinet is required for ${PACKAGE}. On Debian systems this is found in libtokyocabinet-dev. On RedHat, in tokyocabinet-devel.]))
+    AC_MSG_ERROR([libtokyocabinet is required for ${PACKAGE}. On Debian systems this is found in libtokyocabinet-dev. On RedHat, in tokyocabinet-devel.]))
 ])

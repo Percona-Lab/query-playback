@@ -49,6 +49,6 @@ AC_DEFUN([PANDORA_REQUIRE_BOOST_REGEX],[
   PANDORA_REQUIRE_BOOST($1)
   _PANDORA_SEARCH_BOOST_REGEX($1)
   AS_IF([test "x${ac_cv_libboost_regex}" = "xno" -a "x${ac_cv_libboost_regex_mt}" = "xno"],
-      PANDORA_MSG_ERROR([boost::regex is required for ${PACKAGE}]))
+      AC_MSG_ERROR([boost::regex is required for ${PACKAGE}]))
 ])
 

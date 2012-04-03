@@ -21,7 +21,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBHAILDB],[
     AC_LIB_HAVE_LINKFLAGS(haildb,,[
       #include <haildb.h>
     ],[
-      ib_update_table_statistics(NULL);
+      ib_set_panic_handler(NULL);
     ])
     AS_IF([test "x${ac_cv_libhaildb}" = "xyes"],[
       AC_DEFINE([HAVE_HAILDB_H],[1],[Do we have haildb.h])
@@ -39,5 +39,5 @@ AC_DEFUN([PANDORA_HAVE_LIBHAILDB],[
 AC_DEFUN([PANDORA_REQUIRE_LIBHAILDB],[
   AC_REQUIRE([PANDORA_HAVE_LIBHAILDB])
   AS_IF([test "x${ac_cv_libhaildb}" = "xno"],
-      PANDORA_MSG_ERROR([libhaildb 2.3.2 or later is required for ${PACKAGE}]))
+      AC_MSG_ERROR([libhaildb 2.2.0 or later is required for ${PACKAGE}]))
 ])

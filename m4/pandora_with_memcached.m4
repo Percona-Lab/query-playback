@@ -35,7 +35,7 @@ AC_DEFUN([PANDORA_HAVE_MEMCACHED],[
 AC_DEFUN([PANDORA_REQUIRE_MEMCACHED],[
   AC_REQUIRE([PANDORA_HAVE_MEMCACHED])
   AS_IF([test "x$MEMCACHED_BINARY" = "xno"],[
-    PANDORA_MSG_ERROR(["could not find memcached binary"])
+    AC_MSG_ERROR(["could not find memcached binary"])
   ])
 ])
 
