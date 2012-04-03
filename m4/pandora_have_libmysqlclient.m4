@@ -27,40 +27,6 @@ AC_DEFUN([PANDORA_WITH_MYSQL],[
     MYSQL_CONFIG="${with_mysql}"
   ])
 
-  AC_CACHE_CHECK([for MySQL Base Location],[pandora_cv_mysql_base],[
-
-    dnl option 2: something in MYSQL_CONFIG now, use that to get a base dir
-    AS_IF([test -f "${MYSQL_CONFIG}" -a -x "${MYSQL_CONFIG}"],[
-      pandora_cv_mysql_base=$(dirname $(MYSQL_CONFIG --include | sed 's/-I//'))
-    ],[
-      dnl option 1: a directory
-      AS_IF([test -d $with_mysql],[pandora_cv_mysql_base=$with_mysql],[
-        pandora_cv_mysql_base="not found"
-      ])
-    ])
-  ])
-])
-
-AC_DEFUN([_PANDORA_SEARCH_LIBMYSQLCLIENT],[
-  AC_REQUIRE([AC_LIB_PREFIX])
-
-  AC_ARG_ENABLE([libmysqlclient],
-    [AS_HELP_STRING([--disable-libmysqlclient],
-      [Build with libmysqlclient support @<:@default=on@:>@])],
-    [ac_enable_libmysqlclient="$enableval"],
-    [ac_enable_libmysqlclient="yes"])
-
-  AS_IF([test "x$ac_enable_libmysqlclient" = "xyes"],[
-    AC_LIB_HAVE_LINKFLAGS(mysqlclient_r,,[
-#include <mysql/mysql.h>
-    ],[
-MYSQL mysql;
-  ])],[
-    ac_cv_libmysqlclient_r="no"
-  ])
-
-  AM_CONDITIONAL(HAVE_LIBMYSQLCLIENT, [test "x${ac_cv_libmysqlclient_r}" = "xyes"])
-
   AS_IF([test "x$MYSQL_CONFIG" = "xISDIR"],[
     IBASE="-I${with_mysql}"
     MYSQL_CONFIG="${with_mysql}/scripts/mysql_config"
@@ -76,14 +42,3 @@ MYSQL mysql;
     AC_SUBST(MYSQL_INCLUDES)
     AC_SUBST(MYSQL_LIBS)
 ])
-
-AC_DEFUN([PANDORA_HAVE_LIBMYSQLCLIENT],[
-  AC_REQUIRE([_PANDORA_SEARCH_LIBMYSQLCLIENT])
-])
-
-AC_DEFUN([PANDORA_REQUIRE_LIBMYSQLCLIENT],[
-  AC_REQUIRE([PANDORA_HAVE_LIBMYSQLCLIENT])
-  AS_IF([test "x${ac_cv_libmysqlclient_r}" = "xno"],
-      AC_MSG_ERROR([libmysqlclient_r is required for ${PACKAGE}]))
-])
-
