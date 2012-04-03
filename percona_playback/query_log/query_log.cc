@@ -46,147 +46,51 @@
 #include <boost/program_options.hpp>
 namespace po= boost::program_options;
 
-//! Holds a slice of text.
-/** Instances *must* be allocated/freed using methods herein, because the C++ declaration
-    represents only the header of a much larger object in memory. */
-class TextSlice {
-    //! Pointer to one past last character in sequence
-    char* logical_end;
-    //! Pointer to one past last available byte in sequence.
-    char* physical_end;
-public:
-    //! Allocate a TextSlice object that can hold up to max_size characters.
-    static TextSlice* allocate( size_t max_size ) {
-        // +1 leaves room for a terminating null character.
-      TextSlice* t = reinterpret_cast<TextSlice*>(tbb::tbb_allocator<char>().allocate( sizeof(TextSlice)+max_size+1 ));
-        t->logical_end = t->begin();
-        t->physical_end = t->begin()+max_size;
-        return t;
-    }
-    //! Free a TextSlice object
-    void free() {
-      tbb::tbb_allocator<char>().deallocate(reinterpret_cast<char*>(this),
-				  sizeof(TextSlice)+(physical_end-begin())+1);
-    }
-    //! Pointer to beginning of sequence
-    char* begin() {return (char*)(this+1);}
-    //! Pointer to one past last character in sequence
-    char* end() {return logical_end;}
-    //! Length of sequence
-    size_t size() const {return logical_end-(char*)(this+1);}
-    //! Maximum number of characters that can be appended to sequence
-    size_t avail() const {return physical_end-logical_end;}
-    //! Append sequence [first,last) to this sequence.
-    void append( char* first, char* last ) {
-        memcpy( logical_end, first, last-first );
-        logical_end += last-first;
-    }
-    //! Set end() to given value.
-    void set_end( char* p ) {logical_end=p;}
-};
-
-const size_t MAX_CHAR_PER_INPUT_SLICE = 4000;
-
-class LineFileInputFilter : public tbb::filter {
-public:
-  LineFileInputFilter( FILE* input_file_, unsigned int read_count_);
-  ~LineFileInputFilter();
-  void* operator()(void*);
-private:
-  FILE* input_file;
-  TextSlice* next_slice;
-  unsigned int read_count;
-};
-
-LineFileInputFilter::LineFileInputFilter( FILE* input_file_, unsigned int read_count_ ) :
-    input_file(input_file_),
-    next_slice( NULL ),
-    read_count(read_count_),
-    tbb::filter(/*serial*/true)
-{
-}
-
-LineFileInputFilter::~LineFileInputFilter() {
-  if (next_slice)
-    next_slice->free();
-}
-
-void* LineFileInputFilter::operator()(void*) {
-  if (!next_slice)
-    next_slice= TextSlice::allocate( MAX_CHAR_PER_INPUT_SLICE );
-
-  // Read characters into space that is available in the next slice.
-  size_t m = next_slice->avail();
- read:
-  size_t n = fread( next_slice->end(), 1, m, input_file );
-  if( !n && next_slice->size()==0 && read_count)
-  {
-    fseek(input_file, 0L, SEEK_SET);
-    read_count--;
-    goto read;
-  }
-
-  if( !n && next_slice->size()==0 ) {
-    // No more characters to process
-    return NULL;
-  } else {
-    // Have more characters to process.
-    TextSlice& t = *next_slice;
-    next_slice = TextSlice::allocate( MAX_CHAR_PER_INPUT_SLICE );
-    char* p = t.end()+n;
-    if( n==m ) {
-      // Might have read partial number.  If so, transfer characters of partial number to next slice.
-      while( p>t.begin() && p[-1]!='\n' )
-	--p;
-      next_slice->append( p, t.end()+n );
-    }
-    t.set_end(p);
-    return &t;
-  }
-}
-
 // ParseQueryLogFunc
 class ParseQueryLogFunc: public tbb::filter {
 public:
-  ParseQueryLogFunc(tbb::atomic<uint64_t> *entries_,
+  ParseQueryLogFunc(FILE *input_file_,
+		    unsigned int run_count_,
+		    tbb::atomic<uint64_t> *entries_,
 		    tbb::atomic<uint64_t> *queries_)
-    : previous(NULL),
-      entries(entries_),
+    : entries(entries_),
       queries(queries_),
+      input_file(input_file_),
+      run_count(run_count_),
       tbb::filter(true)
   {};
 
-  ~ParseQueryLogFunc() { delete previous; }
-
   void* operator() (void*);
 private:
-  QueryLogEntry *previous;
   tbb::atomic<uint64_t> *entries;
   tbb::atomic<uint64_t> *queries;
+  FILE *input_file;
+  unsigned int run_count;
 };
 
 void* dispatch(void *input_);
 
-void* ParseQueryLogFunc::operator() (void* input_)  {
-  TextSlice *input= static_cast<TextSlice*>(input_);
-
+void* ParseQueryLogFunc::operator() (void*)  {
   std::vector<QueryLogEntry> *entries = new std::vector<QueryLogEntry>();
-
-  if(previous)
-    entries->push_back(*previous);
-  delete previous;
 
   entries->push_back(QueryLogEntry());
 
-  char *p= input->begin();
-  char *q= input->begin();
+  char *line= NULL;
+  size_t buflen = 0;
+  size_t len;
+
+  if ((len= getline(&line, &buflen, input_file)) == -1)
+  {
+    delete entries;
+    return NULL;
+  }
+
+  char *p= line;
+  char *q;
+  int count= 0;
 
   for (;;) {
-    while (q<input->end() && *q != '\n')
-      q++;
-
-    if(q==input->end())
-      break;
+    q= line+len;
 
     if ( (strncmp(p, "# Time", 5) == 0))
       goto next;
@@ -203,20 +107,23 @@ void* ParseQueryLogFunc::operator() (void* input_)  {
 
     if (strncmp(p, "# User@Host", strlen("# User@Host")) == 0)
     {
+      count++;
       entries->push_back(QueryLogEntry());
       (*this->entries)++;
     }
 
-    entries->back().add_line(std::string(p, q - p), queries);
+    entries->back().add_line(std::string(line), queries);
   next:
-    p= q+1;
-    q++;
+    if (count > 100)
+      break;
+    if (getline(&line, &len, input_file) == -1)
+    {
+      break;
+    }
+    p= line;
   }
 
-  this->previous = new QueryLogEntry(entries->back());
-  entries->pop_back();
-
-  input->free();
+  free(line);
   return entries;
 }
 
@@ -331,10 +238,8 @@ void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_pl
   entries=0;
   queries=0;
 
-  LineFileInputFilter f1(input_file, run_count);
-  ParseQueryLogFunc f2(&entries, &queries);
+  ParseQueryLogFunc f2(input_file, run_count, &entries, &queries);
   DispatchQueriesFunc f4;
-  p.add_filter(f1);
   p.add_filter(f2);
   p.add_filter(f4);
   p.run(2);

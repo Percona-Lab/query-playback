@@ -60,8 +60,8 @@ int main(int argc, char **argv)
   struct percona_playback_run_result *r= percona_playback_run(the_percona_playback);
 
   assert(r->err == 0);
-  assert(r->n_queries == 70);
-  assert(r->n_log_entries = 34);
+  assert(r->n_queries == 35);
+  assert(r->n_log_entries = 17);
 
   percona_playback_destroy(&the_percona_playback);
   return r->err;
