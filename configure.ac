@@ -1,6 +1,7 @@
 #
 # Percona Playback
 #
+# Portions of auto-foo:
 # Copyright (C) 2009-2010 Monty Taylor, Eric Day
 # All rights reserved.
 #
@@ -13,7 +14,7 @@ AC_CONFIG_SRCDIR([percona_playback/percona_playback.h])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 
-PANDORA_CANONICAL_TARGET(warnings-always-on, require-cxx, version-from-vc)
+PANDORA_CANONICAL_TARGET(warnings-always-on, require-cxx)
 
 # Increment if interfaces have been added, removed, or changed.
 LIBPERCONA_PLAYBACK_VERSION_CURRENT=0
