@@ -3,3 +3,4 @@ version = 11.04
 template = pandora-build-c
 project-type = application
 pandora-version = 0.171
+version_pandora-build = 11.10
