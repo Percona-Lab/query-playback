@@ -39,6 +39,6 @@ AC_DEFUN([PANDORA_HAVE_TBB],[
 AC_DEFUN([PANDORA_REQUIRE_TBB],[
   PANDORA_HAVE_TBB($1)
   AS_IF([test x$ac_cv_tbb = xno],
-      PANDORA_MSG_ERROR([tbb is required for ${PACKAGE}]))
+      AC_MSG_ERROR([tbb is required for ${PACKAGE}]))
 ])
 
