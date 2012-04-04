@@ -43,12 +43,16 @@ class QueryResult {
     _error= e;
   }
 
-  uint64_t getRowsSent() {
+  uint64_t getRowsSent() const {
     return _rows_sent;
   }
 
-  uint64_t getRowsExamined() {
+  uint64_t getRowsExamined() const {
     return _rows_examined;
+  }
+
+  int getError() const {
+    return _error;
   }
 
 };

@@ -31,6 +31,7 @@ namespace boost {
 }
 
 class DBThread;
+class QueryResult;
 
 namespace percona_playback {
 
@@ -69,6 +70,21 @@ class DBClientPlugin : public plugin
   virtual DBThread *create(uint64_t _thread_id)=0;
 };
 
+class ReportPlugin : public plugin
+{
+ public:
+  std::string name;
+
+  ReportPlugin(std::string _name) : name(_name) {}
+
+  virtual void query_execution(const uint64_t thread_id,
+			       const std::string &query,
+			       const QueryResult &expected,
+			       const QueryResult &actual)=0;
+
+  virtual void print_report()=0;
+};
+
 class PluginRegistry
 {
  public:
@@ -83,11 +99,15 @@ class PluginRegistry
   typedef std::map<std::string, DBClientPlugin*> DBClientPluginMap;
   typedef std::pair<std::string, DBClientPlugin*> DBClientPluginPair;
 
+  typedef std::map<std::string, ReportPlugin*> ReportPluginMap;
+  typedef std::pair<std::string, ReportPlugin*> ReportPluginPair;
+
   typedef std::map<std::string, plugin*> PluginMap;
   typedef std::pair<std::string, plugin*> PluginPair;
 
   PluginMap all_plugins;
   DBClientPluginMap dbclient_plugins;
+  ReportPluginMap report_plugins;
 
   void add(std::string name, plugin* plugin_object)
   {
@@ -98,6 +118,12 @@ class PluginRegistry
   {
     dbclient_plugins.insert(DBClientPluginPair(name, dbclient));
     all_plugins.insert(PluginPair(name, dbclient));
+  }
+
+  void add(std::string name, ReportPlugin* report_plugin)
+  {
+    report_plugins.insert(ReportPluginPair(name, report_plugin));
+    all_plugins.insert(PluginPair(name, report_plugin));
   }
 };
 

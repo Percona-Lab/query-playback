@@ -43,6 +43,7 @@
 #include <percona_playback/query_log/query_log.h>
 #include <percona_playback/query_result.h>
 
+#include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 namespace po= boost::program_options;
 
@@ -149,8 +150,15 @@ void QueryLogEntry::execute(DBThread *t)
     expected_result.setError(0);
 
     t->execute_query(*it, &r, expected_result);
-    if (r.getRowsSent() != expected_result.getRowsSent())
-      std::cerr << "Rows sent: " << r.getRowsSent() << " != expected " << expected_result.getRowsSent() << std::endl;
+
+    BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
+		  percona_playback::PluginRegistry::singleton().report_plugins)
+    {
+      pp.second->query_execution(getThreadId(),
+				 (*it),
+				 expected_result,
+				 r);
+    }
   }
 }
 

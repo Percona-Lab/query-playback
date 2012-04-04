@@ -240,6 +240,12 @@ struct percona_playback_run_result *percona_playback_run(const percona_playback_
   r->err= run_query_log((*the_percona_playback->slow_query_log_files)[0],
 			the_percona_playback->query_log_file_read_count, r);
 
+  BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
+		  percona_playback::PluginRegistry::singleton().report_plugins)
+  {
+    pp.second->print_report();
+  }
+
   return r;
 }
 
