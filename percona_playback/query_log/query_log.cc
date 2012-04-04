@@ -46,6 +46,8 @@
 #include <boost/program_options.hpp>
 namespace po= boost::program_options;
 
+static bool g_run_set_timestamp;
+
 // ParseQueryLogFunc
 class ParseQueryLogFunc: public tbb::filter {
 public:
@@ -135,7 +137,8 @@ void QueryLogEntry::execute(DBThread *t)
   for ( it=query.begin() ; it < query.end(); it++ )
   {
     const std::string timestamp_query("SET timestamp=");
-    if((*it).compare(0, timestamp_query.length(), timestamp_query) == 0)
+    if(!g_run_set_timestamp
+       && (*it).compare(0, timestamp_query.length(), timestamp_query) == 0)
       continue;
     /*      std::cerr << "thread " << getThreadId()
 	    << " running query " << (*it) << std::endl;*/
@@ -294,6 +297,7 @@ public:
     query_log_options.add_options()
       ("slow-query-log-file", po::value<std::string>(), "Query log file")
       ("file-read-count", po::value<unsigned int>(), "Query log file read count (how many times to read query log file)")
+      ("run-set-timestamp", po::value<bool>(&g_run_set_timestamp)->default_value(false)->zero_tokens(), "By default, we skip the SET TIMESTAMP=XX; query that the MySQL slow query log always includes. This may cause some subsequent queries to fail, depending on your workload. If the --run-set-timestamp option is enabled, we run these queries too.")
       ;
 
     return &query_log_options;
