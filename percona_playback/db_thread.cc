@@ -53,5 +53,4 @@ void RunDBThread(DBThread* dbt, uint64_t thread_id)
     db_executors.erase(thread_id);
     delete dbt;
   }
-  std::cerr << "end thread " << thread_id << std::endl;
 }

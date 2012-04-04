@@ -202,7 +202,6 @@ void* dispatch (void *input_)
 	  DBThread *db_thread= g_dbclient_plugin->create(thread_id);
 	  a->second= db_thread;
 	  db_thread->start_thread();
-	  std::cerr << "new thread " << thread_id << std::endl;
 	}
 	a->second->queries.push((*input)[i]);
       }
