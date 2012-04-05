@@ -46,7 +46,7 @@ private:
   bool shutdown;
 public:
 
-  QueryLogEntry() : thread_id(0), shutdown(false) {};
+ QueryLogEntry() : thread_id(0), shutdown(false) {};
 
   void set_shutdown() { shutdown= true; }
 
@@ -69,8 +69,8 @@ public:
   bool is_quit()
   {
     return query.size() &&
-      (query[0].compare("# administrator command: Quit;") == 0
-       || (query.size()>1 && query[1].compare("# administrator command: Quit;") == 0));
+      (query[0].compare(0, 30, "# administrator command: Quit;") == 0
+       || (query.size()>1 && query[1].compare(0,30,"# administrator command: Quit;") == 0));
   }
 
   void execute(DBThread *t);
