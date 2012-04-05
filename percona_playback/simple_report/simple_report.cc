@@ -94,8 +94,9 @@ public:
     if (actual.getRowsSent() != expected.getRowsSent())
     {
       nr_queries_rows_differ++;
-      std::cerr << "Rows sent: " << actual.getRowsSent()
+      std::cerr << "Thd " << thread_id << " Rows sent: " << actual.getRowsSent()
 		<< " != expected " << expected.getRowsSent()
+		<< " for query " << query
 		<< std::endl;
     }
     nr_queries_executed++;
