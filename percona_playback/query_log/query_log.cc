@@ -110,6 +110,12 @@ void* ParseQueryLogFunc::operator() (void*)  {
     if (p[0] != '#' && strncmp(p, "Time    ", strlen("Time    "))==0)
       goto next;
 
+    /*
+      # fixme, process admin commands.
+      if (strcmp(p,"# administrator command: Prepare;\n") == 0)
+      goto next;
+    */
+
     if (strncmp(p, "# User@Host", strlen("# User@Host")) == 0)
     {
       count++;
@@ -120,7 +126,11 @@ void* ParseQueryLogFunc::operator() (void*)  {
     entries->back().add_line(std::string(line), queries);
   next:
     if (count > 100)
+    {
+      count= 0;
+      //      fseek(input_file,-len, SEEK_CUR);
       break;
+    }
     if (getline(&line, &len, input_file) == -1)
     {
       break;
@@ -143,8 +153,8 @@ void QueryLogEntry::execute(DBThread *t)
     if(!g_run_set_timestamp
        && (*it).compare(0, timestamp_query.length(), timestamp_query) == 0)
       continue;
-    /*      std::cerr << "thread " << getThreadId()
-	    << " running query " << (*it) << std::endl;*/
+    /*          std::cerr << "thread " << getThreadId()
+		<< " running query " << (*it) << std::endl;*/
 
     QueryResult expected_result;
     expected_result.setRowsSent(rows_sent);
