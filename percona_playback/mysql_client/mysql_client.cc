@@ -70,9 +70,15 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
     MYSQL_RES* mysql_res= NULL;
 
     r->setError(mr);
+    r->setWarningCount(mysql_warning_count(&handle));
 
     mysql_res= mysql_store_result(&handle);
-    r->setRowsSent(mysql_num_rows(mysql_res));
+
+    if (mysql_res != NULL)
+      r->setRowsSent(mysql_num_rows(mysql_res));
+    else
+      r->setRowsSent(0);
+
     mysql_free_result(mysql_res);
   }
 }

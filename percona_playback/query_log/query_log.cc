@@ -45,6 +45,8 @@
 
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 namespace po= boost::program_options;
 
 static bool g_run_set_timestamp;
@@ -149,7 +151,15 @@ void QueryLogEntry::execute(DBThread *t)
     expected_result.setRowsExamined(rows_examined);
     expected_result.setError(0);
 
+    boost::posix_time::ptime start_time;
+    start_time= boost::posix_time::microsec_clock::universal_time();
     t->execute_query(*it, &r, expected_result);
+
+    boost::posix_time::ptime end_time;
+    end_time= boost::posix_time::microsec_clock::universal_time();
+
+    boost::posix_time::time_period duration(start_time, end_time);
+    r.setDuration(duration.length());
 
     BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
 		  percona_playback::PluginRegistry::singleton().report_plugins)

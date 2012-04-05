@@ -21,6 +21,7 @@
 
 #include "boost/foreach.hpp"
 #include <boost/program_options.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "tbb/atomic.h"
 #include "tbb/concurrent_unordered_map.h"
@@ -35,6 +36,7 @@ private:
   tbb::atomic<uint64_t> nr_queries_rows_differ;
   tbb::atomic<uint64_t> nr_queries_executed;
   tbb::atomic<uint64_t> nr_error_queries;
+  tbb::atomic<uint64_t> total_execution_time_ms;
 
   typedef tbb::concurrent_unordered_map<uint64_t, tbb::atomic<uint64_t> > ConnectionQueryCountMap;
   typedef std::pair<uint64_t, tbb::atomic<uint64_t> > ConnectionQueryCountPair;
@@ -54,6 +56,7 @@ public:
     nr_queries_rows_differ= 0;
     nr_error_queries= 0;
     show_connection_query_count= false;
+    total_execution_time_ms= 0;
   }
 
   virtual boost::program_options::options_description* getProgramOptions() {
@@ -98,6 +101,8 @@ public:
     nr_queries_executed++;
     nr_expected_rows_sent.fetch_and_add(expected.getRowsSent());
     nr_actual_rows_sent.fetch_and_add(actual.getRowsSent());
+
+    total_execution_time_ms.fetch_and_add(actual.getDuration().total_microseconds());
   }
 
   virtual void print_report()
@@ -105,6 +110,10 @@ public:
     printf("Report\n");
     printf("------\n");
     printf("Executed %" PRIu64 " queries\n", uint64_t(nr_queries_executed));
+
+    boost::posix_time::time_duration total_duration= boost::posix_time::microseconds(total_execution_time_ms);
+    printf("Spent %s executing queries\n", boost::posix_time::to_simple_string(total_duration).c_str());
+
     printf("A total of %" PRIu64 " queries had errors.\n",
 	   uint64_t(nr_error_queries));
     printf("Expected %" PRIu64 " rows, got %" PRIu64 " (a difference of %" PRId64 ")\n",
@@ -129,7 +138,7 @@ public:
     double avg_queries= (double)total_queries / (double)connection_query_counts.size();
 
     printf("\n");
-    printf("Average of %.2f queries per connection.\n", avg_queries);
+    printf("Average of %.2f queries per connection (%"PRIu64 " connections).\n", avg_queries, connection_query_counts.size());
     printf("\n");
 
     if (show_connection_query_count)

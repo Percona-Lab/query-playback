@@ -38,7 +38,6 @@ bool DBThread::run()
       connect();
       continue;
     }
-
     query.execute(this);
   }
 

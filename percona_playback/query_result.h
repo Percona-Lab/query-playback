@@ -16,6 +16,7 @@
 #ifndef PERCONA_PLAYBACK_QUERY_RESULT_H
 #define PERCONA_PLAYBACK_QUERY_RESULT_H
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "percona_playback/visibility.h"
 
 #ifdef __cplusplus
@@ -28,8 +29,16 @@ class QueryResult {
   uint64_t _rows_sent;
   uint64_t _rows_examined;
   int _error;
+  int _warning_count;
+  boost::posix_time::time_duration _duration;
+
  public:
-   QueryResult() : _rows_sent(0), _rows_examined(0), _error(0) { }
+  QueryResult() :  _rows_sent(0),
+    _rows_examined(0),
+    _error(0),
+    _warning_count(0)
+  {
+  }
 
   void setRowsSent(const uint64_t &rows) {
     _rows_sent= rows;
@@ -43,6 +52,14 @@ class QueryResult {
     _error= e;
   }
 
+  void setWarningCount(int nr) {
+    _warning_count= nr;
+  }
+
+  void setDuration(const boost::posix_time::time_duration &duration) {
+    _duration= duration;
+  }
+
   uint64_t getRowsSent() const {
     return _rows_sent;
   }
@@ -53,6 +70,14 @@ class QueryResult {
 
   int getError() const {
     return _error;
+  }
+
+  int getWarningCount() const {
+    return _warning_count;
+  }
+
+  boost::posix_time::time_duration getDuration() const {
+    return _duration;
   }
 
 };
