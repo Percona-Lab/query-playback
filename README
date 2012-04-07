@@ -1,13 +1,43 @@
 Percona Playback
 ----------------
-(C) 2011 Percona Inc.
+(C) 2011-2012 Percona Inc.
 See LICENSE for full text of the GPL.
 
 Percona Playback is a tool for replaying the load of one database server to another.
 
 see ./bin/percona-playback --help for details
 
+Build Dependencies
+------------------
+You will need the following packages to build percona-playback:
+ * libtbb (Intel Threading Building Blocks)
+ * Boost (including boost program_options)
+ * libmysqlclient (MySQL Client Libraries) [1]
+
+[1] Not strictly needed, but if you don't have it, you don't get to do the play back part.
+
+Building
+--------
+If you are building from BZR, you will need to run ./cofig/autorun.sh first.
+
+$ ./configure
+$ make
+
+Test Suite
+----------
+There are several tests included, these use a dummy database client plugin to mainly test that parsing of the logs is correct.
+
+$ make check
+
+Building release tarball
+------------------------
+
+$ make dist
 
 Capturing everything in the slow log
 ------------------------------------
+To capture queries for Percona Playback to play back, you will need to run MySQL, MariaDB or Percona Server with the slow query log capturing the queries you wish to run. You will need the following options to mysqld:
+
 --slow-query-log --log-slow-admin-statements --log-slow-verbosity=microtime --long-query-time=0
+
+
