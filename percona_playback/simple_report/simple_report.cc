@@ -79,7 +79,7 @@ public:
   {
     if (actual.getError())
     {
-      std::cerr << "Error query: " << query;
+      fprintf(stderr,"Error query: %s\n", query.c_str());
       nr_error_queries++;
     }
 
@@ -97,11 +97,9 @@ public:
     if (actual.getRowsSent() != expected.getRowsSent())
     {
       nr_queries_rows_differ++;
-      std::cerr << "Thd " << thread_id << " Rows sent: " << actual.getRowsSent()
-		<< " != expected " << expected.getRowsSent()
-		<< " for query " << query
-		<< std::endl;
+      fprintf(stderr, "Connection %"PRIu64" Rows Sent: %"PRIu64 " != expected %"PRIu64 " for query: %s\n", thread_id, actual.getRowsSent(), expected.getRowsSent(), query.c_str());
     }
+
     nr_queries_executed++;
     nr_expected_rows_sent.fetch_and_add(expected.getRowsSent());
     nr_actual_rows_sent.fetch_and_add(actual.getRowsSent());
