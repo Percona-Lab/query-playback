@@ -78,7 +78,10 @@ public:
 			       const QueryResult &actual)
   {
     if (actual.getError())
+    {
+      std::cerr << "Error query: " << query;
       nr_error_queries++;
+    }
 
     {
       tbb::atomic<uint64_t> zero;
