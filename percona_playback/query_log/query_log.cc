@@ -282,9 +282,6 @@ void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_pl
 
   r->n_log_entries= entries;
   r->n_queries= queries;
-
-  std::cout << "Processed " << entries << " entries" << std::endl;
-  std::cout << "Processed " << queries << " queries" << std::endl;
 }
 
 int run_query_log(const std::string &log_file, unsigned int run_count, struct percona_playback_run_result *r)
