@@ -34,8 +34,6 @@
 #include "tbb/concurrent_queue.h"
 #include "tbb/concurrent_hash_map.h"
 
-#include <mysql/mysql.h>
-
 #include <percona_playback/percona_playback.h>
 #include <percona_playback/plugin.h>
 #include <percona_playback/db_thread.h>
