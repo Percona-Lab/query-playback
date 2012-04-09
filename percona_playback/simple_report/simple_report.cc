@@ -37,6 +37,9 @@ private:
   tbb::atomic<uint64_t> nr_queries_executed;
   tbb::atomic<uint64_t> nr_error_queries;
   tbb::atomic<uint64_t> total_execution_time_ms;
+  tbb::atomic<uint64_t> expected_total_execution_time_ms;
+  tbb::atomic<uint64_t> nr_quicker_queries;
+  tbb::atomic<uint64_t> nr_slower_queries;
 
   typedef tbb::concurrent_unordered_map<uint64_t, tbb::atomic<uint64_t> > ConnectionQueryCountMap;
   typedef std::pair<uint64_t, tbb::atomic<uint64_t> > ConnectionQueryCountPair;
@@ -57,6 +60,9 @@ public:
     nr_error_queries= 0;
     show_connection_query_count= false;
     total_execution_time_ms= 0;
+    expected_total_execution_time_ms= 0;
+    nr_quicker_queries= 0;
+    nr_slower_queries= 0;
   }
 
   virtual boost::program_options::options_description* getProgramOptions() {
@@ -105,6 +111,15 @@ public:
     nr_actual_rows_sent.fetch_and_add(actual.getRowsSent());
 
     total_execution_time_ms.fetch_and_add(actual.getDuration().total_microseconds());
+
+    if (expected.getDuration().total_microseconds())
+    {
+      expected_total_execution_time_ms.fetch_and_add(expected.getDuration().total_microseconds());
+      if (actual.getDuration().total_microseconds() < expected.getDuration().total_microseconds())
+        nr_quicker_queries++;
+      else
+        nr_slower_queries++;
+    }
   }
 
   virtual void print_report()
@@ -114,7 +129,13 @@ public:
     printf("Executed %" PRIu64 " queries\n", uint64_t(nr_queries_executed));
 
     boost::posix_time::time_duration total_duration= boost::posix_time::microseconds(total_execution_time_ms);
-    printf("Spent %s executing queries\n", boost::posix_time::to_simple_string(total_duration).c_str());
+    boost::posix_time::time_duration expected_duration= boost::posix_time::microseconds(expected_total_execution_time_ms);
+    printf("Spent %s executing queries versus an expected %s time.\n",
+           boost::posix_time::to_simple_string(total_duration).c_str(),
+           boost::posix_time::to_simple_string(expected_duration).c_str()
+           );
+    printf("%"PRIu64 " queries were quicker than expected, %"PRIu64" were slower\n",
+           nr_quicker_queries, nr_slower_queries);
 
     printf("A total of %" PRIu64 " queries had errors.\n",
 	   uint64_t(nr_error_queries));

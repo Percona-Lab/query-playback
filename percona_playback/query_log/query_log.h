@@ -41,6 +41,7 @@ private:
   uint64_t thread_id;
   uint64_t rows_sent;
   uint64_t rows_examined;
+  double query_time;
   std::vector<std::string> info;
   std::vector<std::string> query;
   bool shutdown;
@@ -53,6 +54,8 @@ public:
   bool is_shutdown() { return shutdown; }
 
   uint64_t getThreadId() { return thread_id; }
+
+  double getQueryTime() { return query_time; }
 
   void add_line(const std::string &s, tbb::atomic<uint64_t> *queries);
 

@@ -157,6 +157,11 @@ void QueryLogEntry::execute(DBThread *t)
     expected_result.setRowsSent(rows_sent);
     expected_result.setRowsExamined(rows_examined);
     expected_result.setError(0);
+    {
+      boost::posix_time::time_duration expected_duration=
+        boost::posix_time::microseconds(query_time * 1000000);
+      expected_result.setDuration(expected_duration);
+    }
 
     boost::posix_time::ptime start_time;
     start_time= boost::posix_time::microsec_clock::universal_time();
@@ -202,6 +207,15 @@ void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *querie
     if (location != std::string::npos)
     {
       rows_sent = strtoull(s.c_str() + location + strlen("Rows_examined: "), NULL, 10);
+    }
+  }
+
+  {
+    std::string qt_str("Query_time: ");
+    size_t location= s.find(qt_str);
+    if (location != std::string::npos)
+    {
+      query_time= strtod(s.c_str() + location + qt_str.length(), NULL);
     }
   }
 
