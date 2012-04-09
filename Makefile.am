@@ -38,6 +38,7 @@ EXTRA_DIST = \
   percona_playback/test/crashme-slow.log \
   percona_playback/test/sqlbench-transactions-slow.log \
   percona_playback/test/sysbench-slow.log \
+  percona_playback/test/preserve_query_time.log \
   test_run.sh
 
 include config/pandora-plugin.am
