@@ -48,6 +48,7 @@
 namespace po= boost::program_options;
 
 static bool g_run_set_timestamp;
+static bool g_preserve_query_time;
 
 class ParseQueryLogFunc: public tbb::filter {
 public:
@@ -157,11 +158,10 @@ void QueryLogEntry::execute(DBThread *t)
     expected_result.setRowsSent(rows_sent);
     expected_result.setRowsExamined(rows_examined);
     expected_result.setError(0);
-    {
-      boost::posix_time::time_duration expected_duration=
-        boost::posix_time::microseconds(query_time * 1000000);
-      expected_result.setDuration(expected_duration);
-    }
+
+    boost::posix_time::time_duration expected_duration=
+      boost::posix_time::microseconds(query_time * 1000000);
+    expected_result.setDuration(expected_duration);
 
     boost::posix_time::ptime start_time;
     start_time= boost::posix_time::microsec_clock::universal_time();
@@ -172,6 +172,15 @@ void QueryLogEntry::execute(DBThread *t)
 
     boost::posix_time::time_period duration(start_time, end_time);
     r.setDuration(duration.length());
+
+    if (g_preserve_query_time
+        && expected_duration > duration.length())
+    {
+      boost::posix_time::time_duration us_sleep_time=
+        expected_duration - duration.length();
+
+      usleep(us_sleep_time.total_microseconds());
+    }
 
     BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
 		  percona_playback::PluginRegistry::singleton().report_plugins)
@@ -325,6 +334,7 @@ public:
       ("slow-query-log-file", po::value<std::string>(), "Query log file")
       ("file-read-count", po::value<unsigned int>(), "Query log file read count (how many times to read query log file)")
       ("run-set-timestamp", po::value<bool>(&g_run_set_timestamp)->default_value(false)->zero_tokens(), "By default, we skip the SET TIMESTAMP=XX; query that the MySQL slow query log always includes. This may cause some subsequent queries to fail, depending on your workload. If the --run-set-timestamp option is enabled, we run these queries too.")
+      ("preserve-query-time", po::value<bool>(&g_preserve_query_time)->default_value(false)->zero_tokens(), "Ensure that each query takes at least Query_time (from slow query log) to execute.")
       ;
 
     return &query_log_options;
