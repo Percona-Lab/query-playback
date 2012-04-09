@@ -49,7 +49,6 @@ namespace po= boost::program_options;
 
 static bool g_run_set_timestamp;
 
-// ParseQueryLogFunc
 class ParseQueryLogFunc: public tbb::filter {
 public:
   ParseQueryLogFunc(FILE *input_file_,
@@ -239,7 +238,6 @@ void* dispatch (void *input_)
     return NULL;
 }
 
-// DispatchQueriesFunc
 class DispatchQueriesFunc : public tbb::filter {
 public:
   DispatchQueriesFunc() : tbb::filter(true) {};
@@ -249,14 +247,6 @@ public:
     return dispatch(input_);
   }
 };
-
-
-/*
- * Read in lines of file
- * find item boundaries (in order)
- * parse item (parallel)
- * dispatch (in order)
- */
 
 void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_playback_run_result *r)
 {
