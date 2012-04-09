@@ -97,8 +97,8 @@ void* ParseQueryLogFunc::operator() (void*)  {
     if ( (strncmp(p, "# Time", 5) == 0))
       goto next;
 
-    if (p[0] != '#' && (q-p) >= strlen("started with:\n")
-	&& strncmp(q- strlen("started with:\n"), "started with:\n", strlen("started with:\n"))==0)
+    if ((p[0] != '#' && (q-p) >= strlen("started with:\n"))
+	&& strncmp(q- strlen("started with:\n"), "started with:", strlen("started with:"))==0)
       goto next;
 
     if (p[0] != '#' && strncmp(p, "Tcp port: ", strlen("Tcp port: "))==0)
@@ -128,7 +128,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
       //      fseek(input_file,-len, SEEK_CUR);
       break;
     }
-    if (getline(&line, &len, input_file) == -1)
+    if (len= getline(&line, &buflen, input_file) == -1)
     {
       break;
     }
