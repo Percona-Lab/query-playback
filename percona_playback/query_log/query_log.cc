@@ -323,40 +323,64 @@ int run_query_log(const std::string &log_file, unsigned int run_count, struct pe
 class QueryLogPlugin : public percona_playback::InputPlugin
 {
 private:
+  po::options_description     options;
+  std::string                 file_name;
+  unsigned int                read_count;
 
 public:
-  QueryLogPlugin(const std::string &name) : InputPlugin(name) {};
+  QueryLogPlugin(const std::string &name) :
+    InputPlugin(name),
+    options("Query Log Options") {};
 
   virtual boost::program_options::options_description* getProgramOptions() {
-    static po::options_description query_log_options("Query Log Options");
-    query_log_options.add_options()
-      ("slow-query-log-file", po::value<std::string>(), "Query log file")
-      ("file-read-count", po::value<unsigned int>(), "Query log file read count (how many times to read query log file)")
-      ("run-set-timestamp", po::value<bool>(&g_run_set_timestamp)->default_value(false)->zero_tokens(), "By default, we skip the SET TIMESTAMP=XX; query that the MySQL slow query log always includes. This may cause some subsequent queries to fail, depending on your workload. If the --run-set-timestamp option is enabled, we run these queries too.")
-      ("preserve-query-time", po::value<bool>(&g_preserve_query_time)->default_value(false)->zero_tokens(), "Ensure that each query takes at least Query_time (from slow query log) to execute.")
+      options.add_options()
+      ("query-log-file",
+       po::value<std::string>(), "Query log file")
+      ("query-log-read-count",
+       po::value<unsigned int>(&read_count)->default_value(1), 
+       "Query log file read count (how many times to read query log file)")
+      ("query-log-set-timestamp",
+       po::value<bool>(&g_run_set_timestamp)->
+          default_value(false)->
+            zero_tokens(), 
+       "By default, we skip the SET TIMESTAMP=XX; query that the MySQL slow "
+       "query log always includes. This may cause some subsequent queries to "
+       "fail, depending on your workload. If the --run-set-timestamp option "
+       "is enabled, we run these queries too.")
+      ("query-log-preserve-query-time",
+       po::value<bool>(&g_preserve_query_time)->
+        default_value(false)->
+          zero_tokens(),
+       "Ensure that each query takes at least Query_time (from slow query log)"
+       " to execute.")
       ;
 
-    return &query_log_options;
+    return &options;
   }
 
-  virtual int processOptions(boost::program_options::variables_map &vm) {
-    // FIXME: move this from percona_playback.cc
+  virtual int processOptions(boost::program_options::variables_map &vm)
+  {
+    if (vm.count("query-log-file"))  
+      file_name= vm["query-log-file"].as<std::string>();
+    else
+    {
+      fprintf(stderr, 
+              gettext("ERROR: --query-log-file is a required option.\n"));
+      return -1;
+    }
+    
     return 0;
   }
 
-  virtual void run(const std::string            &input_file_name,
-                   percona_playback_run_result  &result)
+  virtual void run(percona_playback_run_result  &result)
   {
-
-    run_query_log(input_file_name,
-		   1,
-                   &result);
+    run_query_log(file_name, read_count, &result);
   }
 };
 
 void init(percona_playback::PluginRegistry&r)
 {
-  r.add("query_log", new QueryLogPlugin("query_log"));
+  r.add("query-log", new QueryLogPlugin("query-log"));
 }
 
 PERCONA_PLAYBACK_PLUGIN(init);
