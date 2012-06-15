@@ -48,8 +48,6 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 
 struct percona_playback_run_result {
   int err;
-  const char *db_plugin_name;
-  const char *query_log_file;
   uint64_t n_log_entries;
   uint64_t n_queries;
 };
