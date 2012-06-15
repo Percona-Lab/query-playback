@@ -24,8 +24,6 @@
 
 #include "tbb/atomic.h"
 
-#include <mysql/mysql.h>
-
 PERCONA_PLAYBACK_API
 int run_query_log(const std::string &log_file, unsigned int read_count, struct percona_playback_run_result *r);
 

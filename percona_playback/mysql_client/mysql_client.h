@@ -1,5 +1,6 @@
 
 #include <percona_playback/db_thread.h>
+#include <mysql.h>
 
 class QueryResult;
 class MySQLOptions;
