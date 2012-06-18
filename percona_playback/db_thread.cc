@@ -23,22 +23,22 @@ bool DBThread::run()
 {
   connect();
 
-  QueryLogEntry query;
+  QueryEntryPtr query;
   while (true)
   {
     queries.pop(query);
-    if (query.is_shutdown())
+    if (query->is_shutdown())
     {
       disconnect();
       return true;
     }
-    if (query.is_quit())
+    if (query->is_quit())
     {
       disconnect();
       connect();
       continue;
     }
-    query.execute(this);
+    query->execute(this);
   }
 
   disconnect();

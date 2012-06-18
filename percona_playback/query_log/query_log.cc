@@ -73,9 +73,11 @@ private:
 void* dispatch(void *input_);
 
 void* ParseQueryLogFunc::operator() (void*)  {
-  std::vector<QueryLogEntry> *entries = new std::vector<QueryLogEntry>();
+  std::vector<boost::shared_ptr<QueryLogEntry> > *entries=
+    new std::vector<boost::shared_ptr<QueryLogEntry> >();
 
-  entries->push_back(QueryLogEntry());
+  boost::shared_ptr<QueryLogEntry> tmp_entry(new QueryLogEntry());
+  entries->push_back(tmp_entry);
 
   char *line= NULL;
   size_t buflen = 0;
@@ -116,11 +118,12 @@ void* ParseQueryLogFunc::operator() (void*)  {
     if (strncmp(p, "# User@Host", strlen("# User@Host")) == 0)
     {
       count++;
-      entries->push_back(QueryLogEntry());
+      tmp_entry.reset(new QueryLogEntry());
+      entries->push_back(tmp_entry);
       (*this->entries)++;
     }
 
-    entries->back().add_line(std::string(line), queries);
+    tmp_entry->add_line(std::string(line), queries);
   next:
     if (count > 100)
     {
@@ -138,6 +141,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
   free(line);
   return entries;
 }
+
 
 void QueryLogEntry::execute(DBThread *t)
 {
@@ -240,11 +244,12 @@ extern percona_playback::DBClientPlugin *g_dbclient_plugin;
 
 void* dispatch (void *input_)
 {
-    std::vector<QueryLogEntry> *input= static_cast<std::vector<QueryLogEntry>*>(input_);
+    std::vector<boost::shared_ptr<QueryLogEntry> > *input= 
+      static_cast<std::vector<boost::shared_ptr<QueryLogEntry> >*>(input_);
     for (int i=0; i< input->size(); i++)
     {
       //      usleep(10);
-      uint64_t thread_id= (*input)[i].getThreadId();
+      uint64_t thread_id= (*input)[i]->getThreadId();
       {
 	DBExecutorsTable::accessor a;
 	if (db_executors.insert( a, thread_id ))
@@ -284,8 +289,7 @@ void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_pl
   p.add_filter(f4);
   p.run(2);
 
-  QueryLogEntry shutdown_command;
-  shutdown_command.set_shutdown();
+  QueryEntryPtr shutdown_command(new FinishEntry());
 
   while(db_executors.size())
   {

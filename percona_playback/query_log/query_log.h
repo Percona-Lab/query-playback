@@ -17,6 +17,7 @@
 #define PERCONA_PLAYBACK_QUERY_LOG_H
 
 #include <percona_playback/visibility.h>
+#include "percona_playback/query_entry.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -34,24 +35,15 @@ extern "C"
 
 class DBThread;
 
-class QueryLogEntry {
+class QueryLogEntry : public QueryEntry
+{
 private:
-  uint64_t thread_id;
   uint64_t rows_sent;
   uint64_t rows_examined;
   double query_time;
   std::vector<std::string> info;
   std::vector<std::string> query;
-  bool shutdown;
 public:
-
- QueryLogEntry() : thread_id(0), shutdown(false) {};
-
-  void set_shutdown() { shutdown= true; }
-
-  bool is_shutdown() { return shutdown; }
-
-  uint64_t getThreadId() { return thread_id; }
 
   double getQueryTime() { return query_time; }
 
