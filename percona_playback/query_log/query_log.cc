@@ -39,6 +39,7 @@
 #include <percona_playback/db_thread.h>
 #include <percona_playback/query_log/query_log.h>
 #include <percona_playback/query_result.h>
+#include "percona_playback/dispatcher.h"
 
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
@@ -249,17 +250,7 @@ void* dispatch (void *input_)
     for (int i=0; i< input->size(); i++)
     {
       //      usleep(10);
-      uint64_t thread_id= (*input)[i]->getThreadId();
-      {
-	DBExecutorsTable::accessor a;
-	if (db_executors.insert( a, thread_id ))
-	{
-	  DBThread *db_thread= g_dbclient_plugin->create(thread_id);
-	  a->second= db_thread;
-	  db_thread->start_thread();
-	}
-	a->second->queries.push((*input)[i]);
-      }
+      g_dispatcher.dispatch((*input)[i]);
     }
     delete input;
     return NULL;
@@ -289,22 +280,7 @@ void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_pl
   p.add_filter(f4);
   p.run(2);
 
-  QueryEntryPtr shutdown_command(new FinishEntry());
-
-  while(db_executors.size())
-  {
-    uint64_t thread_id;
-    DBThread *t;
-    {
-      DBExecutorsTable::const_iterator iter= db_executors.begin();
-      thread_id= (*iter).first;
-      t= (*iter).second;
-    }
-    db_executors.erase(thread_id);
-    t->queries.push(shutdown_command);
-    t->join();
-    delete t;
-  }
+  g_dispatcher.finish_all_and_wait();
 
   r->n_log_entries= entries;
   r->n_queries= queries;
