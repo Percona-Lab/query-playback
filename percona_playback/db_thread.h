@@ -48,7 +48,7 @@ class DBThread
 {
 
 private:
-  boost::thread *thread;
+  boost::thread thread;
   uint64_t thread_id;
   DBThreadState *state;
   bool manage_state;
@@ -58,7 +58,6 @@ public:
   Queries queries;
 
   DBThread(uint64_t _thread_id, bool manage_state= true) :
-    thread(NULL),
     thread_id(_thread_id),
     state(NULL),
     manage_state(manage_state)
@@ -67,14 +66,13 @@ public:
   }
 
   ~DBThread() {
-    delete thread;
     if (manage_state)
       delete state;
   }
 
   void join()
   {
-    thread->join();
+    thread.join();
   }
 
   virtual void connect()= 0;
@@ -88,7 +86,7 @@ public:
 
   void start_thread()
   {
-    thread= new boost::thread(RunDBThread, this, thread_id);
+    thread= boost::thread(RunDBThread, this, thread_id);
   }
 };
 
