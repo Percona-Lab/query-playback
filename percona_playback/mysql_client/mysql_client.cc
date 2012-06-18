@@ -18,6 +18,8 @@
 #include <percona_playback/query_result.h>
 
 #include <boost/program_options.hpp>
+
+#include <stdio.h>
 namespace po= boost::program_options;
 
 class MySQLOptions
@@ -109,6 +111,20 @@ public:
   }
 
   virtual int processOptions(boost::program_options::variables_map &vm) {
+    if (!active &&
+        (vm.count("mysql-host") ||
+         vm.count("mysql-username") ||
+         vm.count("mysql-password") ||
+         vm.count("mysql-schema") ||
+         vm.count("mysql-port")))
+    {
+      fprintf(stderr, 
+              gettext("libmysqlclient plugin is not selected, "
+                      "you shouldn't use this plugin-related "
+                      "command line options\n"));
+      return -1;
+    }
+
     if (vm.count("mysql-host"))
     {
       options.host= vm["mysql-host"].as<std::string>();

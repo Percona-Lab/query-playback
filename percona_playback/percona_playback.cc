@@ -188,6 +188,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
       return -1;
     }
   }
+  g_dbclient_plugin->active= true;
 
   if (vm.count("input-plugin"))
   {
@@ -211,6 +212,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
       return -1;
     }
   }
+  g_input_plugin->active= true;
 
   if (vm.count("help") || argc==1)
   {
@@ -228,7 +230,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     Process plugin options after "help" processing to avoid
     required options requests in "help" message.
   */
-  BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair pp,
+  BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair &pp,
 		percona_playback::PluginRegistry::singleton().all_plugins)
   {
     if (pp.second->processOptions(vm))
