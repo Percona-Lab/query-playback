@@ -38,20 +38,38 @@ extern unsigned int g_db_thread_queue_depth;
 
 class QueryResult;
 
-class DBThread {
+class DBThreadState
+{
+public:
+  virtual ~DBThreadState(){}
+};
+
+class DBThread
+{
+
 private:
   boost::thread *thread;
   uint64_t thread_id;
+  DBThreadState *state;
+  bool manage_state;
+
 public:
   typedef tbb::concurrent_bounded_queue<QueryEntryPtr> Queries;
   Queries queries;
 
-  DBThread(uint64_t _thread_id) : thread_id(_thread_id) {
+  DBThread(uint64_t _thread_id, bool manage_state= true) :
+    thread(NULL),
+    thread_id(_thread_id),
+    state(NULL),
+    manage_state(manage_state)
+  {
     queries.set_capacity(g_db_thread_queue_depth);
   }
 
   ~DBThread() {
     delete thread;
+    if (manage_state)
+      delete state;
   }
 
   void join()
