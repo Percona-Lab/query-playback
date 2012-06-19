@@ -39,6 +39,11 @@ EXTRA_DIST = \
   percona_playback/test/sqlbench-transactions-slow.log \
   percona_playback/test/sysbench-slow.log \
   percona_playback/test/preserve_query_time.log \
+  percona_playback/test/tcpdump_without_handshake.dump \
+  percona_playback/test/tcpdump_fragmented_packet.dump \
+  percona_playback/test/tcpdump_multiple_connections.dump \
+  percona_playback/test/tcpdump_stress_test.dump \
+  percona_playback/test/tcpdump_accuracy.dump \
   test_run.sh
 
 include config/pandora-plugin.am
@@ -69,8 +74,8 @@ libpercona_playback_la_CXXFLAGS = \
 	$(AM_CXXFLAGS) \
 	-DBUILDING_PERCONA_PLAYBACK
 
-libpercona_playback_la_LIBADD = $(LIBDL_LIBS) $(BOOST_LIBS) $(TBB_LIBS)
-libpercona_playback_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBPERCONA_PLAYBACK_VERSION) $(BOOST_LIBS) $(TBB_LIBS) $(pandora_plugin_libs)
+libpercona_playback_la_LIBADD = $(LIBDL_LIBS) $(BOOST_LIBS) $(LTLIBTBB)
+libpercona_playback_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBPERCONA_PLAYBACK_VERSION) $(BOOST_LIBS) $(LTLIBTBB) $(pandora_plugin_libs)
 libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES}
 
 check_PROGRAMS += \
@@ -80,6 +85,11 @@ check_PROGRAMS += \
   percona_playback/test/sqlbench-transactions-slow \
   percona_playback/test/sysbench-slow \
   percona_playback/test/preserve_query_time \
+  percona_playback/test/tcpdump_without_handshake \
+  percona_playback/test/tcpdump_fragmented_packet \
+  percona_playback/test/tcpdump_multiple_connections \
+  percona_playback/test/tcpdump_stress_test \
+  percona_playback/test/tcpdump_accuracy \
   percona_playback/test/help
 
 percona_playback_test_basic_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
@@ -88,6 +98,11 @@ percona_playback_test_crashme_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}
 percona_playback_test_sqlbench_transactions_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_sysbench_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_preserve_query_time_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_tcpdump_without_handshake_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_tcpdump_fragmented_packet_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_tcpdump_multiple_connections_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_tcpdump_stress_test_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_tcpdump_accuracy_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 
 percona_playback_test_help_SOURCES= percona_playback/test/help.cc
 percona_playback_test_help_LDADD= $(LDADD) $(MYSQL_LIBS)
@@ -110,7 +125,20 @@ percona_playback_test_sysbench_slow_LDADD= $(LDADD) $(MYSQL_LIBS)
 percona_playback_test_preserve_query_time_SOURCES= percona_playback/test/preserve_query_time.cc
 percona_playback_test_preserve_query_time_LDADD= $(LDADD) $(MYSQL_LIBS)
 
+percona_playback_test_tcpdump_without_handshake_SOURCES= percona_playback/test/tcpdump_without_handshake.cc
+percona_playback_test_tcpdump_without_handshake_LDADD= $(LDADD) $(MYSQL_LIBS)
 
+percona_playback_test_tcpdump_fragmented_packet_SOURCES= percona_playback/test/tcpdump_fragmented_packet.cc
+percona_playback_test_tcpdump_fragmented_packet_LDADD= $(LDADD) $(MYSQL_LIBS)
+
+percona_playback_test_tcpdump_multiple_connections_SOURCES= percona_playback/test/tcpdump_multiple_connections.cc
+percona_playback_test_tcpdump_multiple_connections_LDADD= $(LDADD) $(MYSQL_LIBS)
+
+percona_playback_test_tcpdump_stress_test_SOURCES= percona_playback/test/tcpdump_stress_test.cc
+percona_playback_test_tcpdump_stress_test_LDADD= $(LDADD) $(MYSQL_LIBS)
+
+percona_playback_test_tcpdump_accuracy_SOURCES= percona_playback/test/tcpdump_accuracy.cc
+percona_playback_test_tcpdump_accuracy_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 #
 # Simple percona_playback application
@@ -118,7 +146,7 @@ percona_playback_test_preserve_query_time_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 bin_PROGRAMS += bin/percona_playback
 bin_percona_playback_SOURCES = bin/percona_playback.cc
-bin_percona_playback_LDADD= $(BOOST_LIBS) $(LDADD) $(TBB_LIBS) $(MYSQL_LIBS) $(pandora_plugin_libs) $(PANDORA_DYNAMIC_LDADDS)
+bin_percona_playback_LDADD= $(BOOST_LIBS) $(LDADD) $(LTLIBTBB) $(MYSQL_LIBS) $(pandora_plugin_libs) $(PANDORA_DYNAMIC_LDADDS)
 
 include docs/include.am
 
