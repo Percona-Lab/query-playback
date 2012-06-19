@@ -342,9 +342,9 @@ public:
   {
     if (!active &&
         (vm.count("query-log-file") ||
-         vm.count("query-log-read-count") ||
-         vm.count("query-log-preserve-query-time") ||
-         vm.count("query-log-set-timestamp")))
+         !vm["query-log-read-count"].defaulted() ||
+         !vm["query-log-preserve-query-time"].defaulted() ||
+         !vm["query-log-set-timestamp"].defaulted()))
     {
       fprintf(stderr, 
               gettext("query-log plugin is not selected, "
@@ -353,6 +353,8 @@ public:
       return -1;
     }
 
+    if (!active)
+      return 0;
 
     if (vm.count("query-log-file"))  
       file_name= vm["query-log-file"].as<std::string>();
