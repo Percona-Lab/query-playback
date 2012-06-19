@@ -43,7 +43,6 @@ class DBThread
 {
 
 private:
-  boost::thread thread;
   uint64_t thread_id;
   boost::shared_ptr<DBThreadState> state;
 
@@ -65,11 +64,6 @@ public:
     return state;
   }
 
-  void join()
-  {
-    thread.join();
-  }
-
   virtual void connect()= 0;
 
   virtual void disconnect()= 0;
@@ -78,8 +72,6 @@ public:
 			     const QueryResult &expected_result)= 0;
 
   void run();
-
-  void start_thread();
 };
 
 #ifdef __cplusplus

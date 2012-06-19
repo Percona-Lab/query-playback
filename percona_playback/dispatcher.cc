@@ -2,11 +2,30 @@
 #include "percona_playback/db_thread.h"
 #include "percona_playback/plugin.h"
 
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+
 #include <assert.h>
+#include <unistd.h>
 
 Dispatcher g_dispatcher;
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
+
+void
+Dispatcher::db_thread_func(DBThread *db_thread)
+{
+  ++active_threads;
+  db_thread->run();
+  delete db_thread;
+  --active_threads;
+}
+
+void
+Dispatcher::start_thread(DBThread *db_thread)
+{
+  boost::thread(boost::bind(&Dispatcher::db_thread_func, this, db_thread));
+}
 
 boost::shared_ptr<DBThreadState>
 Dispatcher::get_thread_state(
@@ -22,7 +41,7 @@ Dispatcher::get_thread_state(
     a->second= db_thread;
     if (!run_on_db_thread_create.empty())
       run_on_db_thread_create(db_thread);
-    db_thread->start_thread();
+    start_thread(db_thread);
   }
 
   return a->second->get_state();
@@ -38,14 +57,14 @@ Dispatcher::dispatch(QueryEntryPtr query_entry)
     {
       DBThread *db_thread= g_dbclient_plugin->create(thread_id);
       a->second= db_thread;
-      db_thread->start_thread();
+      start_thread(db_thread);
     }
     a->second->queries.push(query_entry);
   }
 }
 
 bool
-Dispatcher::finish_and_wait(uint64_t thread_id)
+Dispatcher::finish(uint64_t thread_id)
 {
   DBThread *db_thread= NULL;
   {
@@ -61,10 +80,6 @@ Dispatcher::finish_and_wait(uint64_t thread_id)
     return false;
 
   db_thread->queries.push(QueryEntryPtr(new FinishEntry()));
-  db_thread->join();
-
-  delete db_thread;
-
   return true;
 }
 
@@ -84,8 +99,9 @@ Dispatcher::finish_all_and_wait()
     executors.erase(thread_id);
 
     t->queries.push(shutdown_command);
-    t->join();
-
-    delete t;
   }
+
+  while (active_threads != 0)
+    usleep(100000);
+
 }

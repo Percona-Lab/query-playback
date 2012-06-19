@@ -18,6 +18,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 #include <boost/function.hpp>
+#include <tbb/tbb.h>
 
 #include "percona_playback/query_entry.h"
 
@@ -28,17 +29,19 @@ class Dispatcher
 {
   typedef tbb::concurrent_hash_map<uint64_t, DBThread*> DBExecutorsTable;
   DBExecutorsTable  executors;
+  tbb::atomic<uint32_t>  active_threads;
   void db_thread_func(DBThread *thread);
   void start_thread(DBThread *thread);
 
 public:
+  Dispatcher() { active_threads= 0; }
   boost::shared_ptr<DBThreadState>
     get_thread_state(uint64_t thread_id,
                      boost::function1<void, DBThread *>
                       run_on_db_thread_create=
                         boost::function1<void, DBThread *>());
   void dispatch(QueryEntryPtr query_entry);
-  bool finish_and_wait(uint64_t thread_id);
+  bool finish(uint64_t thread_id);
   void finish_all_and_wait();
 };
 

@@ -46,10 +46,3 @@ void DBThread::run()
   disconnect();
   return;
 }
-
-void 
-DBThread::start_thread()
-{
-  assert(!thread.joinable());
-  thread= boost::thread(boost::bind(&DBThread::run, this));
-}
