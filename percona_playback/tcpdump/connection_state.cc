@@ -160,7 +160,7 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
         The text representation of error can be got with
         drizzle_result_error(res)
       */
-      goto FREE_AND_RETURN;
+      goto free_and_return;
     }
     else if(ret == DRIZZLE_RETURN_OK)
     {
@@ -171,7 +171,7 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
         last_query_result.setRowsExamined(drizzle_result_affected_rows(res));
         last_query_result.setWarningCount(drizzle_result_warning_count(res));
         retval= PKT_RESULT;
-        goto FREE_AND_RETURN;
+        goto free_and_return;
       }
       /* Else this is "Result set header" packet */
     }
@@ -179,7 +179,7 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
     {
       std::cerr << "Unknown packet type from server" << std::endl;
       retval= PKT_ERROR;
-      goto FREE_AND_RETURN;
+      goto free_and_return;
     }
   }
   /* Parse result set */
@@ -202,7 +202,7 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
       {
         std::cerr << "Parse column error" << std::endl;
         retval= PKT_ERROR;
-        goto FREE_AND_RETURN;
+        goto free_and_return;
       }
     }
     /* "Row" packets */
@@ -214,7 +214,7 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
       {
         std::cerr << "Error in parsing row" << std::endl;
         retval= PKT_ERROR;
-        goto FREE_AND_RETURN;
+        goto free_and_return;
       }
       else
         ++sent_rows_count;
@@ -238,7 +238,7 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
 
         sent_rows_count= 0;
         retval= PKT_RESULT;
-        goto FREE_AND_RETURN;
+        goto free_and_return;
       }
       else
         retval= PKT_OK;
@@ -247,7 +247,7 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
 
   return retval;
 
-FREE_AND_RETURN:
+free_and_return:
   drizzle_result_free_all(drizzle_con.get());
   drizzle_con->result= NULL;
   was_query= false;
