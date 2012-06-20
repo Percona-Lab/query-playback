@@ -259,9 +259,10 @@ ConnectionState::ClientPacket(IN UCharBuffer   &buff,
                               OUT std::string   &query)
 {
   drizzle_command_t command;
-  uint8_t *data= NULL;
   drizzle_return_t ret;
   size_t total;
+  uint8_t *data;
+  PktResult result= PKT_UNKNOWN;
 
   drizzle_con->buffer_ptr= &buff[0];
   drizzle_con->buffer_size= buff.size();
@@ -276,20 +277,22 @@ ConnectionState::ClientPacket(IN UCharBuffer   &buff,
       case DRIZZLE_COMMAND_QUERY:
         query.assign((const char *)data);
         was_query= true;
-        return PKT_QUERY;
+        result= PKT_QUERY;
+        break;
 
       case DRIZZLE_COMMAND_INIT_DB:
         query.assign("use ");
         query+= (const char *)data;
         was_query= true;
-        return PKT_QUERY;
-        
-      default:
-        return PKT_UNKNOWN;
+        result= PKT_QUERY;
+        break;
+
+      default:;
     }
   }
-  
-  return PKT_UNKNOWN;
+
+  free(data);
+  return result;
 }
 
 void
