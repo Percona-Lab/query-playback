@@ -231,7 +231,12 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
         drizzle_result_st *res= drizzle_result_read(drizzle_con.get(),
                                                     NULL,
                                                     &ret);
-
+        /*
+          Setting DRIZZLE_RESULT_ALLOCATED in result options
+          helps to avoid memory leak.
+          See https://bugs.launchpad.net/drizzle/+bug/1015576
+        */
+        res->options|= DRIZZLE_RESULT_ALLOCATED;
         last_query_result.setWarningCount(drizzle_result_warning_count(res));
         /* Don't count the last EOF packet */
         last_query_result.setRowsSent(sent_rows_count - 1);
