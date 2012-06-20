@@ -130,7 +130,12 @@ public:
    {
      drizzle_con->result= NULL;
    }
- 
+
+  ~ConnectionState()
+  {
+    drizzle_result_free_all(drizzle_con.get());
+  }
+
   void ProcessMysqlPkts(const u_char                 *pkts,
                         u_int                        total_len,
                         const timeval                &ts,
