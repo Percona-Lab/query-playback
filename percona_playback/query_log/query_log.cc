@@ -37,7 +37,6 @@
 #include <percona_playback/percona_playback.h>
 #include <percona_playback/plugin.h>
 #include <percona_playback/db_thread.h>
-#include <percona_playback/mysql_client/mysql_client.h>
 #include <percona_playback/query_log/query_log.h>
 #include <percona_playback/query_result.h>
 
