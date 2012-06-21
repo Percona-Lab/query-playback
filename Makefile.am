@@ -69,7 +69,7 @@ libpercona_playback_la_CXXFLAGS = \
 
 libpercona_playback_la_LIBADD = $(LIBDL_LIBS) $(BOOST_LIBS) $(TBB_LIBS)
 libpercona_playback_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBPERCONA_PLAYBACK_VERSION) $(BOOST_LIBS) $(TBB_LIBS) $(pandora_plugin_libs)
-libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES}
+libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES} $(pandora_plugin_libs)
 
 check_PROGRAMS += \
   percona_playback/test/basic \
@@ -147,3 +147,5 @@ check-strace:
 
 check-truss:
 	@PERCONA_PLAYBACK_TEST_PREFIX="truss -c" make check
+
+SUBDIRS = po
