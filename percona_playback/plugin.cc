@@ -74,13 +74,30 @@ static void load_plugin(const char *so_file, const std::string &plugin_name)
 void load_plugins()
 {
   std::vector<std::string> builtin_load_list;
+  std::vector<std::string> load_list;
   tokenize(PANDORA_BUILTIN_LOAD_LIST, builtin_load_list, ",", true);
+  tokenize(PANDORA_PLUGIN_LIST, load_list, ",", true);
 
   /* load builtin plugins */
   BOOST_FOREACH(const std::string& plugin_name, builtin_load_list)
   {
     load_plugin(NULL, plugin_name);
   }
+
+  /* load default plugins */
+  BOOST_FOREACH(const std::string& plugin_name, load_list)
+  {
+    std::string plugin_lib_name("lib");
+    plugin_lib_name.append(plugin_name);
+    plugin_lib_name.append("_module");
+#if defined(TARGET_OS_OSX)
+    plugin_lib_name.append(".dylib");
+#else
+    plugin_lib_name.append(".so");
+#endif
+    load_plugin(plugin_lib_name.c_str(), plugin_name);
+  }
+
 }
 
 } /* namespace percona_playback */
