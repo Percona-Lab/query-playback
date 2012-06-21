@@ -38,6 +38,7 @@
 namespace po= boost::program_options;
 
 percona_playback::DBClientPlugin *g_dbclient_plugin= NULL;
+percona_playback::InputPlugin *g_input_plugin= NULL;
 unsigned int g_db_thread_queue_depth;
 
 struct percona_playback_st
@@ -112,6 +113,22 @@ static void help(po::options_description &options_description)
 
     assert(g_dbclient_plugin);
     std::cerr << "Selected DB Plugin: " << g_dbclient_plugin->name << std::endl;
+
+    std::cerr << std::endl << "Loaded Input Plugins: ";
+
+    BOOST_FOREACH(const percona_playback::PluginRegistry::InputPluginPair &pp,
+		  percona_playback::PluginRegistry::singleton().input_plugins)
+    {
+      std::cerr << pp.first << " ";
+    }
+
+    std::cerr << std::endl;
+    std::cerr << std::endl;
+
+    assert(g_input_plugin);
+    std::cerr << "Selected Input Plugin: " 
+              << g_input_plugin->name
+              << std::endl;
 }
 
 int percona_playback_argv(percona_playback_st *the_percona_playback,
@@ -129,6 +146,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   po::options_description db_options("Database Options");
   db_options.add_options()
     ("db-plugin", po::value<std::string>(), "Database plugin")
+    ("input-plugin", po::value<std::string>(), "Input plugin")
     ("queue-depth", po::value<unsigned int>(),
      "Queue depth for DB executor (thread). The larger this number the"
      " greater the played-back workload can deviate from the original workload"
@@ -183,6 +201,29 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     }
   }
 
+  if (vm.count("input-plugin"))
+  {
+    g_input_plugin= 
+      percona_playback::PluginRegistry::singleton().input_plugins[
+        vm["input-plugin"].as<std::string>()
+      ];
+    if (g_input_plugin == NULL)
+    {
+      std::cerr << "Invalid Input Plugin" << std::endl;
+      return -1;
+    }
+  }
+  else
+  {
+    g_input_plugin=
+      percona_playback::PluginRegistry::singleton().input_plugins["query_log"];
+    if (g_dbclient_plugin == NULL)
+    {
+      fprintf(stderr, gettext("Invalid Input plugin\n"));
+      return -1;
+    }
+  }
+
   if (vm.count("help") || argc==1)
   {
     help(options_description);
@@ -232,12 +273,24 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   return 0;
 }
 
+static
+percona_playback_run_result *
+create_percona_playback_run_result()
+{
+  percona_playback_run_result *r=
+    static_cast<struct percona_playback_run_result *>(
+      malloc(sizeof(struct percona_playback_run_result)));
+  assert(r);
+  r->err= 0;
+  r->n_log_entries= 0;
+  r->n_queries= 0;
+  return r;
+}
+
 struct percona_playback_run_result *percona_playback_run(const percona_playback_st *the_percona_playback)
 {
-  struct percona_playback_run_result *r= static_cast<struct percona_playback_run_result *>(malloc(sizeof(struct percona_playback_run_result)));
+  percona_playback_run_result *r= create_percona_playback_run_result();
   assert(g_dbclient_plugin);
-  r->db_plugin_name= g_dbclient_plugin->name.c_str();
-  r->query_log_file= (*the_percona_playback->slow_query_log_files)[0].c_str();
 
   std::cerr << "Database Plugin: " << g_dbclient_plugin->name << std::endl;
   std::cerr << " Running..." << std::endl;
@@ -245,8 +298,7 @@ struct percona_playback_run_result *percona_playback_run(const percona_playback_
 	    << (*the_percona_playback->slow_query_log_files)[0]
 	    << std::endl;
 
-  r->err= run_query_log((*the_percona_playback->slow_query_log_files)[0],
-			the_percona_playback->query_log_file_read_count, r);
+  g_input_plugin->run((*the_percona_playback->slow_query_log_files)[0], *r);
 
   BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
 		  percona_playback::PluginRegistry::singleton().report_plugins)

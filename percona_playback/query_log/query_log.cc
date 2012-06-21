@@ -320,12 +320,12 @@ int run_query_log(const std::string &log_file, unsigned int run_count, struct pe
   return 0;
 }
 
-class QueryLogPlugin : public percona_playback::plugin
+class QueryLogPlugin : public percona_playback::InputPlugin
 {
 private:
 
 public:
-  QueryLogPlugin(std::string _name) {};
+  QueryLogPlugin(const std::string &name) : InputPlugin(name) {};
 
   virtual boost::program_options::options_description* getProgramOptions() {
     static po::options_description query_log_options("Query Log Options");
@@ -344,6 +344,14 @@ public:
     return 0;
   }
 
+  virtual void run(const std::string            &input_file_name,
+                   percona_playback_run_result  &result)
+  {
+
+    run_query_log(input_file_name,
+		   1,
+                   &result);
+  }
 };
 
 void init(percona_playback::PluginRegistry&r)
