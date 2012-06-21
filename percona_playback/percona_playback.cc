@@ -37,7 +37,7 @@
 
 namespace po= boost::program_options;
 
-percona_playback::DBClientPlugin *g_dbclient_plugin;
+percona_playback::DBClientPlugin *g_dbclient_plugin= NULL;
 unsigned int g_db_thread_queue_depth;
 
 struct percona_playback_st
@@ -110,6 +110,7 @@ static void help(po::options_description &options_description)
     std::cerr << std::endl;
     std::cerr << std::endl;
 
+    assert(g_dbclient_plugin);
     std::cerr << "Selected DB Plugin: " << g_dbclient_plugin->name << std::endl;
 }
 
@@ -173,7 +174,13 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   {
     g_dbclient_plugin= percona_playback::PluginRegistry::singleton().dbclient_plugins["libmysqlclient"];
     if (g_dbclient_plugin == NULL)
-      percona_playback::PluginRegistry::singleton().dbclient_plugins["null_dbclient"];
+      g_dbclient_plugin= percona_playback::PluginRegistry::singleton().
+        dbclient_plugins["null"];
+    if (g_dbclient_plugin == NULL)
+    {
+      fprintf(stderr, gettext("Invalid DB plugin\n"));
+      return -1;
+    }
   }
 
   if (vm.count("help") || argc==1)
@@ -228,6 +235,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 struct percona_playback_run_result *percona_playback_run(const percona_playback_st *the_percona_playback)
 {
   struct percona_playback_run_result *r= static_cast<struct percona_playback_run_result *>(malloc(sizeof(struct percona_playback_run_result)));
+  assert(g_dbclient_plugin);
   r->db_plugin_name= g_dbclient_plugin->name.c_str();
   r->query_log_file= (*the_percona_playback->slow_query_log_files)[0].c_str();
 
