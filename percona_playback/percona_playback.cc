@@ -203,23 +203,25 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 
   if (vm.count("input-plugin"))
   {
-    g_input_plugin= PluginRegistry::singleton().input_plugins[
-        vm["input-plugin"].as<std::string>()
-      ];
-    if (g_input_plugin == NULL)
+    PluginRegistry::InputPluginMap::iterator it;
+    it= PluginRegistry::singleton().input_plugins.find(vm["input-plugin"].as<std::string>());
+    if (it == PluginRegistry::singleton().input_plugins.end())
     {
       std::cerr << "Invalid Input Plugin" << std::endl;
       return -1;
     }
+    g_input_plugin= it->second;
   }
   else
   {
-    g_input_plugin= PluginRegistry::singleton().input_plugins["query-log"];
-    if (g_dbclient_plugin == NULL)
+    PluginRegistry::InputPluginMap::iterator it;
+    it= PluginRegistry::singleton().input_plugins.find("query-log");
+    if (it == PluginRegistry::singleton().input_plugins.end())
     {
       fprintf(stderr, gettext("Invalid Input plugin\n"));
       return -1;
     }
+    g_input_plugin= it->second;
   }
 
   if (vm.count("help") || argc==1)
