@@ -80,7 +80,7 @@ echo "   * Warnings as errors:        $ac_cv_warnings_as_errors"
 echo "   * Configured modules:"
 echo ""
 echo $PANDORA_PLUGIN_LIST
-for module in `echo $PANDORA_PLUGIN_LIST | sed 's/_/::/g' | tr ',' '\n' | sort`
+for module in `echo $PANDORA_PLUGIN_LIST | tr ',' '\n' | sort`
 do
   echo "     - $module"
 done
