@@ -91,7 +91,7 @@ static void help(po::options_description &options_description)
     std::cerr << std::endl;
     std::cerr << "Bugs: " << PACKAGE_BUGREPORT << std::endl;
     std::cerr << "Loaded plugins: ";
-    BOOST_FOREACH(const std::string &plugin_name, percona_playback::PluginRegistry::singleton().loaded_plugin_names)
+    BOOST_FOREACH(const std::string &plugin_name, PluginRegistry::singleton().loaded_plugin_names)
     {
       std::cerr << plugin_name << " ";
     }
@@ -99,8 +99,8 @@ static void help(po::options_description &options_description)
     std::cerr << std::endl;
 
     std::cerr << std::endl << "Loaded DB Plugins: ";
-    for(percona_playback::PluginRegistry::DBClientPluginMap::iterator it= percona_playback::PluginRegistry::singleton().dbclient_plugins.begin();
-	it != percona_playback::PluginRegistry::singleton().dbclient_plugins.end();
+    for(PluginRegistry::DBClientPluginMap::iterator it= PluginRegistry::singleton().dbclient_plugins.begin();
+	it != PluginRegistry::singleton().dbclient_plugins.end();
 	it++)
     {
       std::cerr << it->first << " ";
@@ -113,8 +113,8 @@ static void help(po::options_description &options_description)
 
     std::cerr << std::endl << "Loaded Input Plugins: ";
 
-    BOOST_FOREACH(const percona_playback::PluginRegistry::InputPluginPair &pp,
-		  percona_playback::PluginRegistry::singleton().input_plugins)
+    BOOST_FOREACH(const PluginRegistry::InputPluginPair &pp,
+		  PluginRegistry::singleton().input_plugins)
     {
       std::cerr << pp.first << " ";
     }
@@ -131,7 +131,7 @@ static void help(po::options_description &options_description)
 int percona_playback_argv(percona_playback_st *the_percona_playback,
 			  int argc, char** argv)
 {
-  percona_playback::load_plugins();
+  load_plugins();
 
   po::options_description general_options("General options");
   general_options.add_options()
@@ -156,8 +156,8 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   options_description.add(general_options);
   options_description.add(db_options);
 
-  BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair pp,
-		percona_playback::PluginRegistry::singleton().all_plugins)
+  BOOST_FOREACH(const PluginRegistry::PluginPair pp,
+		PluginRegistry::singleton().all_plugins)
   {
     po::options_description *plugin_opts= pp.second->getProgramOptions();
 
@@ -203,8 +203,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 
   if (vm.count("input-plugin"))
   {
-    g_input_plugin= 
-      percona_playback::PluginRegistry::singleton().input_plugins[
+    g_input_plugin= PluginRegistry::singleton().input_plugins[
         vm["input-plugin"].as<std::string>()
       ];
     if (g_input_plugin == NULL)
@@ -215,8 +214,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   }
   else
   {
-    g_input_plugin=
-      percona_playback::PluginRegistry::singleton().input_plugins["query-log"];
+    g_input_plugin= PluginRegistry::singleton().input_plugins["query-log"];
     if (g_dbclient_plugin == NULL)
     {
       fprintf(stderr, gettext("Invalid Input plugin\n"));
@@ -240,8 +238,8 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     Process plugin options after "help" processing to avoid
     required options requests in "help" message.
   */
-  BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair pp,
-		percona_playback::PluginRegistry::singleton().all_plugins)
+  BOOST_FOREACH(const PluginRegistry::PluginPair pp,
+		PluginRegistry::singleton().all_plugins)
   {
     if (pp.second->processOptions(vm))
       return -1;
@@ -288,8 +286,8 @@ struct percona_playback_run_result *percona_playback_run(const percona_playback_
 
   g_input_plugin->run(*r);
 
-  BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
-		  percona_playback::PluginRegistry::singleton().report_plugins)
+  BOOST_FOREACH(const PluginRegistry::ReportPluginPair pp,
+		  PluginRegistry::singleton().report_plugins)
   {
     pp.second->print_report();
   }
