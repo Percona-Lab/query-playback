@@ -41,6 +41,8 @@ percona_playback::DBClientPlugin *g_dbclient_plugin= NULL;
 percona_playback::InputPlugin *g_input_plugin= NULL;
 unsigned int g_db_thread_queue_depth;
 
+using namespace percona_playback;
+
 struct percona_playback_st
 {
   const char *name;
@@ -181,23 +183,33 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 
   if (vm.count("db-plugin"))
   {
-    g_dbclient_plugin= percona_playback::PluginRegistry::singleton().dbclient_plugins[vm["db-plugin"].as<std::string>()];
-    if (g_dbclient_plugin == NULL)
+    PluginRegistry::DBClientPluginMap::iterator it;
+    it= PluginRegistry::singleton().dbclient_plugins.find(vm["db-plugin"].as<std::string>());
+    if (it == PluginRegistry::singleton().dbclient_plugins.end())
     {
       std::cerr << "Invalid DB Plugin" << std::endl;
       return -1;
     }
+    g_dbclient_plugin= it->second;
   }
   else
   {
-    g_dbclient_plugin= percona_playback::PluginRegistry::singleton().dbclient_plugins["libmysqlclient"];
-    if (g_dbclient_plugin == NULL)
-      g_dbclient_plugin= percona_playback::PluginRegistry::singleton().
-        dbclient_plugins["null"];
-    if (g_dbclient_plugin == NULL)
+    PluginRegistry::DBClientPluginMap::iterator it;
+    it= PluginRegistry::singleton().dbclient_plugins.find("libmysqlclient");
+    if (it == PluginRegistry::singleton().dbclient_plugins.end())
     {
-      fprintf(stderr, gettext("Invalid DB plugin\n"));
-      return -1;
+      PluginRegistry::DBClientPluginMap::iterator null_it;
+      null_it= PluginRegistry::singleton().dbclient_plugins.find("null");
+      if (null_it == PluginRegistry::singleton().dbclient_plugins.end())
+      {
+	fprintf(stderr, gettext("Invalid DB plugin\n"));
+	return -1;
+      }
+      g_dbclient_plugin= null_it->second;
+    }
+    else
+    {
+      g_dbclient_plugin= it->second;
     }
   }
 
