@@ -1,5 +1,5 @@
-# lib-prefix.m4 serial 6 (gettext-0.18)
-dnl Copyright (C) 2001-2005, 2008 Free Software Foundation, Inc.
+# lib-prefix.m4 serial 7 (gettext-0.18)
+dnl Copyright (C) 2001-2005, 2008-2010 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -184,10 +184,10 @@ AC_DEFUN([AC_LIB_PREPARE_MULTILIB],
       dnl But we want to recognize the sparcv9 or amd64 subdirectory also if the
       dnl symlink is missing, so we set acl_libdirstem2 too.
       AC_CACHE_CHECK([for 64-bit host], [gl_cv_solaris_64bit],
-        [AC_RUN_IFELSE([
-           AC_LANG_PROGRAM([], [[
-             return sizeof(void*) == 8 ? 0 : 1;
-           ]])            
+        [AC_EGREP_CPP([sixtyfour bits], [
+#ifdef _LP64
+sixtyfour bits
+#endif
            ], [gl_cv_solaris_64bit=yes], [gl_cv_solaris_64bit=no])
         ])
       if test $gl_cv_solaris_64bit = yes; then
@@ -206,6 +206,9 @@ AC_DEFUN([AC_LIB_PREPARE_MULTILIB],
           if test -d "$searchdir"; then
             case "$searchdir" in
               */lib64/ | */lib64 ) acl_libdirstem=lib64 ;;
+              */../ | */.. )
+                # Better ignore directories of this form. They are misleading.
+                ;;
               *) searchdir=`cd "$searchdir" && pwd`
                  case "$searchdir" in
                    */lib64 ) acl_libdirstem=lib64 ;;

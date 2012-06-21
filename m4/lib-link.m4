@@ -1,5 +1,5 @@
-# lib-link.m4 serial 18 (gettext-0.18)
-dnl Copyright (C) 2001-2009 Free Software Foundation, Inc.
+# lib-link.m4 serial 21 (gettext-0.18)
+dnl Copyright (C) 2001-2010 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -43,12 +43,13 @@ AC_DEFUN([AC_LIB_LINKFLAGS],
   popdef([Name])
 ])
 
-dnl AC_LIB_HAVE_LINKFLAGS(name, dependencies, includes, testcode, [system])
+dnl AC_LIB_HAVE_LINKFLAGS(name, dependencies, includes, testcode, [missing-message])
 dnl searches for libname and the libraries corresponding to explicit and
 dnl implicit dependencies, together with the specified include files and
-dnl the ability to compile and link the specified testcode. If found, it
-dnl sets and AC_SUBSTs HAVE_LIB${NAME}=yes and the LIB${NAME} and
-dnl LTLIB${NAME} variables and augments the CPPFLAGS variable, and
+dnl the ability to compile and link the specified testcode. The missing-message
+dnl defaults to 'no' and may contain additional hints for the user.
+dnl If found, it sets and AC_SUBSTs HAVE_LIB${NAME}=yes and the LIB${NAME}
+dnl and LTLIB${NAME} variables and augments the CPPFLAGS variable, and
 dnl #defines HAVE_LIB${NAME} to 1. Otherwise, it sets and AC_SUBSTs
 dnl HAVE_LIB${NAME}=no and LIB${NAME} and LTLIB${NAME} to empty.
 dnl Sets and AC_SUBSTs the LIB${NAME}_PREFIX variable to nonempty if libname
@@ -63,7 +64,7 @@ AC_DEFUN([AC_LIB_HAVE_LINKFLAGS],
 
   dnl Search for lib[]Name and define LIB[]NAME, LTLIB[]NAME and INC[]NAME
   dnl accordingly.
-  AC_LIB_LINKFLAGS_BODY([$1], [$2], [$5])
+  AC_LIB_LINKFLAGS_BODY([$1], [$2])
 
   dnl Add $INC[]NAME to CPPFLAGS before performing the following checks,
   dnl because if the user has installed lib[]Name and not disabled its use
@@ -73,13 +74,25 @@ AC_DEFUN([AC_LIB_HAVE_LINKFLAGS],
 
   AC_CACHE_CHECK([for lib[]$1], [ac_cv_lib[]Name], [
     ac_save_LIBS="$LIBS"
-    LIBS="$LIBS $LIB[]NAME"
-    AC_TRY_LINK([$3], [$4], [ac_cv_lib[]Name=yes], [ac_cv_lib[]Name=no])
+    dnl If $LIB[]NAME contains some -l options, add it to the end of LIBS,
+    dnl because these -l options might require -L options that are present in
+    dnl LIBS. -l options benefit only from the -L options listed before it.
+    dnl Otherwise, add it to the front of LIBS, because it may be a static
+    dnl library that depends on another static library that is present in LIBS.
+    dnl Static libraries benefit only from the static libraries listed after
+    dnl it.
+    case " $LIB[]NAME" in
+      *" -l"*) LIBS="$LIBS $LIB[]NAME" ;;
+      *)       LIBS="$LIB[]NAME $LIBS" ;;
+    esac
+    AC_TRY_LINK([$3], [$4],
+      [ac_cv_lib[]Name=yes],
+      [ac_cv_lib[]Name='m4_if([$5], [], [no], [[$5]])'])
     LIBS="$ac_save_LIBS"
   ])
   if test "$ac_cv_lib[]Name" = yes; then
     HAVE_LIB[]NAME=yes
-    AC_DEFINE([HAVE_LIB]NAME, 1, [Define if you have the $1 library.])
+    AC_DEFINE([HAVE_LIB]NAME, 1, [Define if you have the lib][$1 library.])
     AC_MSG_CHECKING([how to link with lib[]$1])
     AC_MSG_RESULT([$LIB[]NAME])
   else
@@ -157,13 +170,11 @@ AC_DEFUN([AC_LIB_FROMPACKAGE],
   popdef([PACK])
 ])
 
-dnl AC_LIB_LINKFLAGS_BODY(name [, dependencies, system]) searches for
-dnl libname and the libraries corresponding to explicit and implicit
-dnl dependencies.
+dnl AC_LIB_LINKFLAGS_BODY(name [, dependencies]) searches for libname and
+dnl the libraries corresponding to explicit and implicit dependencies.
 dnl Sets the LIB${NAME}, LTLIB${NAME} and INC${NAME} variables.
 dnl Also, sets the LIB${NAME}_PREFIX variable to nonempty if libname was found
 dnl in ${LIB${NAME}_PREFIX}/$acl_libdirstem.
-dnl If system==system, -isystem is used instead of -I
 AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
 [
   AC_REQUIRE([AC_LIB_PREPARE_MULTILIB])
@@ -177,13 +188,6 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
   pushdef([P_A_C_K],[m4_if(m4_version_compare(m4_defn([m4_PACKAGE_VERSION]),[2.61]),[-1],[translit(PACK,[.],[_])],PACK)])
   dnl By default, look in $includedir and $libdir.
   use_additional=yes
-  if test "x$GCC" = "xyes" -a "x$3" = "xsystem"
-  then
-    i_system="-isystem "
-  else
-    i_system="-I"
-  fi
-
   AC_LIB_WITH_FINAL_PREFIX([
     eval additional_includedir=\"$includedir\"
     eval additional_libdir=\"$libdir\"
@@ -216,6 +220,9 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
   LTLIB[]NAME=
   INC[]NAME=
   LIB[]NAME[]_PREFIX=
+  dnl HAVE_LIB${NAME} is an indicator that LIB${NAME}, LTLIB${NAME} have been
+  dnl computed. So it has to be reset here.
+  HAVE_LIB[]NAME=
   rpathdirs=
   ltrpathdirs=
   names_already_handled=
@@ -488,7 +495,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
                 if test -z "$haveit"; then
                   for x in $CPPFLAGS $INC[]NAME; do
                     AC_LIB_WITH_FINAL_PREFIX([eval x=\"$x\"])
-                    if test "X$x" = "X${i_system}$additional_includedir"; then
+                    if test "X$x" = "X-I$additional_includedir"; then
                       haveit=yes
                       break
                     fi
@@ -496,7 +503,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
                   if test -z "$haveit"; then
                     if test -d "$additional_includedir"; then
                       dnl Really add $additional_includedir to $INCNAME.
-                      INC[]NAME="${INC[]NAME}${INC[]NAME:+ }${i_system}$additional_includedir"
+                      INC[]NAME="${INC[]NAME}${INC[]NAME:+ }-I$additional_includedir"
                     fi
                   fi
                 fi
