@@ -135,7 +135,8 @@ public:
            boost::posix_time::to_simple_string(expected_duration).c_str()
            );
     printf("%"PRIu64 " queries were quicker than expected, %"PRIu64" were slower\n",
-           nr_quicker_queries, nr_slower_queries);
+           uint64_t(nr_quicker_queries),
+           uint64_t(nr_slower_queries));
 
     printf("A total of %" PRIu64 " queries had errors.\n",
 	   uint64_t(nr_error_queries));
