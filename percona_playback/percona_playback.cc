@@ -47,8 +47,6 @@ struct percona_playback_st
 {
   const char *name;
   unsigned int loop;
-  std::vector<std::string> *slow_query_log_files;
-  unsigned int query_log_file_read_count;
 };
 
 percona_playback_st *percona_playback_create(const char *name)
@@ -57,8 +55,6 @@ percona_playback_st *percona_playback_create(const char *name)
     static_cast<percona_playback_st *>(malloc(sizeof(percona_playback_st)));
   assert(the_percona_playback);
   the_percona_playback->name= name;
-  the_percona_playback->slow_query_log_files= NULL;
-  the_percona_playback->query_log_file_read_count= 0;
   return the_percona_playback;
 }
 
@@ -66,7 +62,6 @@ void percona_playback_destroy(percona_playback_st **the_percona_playback)
 {
   if (the_percona_playback)
   {
-    delete (*the_percona_playback)->slow_query_log_files;
     free(*the_percona_playback);
     *the_percona_playback= NULL;
   }
@@ -174,13 +169,6 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   po::store(po::parse_command_line(argc, argv, options_description), vm);
   po::notify(vm);
 
-  BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair pp,
-		percona_playback::PluginRegistry::singleton().all_plugins)
-  {
-    pp.second->processOptions(vm);
-  }
-
-
   if (vm.count("db-plugin"))
   {
     PluginRegistry::DBClientPluginMap::iterator it;
@@ -228,7 +216,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   else
   {
     g_input_plugin=
-      percona_playback::PluginRegistry::singleton().input_plugins["query_log"];
+      percona_playback::PluginRegistry::singleton().input_plugins["query-log"];
     if (g_dbclient_plugin == NULL)
     {
       fprintf(stderr, gettext("Invalid Input plugin\n"));
@@ -247,6 +235,18 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     version();
     return 2;
   }
+
+  /*
+    Process plugin options after "help" processing to avoid
+    required options requests in "help" message.
+  */
+  BOOST_FOREACH(const percona_playback::PluginRegistry::PluginPair pp,
+		percona_playback::PluginRegistry::singleton().all_plugins)
+  {
+    if (pp.second->processOptions(vm))
+      return -1;
+  }
+
   if (vm.count("loop"))
   {
     the_percona_playback->loop= vm["loop"].as<unsigned int>();
@@ -260,27 +260,6 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   }
   else
     g_db_thread_queue_depth= 1;
-
-  if (vm.count("slow-query-log-file"))
-  {
-    the_percona_playback->slow_query_log_files= new std::vector<std::string>();
-    the_percona_playback->slow_query_log_files->push_back(vm["slow-query-log-file"].as<std::string>());
-  }
-  else
-  {
-    std::cerr << "ERROR: --slow-query-log-file is a required option."
-	      << std::endl << std::endl;
-    help(options_description);
-    return 3;
-  }
-
-
-  if (vm.count("file-read-count"))
-  {
-    the_percona_playback->query_log_file_read_count= vm["file-read-count"].as<unsigned int>();
-  }
-  else
-    the_percona_playback->query_log_file_read_count= 1;
 
   return 0;
 }
@@ -306,11 +285,8 @@ struct percona_playback_run_result *percona_playback_run(const percona_playback_
 
   std::cerr << "Database Plugin: " << g_dbclient_plugin->name << std::endl;
   std::cerr << " Running..." << std::endl;
-  std::cerr << "  Query Log File: "
-	    << (*the_percona_playback->slow_query_log_files)[0]
-	    << std::endl;
 
-  g_input_plugin->run((*the_percona_playback->slow_query_log_files)[0], *r);
+  g_input_plugin->run(*r);
 
   BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
 		  percona_playback::PluginRegistry::singleton().report_plugins)

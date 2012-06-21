@@ -42,14 +42,14 @@ int main(int argc, char **argv)
   char *dbplugin= new char[null_dbplugin.length()+1];
   strcpy(dbplugin, null_dbplugin.c_str());
 
-  std::string querylog_str("--slow-query-log-file=");
+  std::string querylog_str("--query-log-file=");
   querylog_str.append(SRCDIR);
   querylog_str.append("/percona_playback/test/preserve_query_time.log");
 
   char *querylog= new char[querylog_str.length()+1];
   strcpy(querylog, querylog_str.c_str());
 
-  std::string preserve_time_str("--preserve-query-time");
+  std::string preserve_time_str("--query-log-preserve-query-time");
   char *preserve_time= new char[preserve_time_str.length()+1];
   strcpy(preserve_time, preserve_time_str.c_str());
 

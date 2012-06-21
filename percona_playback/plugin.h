@@ -93,8 +93,7 @@ class InputPlugin : public plugin
 
   InputPlugin(const std::string &name) : name(name) {}
 
-  virtual void run(const std::string            &input_file_name,
-                   percona_playback_run_result  &result)= 0;
+  virtual void run(percona_playback_run_result  &result)= 0;
 
 };
 
