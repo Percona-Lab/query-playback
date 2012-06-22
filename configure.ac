@@ -77,9 +77,13 @@ echo "   * Debug enabled:             $with_debug"
 echo "   * Profiling enabled:         $ac_profiling"
 echo "   * Coverage enabled:          $ac_coverage"
 echo "   * Warnings as errors:        $ac_cv_warnings_as_errors"
-echo "   * Configured modules:"
+echo "   * Builtin modules:"
+for module in `echo $PANDORA_BUILTIN_LIST|tr ',' '\n' |sort`
+do
+  echo "     - $module"
+done
 echo ""
-echo $PANDORA_PLUGIN_LIST
+echo "   * Dynamic modules:"
 for module in `echo $PANDORA_PLUGIN_LIST | tr ',' '\n' | sort`
 do
   echo "     - $module"
