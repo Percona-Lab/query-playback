@@ -18,6 +18,7 @@
 
 #include "percona_playback/visibility.h"
 #include "boost/thread.hpp"
+#include <boost/shared_ptr.hpp>
 #include "tbb/concurrent_queue.h"
 #include "tbb/concurrent_hash_map.h"
 
@@ -38,25 +39,41 @@ extern unsigned int g_db_thread_queue_depth;
 
 class QueryResult;
 
-class DBThread {
+class DBThreadState
+{
+public:
+  virtual ~DBThreadState(){}
+};
+
+class DBThread
+{
+
 private:
-  boost::thread *thread;
+  boost::thread thread;
   uint64_t thread_id;
+  boost::shared_ptr<DBThreadState> state;
+
 public:
   typedef tbb::concurrent_bounded_queue<QueryEntryPtr> Queries;
   Queries queries;
 
-  DBThread(uint64_t _thread_id) : thread_id(_thread_id) {
+  DBThread(uint64_t _thread_id) : thread_id(_thread_id)  {
     queries.set_capacity(g_db_thread_queue_depth);
   }
 
-  ~DBThread() {
-    delete thread;
+  void set_state(boost::shared_ptr<DBThreadState> new_state)
+  {
+    state= new_state;
+  }
+
+  boost::shared_ptr<DBThreadState> get_state() const
+  {
+    return state;
   }
 
   void join()
   {
-    thread->join();
+    thread.join();
   }
 
   virtual void connect()= 0;
@@ -70,7 +87,7 @@ public:
 
   void start_thread()
   {
-    thread= new boost::thread(RunDBThread, this, thread_id);
+    thread= boost::thread(RunDBThread, this, thread_id);
   }
 };
 
