@@ -76,7 +76,7 @@ class QueryResult {
     return _warning_count;
   }
 
-  boost::posix_time::time_duration getDuration() const {
+  const boost::posix_time::time_duration &getDuration() const {
     return _duration;
   }
 
