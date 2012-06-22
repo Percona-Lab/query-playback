@@ -61,7 +61,9 @@ nobase_include_HEADERS += \
   percona_playback/query_result.h \
   percona_playback/plugin.h \
   percona_playback/tokenize.h \
-  percona_playback/visibility.h
+  percona_playback/visibility.h \
+  percona_playback/gettext.h \
+  percona_playback/query_entry.h
 
 libpercona_playback_la_CXXFLAGS = \
 	$(AM_CXXFLAGS) \

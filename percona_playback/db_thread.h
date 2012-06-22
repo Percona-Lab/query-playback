@@ -21,7 +21,7 @@
 #include "tbb/concurrent_queue.h"
 #include "tbb/concurrent_hash_map.h"
 
-#include "percona_playback/query_log/query_log.h"
+#include "percona_playback/query_entry.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -43,7 +43,8 @@ private:
   boost::thread *thread;
   uint64_t thread_id;
 public:
-  tbb::concurrent_bounded_queue<QueryLogEntry> queries;
+  typedef tbb::concurrent_bounded_queue<QueryEntryPtr> Queries;
+  Queries queries;
 
   DBThread(uint64_t _thread_id) : thread_id(_thread_id) {
     queries.set_capacity(g_db_thread_queue_depth);
