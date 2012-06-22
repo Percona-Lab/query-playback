@@ -52,6 +52,10 @@ class plugin
     void (*init)(PluginRegistry &r);
   } definition;
 
+  bool    active;
+
+  plugin() : active(false) {}
+
   virtual boost::program_options::options_description* getProgramOptions() {
     return NULL;
   }
@@ -138,6 +142,7 @@ class PluginRegistry
 
   void add(const std::string &name, ReportPlugin* report_plugin)
   {
+    report_plugin->active= true;
     report_plugins.insert(ReportPluginPair(name, report_plugin));
     all_plugins.insert(PluginPair(name, report_plugin));
   } 

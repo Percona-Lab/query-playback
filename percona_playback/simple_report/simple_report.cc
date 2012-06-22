@@ -78,6 +78,20 @@ public:
     return &simple_report_options;
   }
 
+  virtual int processOptions(boost::program_options::variables_map &vm) {
+    if (!active &&
+      (vm.count("show-per-connection-query-count")))
+  {
+      fprintf(stderr, 
+              gettext("simple_report plugin is not selected, "
+                      "you shouldn't use this plugin-related "
+                      "command line options\n"));
+      return -1;
+  }
+
+  }
+
+
   virtual void query_execution(const uint64_t thread_id,
 			       const std::string &query,
 			       const QueryResult &expected,

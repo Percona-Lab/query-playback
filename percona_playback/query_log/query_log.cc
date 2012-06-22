@@ -360,6 +360,20 @@ public:
 
   virtual int processOptions(boost::program_options::variables_map &vm)
   {
+    if (!active &&
+        (vm.count("query-log-file") ||
+         vm.count("query-log-read-count") ||
+         vm.count("query-log-preserve-query-time") ||
+         vm.count("query-log-set-timestamp")))
+    {
+      fprintf(stderr, 
+              gettext("query-log plugin is not selected, "
+                      "you shouldn't use this plugin-related "
+                      "command line options\n"));
+      return -1;
+    }
+
+
     if (vm.count("query-log-file"))  
       file_name= vm["query-log-file"].as<std::string>();
     else
