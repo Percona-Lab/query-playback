@@ -17,9 +17,11 @@
 
 #include <percona_playback/db_thread.h>
 
-DBExecutorsTable db_executors;
+#include <assert.h>
 
-bool DBThread::run()
+#include <boost/bind.hpp>
+
+void DBThread::run()
 {
   connect();
 
@@ -27,29 +29,27 @@ bool DBThread::run()
   while (true)
   {
     queries.pop(query);
+
     if (query->is_shutdown())
-    {
-      disconnect();
-      return true;
-    }
+      break;
+
     if (query->is_quit())
     {
       disconnect();
       connect();
       continue;
     }
+
     query->execute(this);
   }
 
   disconnect();
-  return false;
+  return;
 }
 
-void RunDBThread(DBThread* dbt, uint64_t thread_id)
+void 
+DBThread::start_thread()
 {
-  if (dbt->run() == false)
-  {
-    db_executors.erase(thread_id);
-    delete dbt;
-  }
+  assert(!thread.joinable());
+  thread= boost::thread(boost::bind(&DBThread::run, this));
 }

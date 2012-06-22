@@ -53,11 +53,13 @@ lib_LTLIBRARIES += libpercona_playback.la
 libpercona_playback_la_SOURCES = \
   percona_playback/percona_playback.cc \
   percona_playback/plugin.cc \
-  percona_playback/db_thread.cc
+  percona_playback/db_thread.cc \
+  percona_playback/dispatcher.cc
 
 nobase_include_HEADERS += \
   percona_playback/percona_playback.h \
   percona_playback/db_thread.h \
+  percona_playback/dispatcher.h \
   percona_playback/query_result.h \
   percona_playback/plugin.h \
   percona_playback/tokenize.h \

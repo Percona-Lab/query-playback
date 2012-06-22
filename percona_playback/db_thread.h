@@ -29,12 +29,6 @@ extern "C"
 {
 #endif
 
-class DBThread;
-void RunDBThread(DBThread* dbt, uint64_t thread_id);
-
-typedef tbb::concurrent_hash_map<uint64_t, DBThread*> DBExecutorsTable;
-
-extern DBExecutorsTable db_executors;
 extern unsigned int g_db_thread_queue_depth;
 
 class QueryResult;
@@ -83,12 +77,9 @@ public:
 			     QueryResult *r,
 			     const QueryResult &expected_result)= 0;
 
-  bool run();
+  void run();
 
-  void start_thread()
-  {
-    thread= boost::thread(RunDBThread, this, thread_id);
-  }
+  void start_thread();
 };
 
 #ifdef __cplusplus
