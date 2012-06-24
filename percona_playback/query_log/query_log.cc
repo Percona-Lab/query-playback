@@ -56,17 +56,17 @@ public:
 		    unsigned int run_count_,
 		    tbb::atomic<uint64_t> *entries_,
 		    tbb::atomic<uint64_t> *queries_)
-    : entries(entries_),
-      queries(queries_),
+    : tbb::filter(true),
+      nr_entries(entries_),
+      nr_queries(queries_),
       input_file(input_file_),
-      run_count(run_count_),
-      tbb::filter(true)
+      run_count(run_count_)
   {};
 
   void* operator() (void*);
 private:
-  tbb::atomic<uint64_t> *entries;
-  tbb::atomic<uint64_t> *queries;
+  tbb::atomic<uint64_t> *nr_entries;
+  tbb::atomic<uint64_t> *nr_queries;
   FILE *input_file;
   unsigned int run_count;
 };
@@ -121,10 +121,10 @@ void* ParseQueryLogFunc::operator() (void*)  {
       count++;
       tmp_entry.reset(new QueryLogEntry());
       entries->push_back(tmp_entry);
-      (*this->entries)++;
+      (*this->nr_entries)++;
     }
 
-    tmp_entry->add_line(std::string(line), queries);
+    tmp_entry->add_line(std::string(line), nr_queries);
   next:
     if (count > 100)
     {
@@ -132,7 +132,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
       //      fseek(input_file,-len, SEEK_CUR);
       break;
     }
-    if (len= getline(&line, &buflen, input_file) == -1)
+    if ((len= getline(&line, &buflen, input_file)) == -1)
     {
       break;
     }
@@ -197,7 +197,7 @@ void QueryLogEntry::execute(DBThread *t)
   }
 }
 
-void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *queries)
+void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *nr_queries)
 {
   {
     size_t location= s.find("Thread_id: ");
@@ -237,7 +237,7 @@ void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *querie
   else
   {
     query.push_back(s);
-    (*queries)++;
+    (*nr_queries)++;
   }
 }
 
@@ -247,7 +247,7 @@ void* dispatch (void *input_)
 {
     std::vector<boost::shared_ptr<QueryLogEntry> > *input= 
       static_cast<std::vector<boost::shared_ptr<QueryLogEntry> >*>(input_);
-    for (int i=0; i< input->size(); i++)
+    for (unsigned int i=0; i< input->size(); i++)
     {
       //      usleep(10);
       g_dispatcher.dispatch((*input)[i]);
@@ -266,7 +266,7 @@ public:
   }
 };
 
-void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_playback_run_result *r)
+static void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_playback_run_result *r)
 {
   tbb::pipeline p;
   tbb::atomic<uint64_t> entries;
@@ -308,8 +308,8 @@ private:
   unsigned int                read_count;
 
 public:
-  QueryLogPlugin(const std::string &name) :
-    InputPlugin(name),
+  QueryLogPlugin(const std::string &_name) :
+    InputPlugin(_name),
     options("Query Log Options") {};
 
   virtual boost::program_options::options_description* getProgramOptions() {
@@ -374,7 +374,7 @@ public:
   }
 };
 
-void init(percona_playback::PluginRegistry&r)
+static void init(percona_playback::PluginRegistry&r)
 {
   r.add("query-log", new QueryLogPlugin("query-log"));
 }

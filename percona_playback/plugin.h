@@ -55,12 +55,13 @@ class plugin
   bool    active;
 
   plugin() : active(false) {}
+  virtual ~plugin() {}
 
   virtual boost::program_options::options_description* getProgramOptions() {
     return NULL;
   }
 
-  virtual int processOptions(boost::program_options::variables_map &vm) {
+  virtual int processOptions(boost::program_options::variables_map &) {
     return 0;
   }
 };
@@ -95,7 +96,7 @@ class InputPlugin : public plugin
  public:
   std::string name;
 
-  InputPlugin(const std::string &name) : name(name) {}
+  InputPlugin(const std::string &_name) : name(_name) {}
 
   virtual void run(percona_playback_run_result  &result)= 0;
 

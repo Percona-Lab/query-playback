@@ -81,14 +81,14 @@ public:
   virtual int processOptions(boost::program_options::variables_map &vm) {
     if (!active &&
       (vm.count("show-per-connection-query-count")))
-  {
-      fprintf(stderr, 
-              gettext("simple_report plugin is not selected, "
-                      "you shouldn't use this plugin-related "
-                      "command line options\n"));
-      return -1;
-  }
-
+      {
+	fprintf(stderr, 
+		gettext("simple_report plugin is not selected, "
+			"you shouldn't use this plugin-related "
+			"command line options\n"));
+	return -1;
+      }
+    return 0;
   }
 
 

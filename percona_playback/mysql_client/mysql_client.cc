@@ -60,7 +60,7 @@ void MySQLDBThread::disconnect()
 }
 
 void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
-				  const QueryResult &expected_result)
+				  const QueryResult &)
 {
   int mr= mysql_real_query(&handle, query.c_str(), query.length());
   if(mr != 0)

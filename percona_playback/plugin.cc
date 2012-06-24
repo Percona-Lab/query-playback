@@ -89,7 +89,7 @@ void load_plugins()
   {
     std::string plugin_lib_name("lib");
     plugin_lib_name.append(plugin_name);
-    plugin_lib_name.append("_module");
+    plugin_lib_name.append("_plugin");
 #if defined(TARGET_OS_OSX)
     plugin_lib_name.append(".dylib");
 #else

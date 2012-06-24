@@ -55,6 +55,8 @@ public:
     queries.set_capacity(g_db_thread_queue_depth);
   }
 
+  virtual ~DBThread() {}
+
   void set_state(boost::shared_ptr<DBThreadState> new_state)
   {
     state= new_state;

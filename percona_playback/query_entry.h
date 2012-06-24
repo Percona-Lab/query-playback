@@ -28,8 +28,8 @@ protected:
   bool shutdown;
 public:
   QueryEntry() : thread_id(0), shutdown(false) {};
-  QueryEntry(uint64_t thread_id, bool shutdown) :
-    thread_id(thread_id), shutdown(shutdown) {}
+  QueryEntry(uint64_t _thread_id, bool _shutdown) :
+    thread_id(_thread_id), shutdown(_shutdown) {}
   virtual ~QueryEntry() {}
 
   void set_shutdown() { shutdown= true; }
@@ -48,7 +48,7 @@ public:
   FinishEntry() { set_shutdown(); }
   bool is_quit() { return false; }
 
-  void execute(DBThread *t) {}
+  void execute(DBThread *) {}
 };
 
 typedef boost::shared_ptr<QueryEntry> QueryEntryPtr;

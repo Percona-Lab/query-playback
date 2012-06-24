@@ -24,8 +24,8 @@ class TcpDumpParserPlugin : public percona_playback::InputPlugin
 {
 
 public:
-  TcpDumpParserPlugin(const std::string &name) :
-    InputPlugin(name),
+  TcpDumpParserPlugin(const std::string &_name) :
+    InputPlugin(_name),
     options("Tcpdump Options")
   {};
 
@@ -33,7 +33,7 @@ public:
 
   virtual int processOptions(boost::program_options::variables_map &vm);
 
-  virtual void run(percona_playback_run_result  &result) {}
+  virtual void run(percona_playback_run_result  &) {}
 
 
   std::string file_name;

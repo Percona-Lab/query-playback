@@ -281,7 +281,7 @@ create_percona_playback_run_result()
   return r;
 }
 
-struct percona_playback_run_result *percona_playback_run(const percona_playback_st *the_percona_playback)
+struct percona_playback_run_result *percona_playback_run(const percona_playback_st *)
 {
   percona_playback_run_result *r= create_percona_playback_run_result();
   assert(g_dbclient_plugin);

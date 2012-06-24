@@ -58,7 +58,7 @@ PANDORA_PLUGINS([percona_playback/plugin_load_list.h])
 
 AC_DEFINE_UNQUOTED([PERCONA_PLAYBACK_MODULE_EXT], ["$acl_cv_shlibext"],
                    [Extension to use for modules.])
-AM_CXXFLAGS="${NO_EFF_CXX}"
+AM_CXXFLAGS="${AM_CXXFLAGS} ${NO_EFF_CXX} ${NO_OLD_STYLE_CAST} ${NO_VISIBILITY}"
 AC_CONFIG_FILES(Makefile dnl po/Makefile.in
  percona_playback/version.h dnl
  docs/header.html)
@@ -77,6 +77,9 @@ echo "   * Debug enabled:             $with_debug"
 echo "   * Profiling enabled:         $ac_profiling"
 echo "   * Coverage enabled:          $ac_coverage"
 echo "   * Warnings as errors:        $ac_cv_warnings_as_errors"
+echo "   * Default CFLAGS:            $AM_CFLAGS"
+echo "   * Default CXXFLAGS:          $AM_CXXFLAGS"
+echo "   * Default LDFLAGS:           $AM_LDFLAGS"
 echo "   * Builtin modules:"
 for module in `echo $PANDORA_BUILTIN_LIST|tr ',' '\n' |sort`
 do
