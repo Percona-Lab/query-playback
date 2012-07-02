@@ -236,7 +236,9 @@ ConnectionState::ServerPacket(IN UCharBuffer &buff)
           helps to avoid memory leak.
           See https://bugs.launchpad.net/drizzle/+bug/1015576
         */
-        res->options|= DRIZZLE_RESULT_ALLOCATED;
+        res->options=
+          (drizzle_result_options_t)
+            ((uint64_t)(res->options) | (uint64_t)DRIZZLE_RESULT_ALLOCATED);
         last_query_result.setWarningCount(drizzle_result_warning_count(res));
         /* Don't count the last EOF packet */
         last_query_result.setRowsSent(sent_rows_count - 1);
