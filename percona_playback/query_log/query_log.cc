@@ -82,7 +82,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
 
   char *line= NULL;
   size_t buflen = 0;
-  size_t len;
+  ssize_t len;
 
   if ((len= getline(&line, &buflen, input_file)) == -1)
   {
@@ -100,7 +100,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
     if ( (strncmp(p, "# Time", 5) == 0))
       goto next;
 
-    if ((p[0] != '#' && (q-p) >= strlen("started with:\n"))
+    if ((p[0] != '#' && q > p && (unsigned)(q-p) >= strlen("started with:\n"))
 	&& strncmp(q- strlen("started with:\n"), "started with:", strlen("started with:"))==0)
       goto next;
 
