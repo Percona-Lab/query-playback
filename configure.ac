@@ -59,7 +59,7 @@ PANDORA_PLUGINS([percona_playback/plugin_load_list.h])
 AC_DEFINE_UNQUOTED([PERCONA_PLAYBACK_MODULE_EXT], ["$acl_cv_shlibext"],
                    [Extension to use for modules.])
 AM_CXXFLAGS="${NO_EFF_CXX}"
-AC_CONFIG_FILES(Makefile dnl
+AC_CONFIG_FILES(Makefile dnl po/Makefile.in
  percona_playback/version.h dnl
  docs/header.html)
 
@@ -87,3 +87,11 @@ done
 
 echo ""
 echo "---"
+
+dnl libtoolize scans configure.ac  and needs to see some text
+m4_define([LIBTOOLIZE_AC_INIT], [])
+m4_define([UNUSED_MACRO], [
+  LT_INIT
+  AC_CONFIG_MACRO_DIR([m4])
+])
+

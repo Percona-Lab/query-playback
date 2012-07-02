@@ -32,6 +32,7 @@
 #include <boost/foreach.hpp>
 
 #include <percona_playback/plugin.h>
+#include <percona_playback/gettext.h>
 
 #include <vector>
 
@@ -87,8 +88,8 @@ static void help(po::options_description &options_description)
     std::cerr << std::endl;
     std::cerr << options_description << std::endl;
     std::cerr << std::endl;
-    std::cerr << "Bugs: " << PACKAGE_BUGREPORT << std::endl;
-    std::cerr << "Loaded plugins: ";
+    std::cerr << _("Bugs: ") << PACKAGE_BUGREPORT << std::endl;
+    std::cerr << _("Loaded plugins: ");
     BOOST_FOREACH(const std::string &plugin_name, percona_playback::PluginRegistry::singleton().loaded_plugin_names)
     {
       std::cerr << plugin_name << " ";
@@ -96,7 +97,7 @@ static void help(po::options_description &options_description)
 
     std::cerr << std::endl;
 
-    std::cerr << std::endl << "Loaded DB Plugins: ";
+    std::cerr << std::endl << _("Loaded DB Plugins: ");
     for(percona_playback::PluginRegistry::DBClientPluginMap::iterator it= percona_playback::PluginRegistry::singleton().dbclient_plugins.begin();
 	it != percona_playback::PluginRegistry::singleton().dbclient_plugins.end();
 	it++)
@@ -107,9 +108,9 @@ static void help(po::options_description &options_description)
     std::cerr << std::endl;
 
     assert(g_dbclient_plugin);
-    std::cerr << "Selected DB Plugin: " << g_dbclient_plugin->name << std::endl;
+    std::cerr << _("Selected DB Plugin: ") << g_dbclient_plugin->name << std::endl;
 
-    std::cerr << std::endl << "Loaded Input Plugins: ";
+    std::cerr << std::endl << _("Loaded Input Plugins: ");
 
     BOOST_FOREACH(const percona_playback::PluginRegistry::InputPluginPair &pp,
 		  percona_playback::PluginRegistry::singleton().input_plugins)
@@ -121,7 +122,7 @@ static void help(po::options_description &options_description)
     std::cerr << std::endl;
 
     assert(g_input_plugin);
-    std::cerr << "Selected Input Plugin: " 
+    std::cerr << _("Selected Input Plugin: ")
               << g_input_plugin->name
               << std::endl;
 }
@@ -131,7 +132,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 {
   percona_playback::load_plugins();
 
-  po::options_description general_options("General options");
+  po::options_description general_options(_("General options"));
   general_options.add_options()
     ("help",    "Display this message")
     ("version", "Display version information")
