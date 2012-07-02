@@ -3,7 +3,7 @@ dnl This file is free software; Sun Microsystems, Inc.
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
-AC_DEFUN([_PANDORA_SEARCH_LIBDRIZZLE],[
+AC_DEFUN([_PANDORA_SEARCH_LIBDRIZZLE_1_0],[
   AC_REQUIRE([AC_LIB_PREFIX])
 
   dnl --------------------------------------------------------------------
@@ -43,12 +43,12 @@ AC_DEFUN([_PANDORA_SEARCH_LIBDRIZZLE],[
   AM_CONDITIONAL(HAVE_LIBDRIZZLE, [test "x${ac_cv_libdrizzle}" = "xyes"])
 ])
 
-AC_DEFUN([PANDORA_HAVE_LIBDRIZZLE],[
-  AC_REQUIRE([_PANDORA_SEARCH_LIBDRIZZLE])
+AC_DEFUN([PANDORA_HAVE_LIBDRIZZLE_1_0],[
+  AC_REQUIRE([_PANDORA_SEARCH_LIBDRIZZLE_1_0])
 ])
 
-AC_DEFUN([PANDORA_REQUIRE_LIBDRIZZLE],[
-  AC_REQUIRE([PANDORA_HAVE_LIBDRIZZLE])
+AC_DEFUN([PANDORA_REQUIRE_LIBDRIZZLE_1_0],[
+  AC_REQUIRE([PANDORA_HAVE_LIBDRIZZLE_1_0])
   AS_IF([test "x${ac_cv_libdrizzle}" = "xno"],[
     AC_MSG_ERROR([libdrizzle is required for ${PACKAGE}])
   ],[
