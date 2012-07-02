@@ -14,8 +14,8 @@
  * END LICENSE */
 #include <pcap.h>
 #include <iostream>
-#include <libdrizzle-1.0/drizzle_server.h>
-#include <libdrizzle-1.0/row_client.h>
+#include <libdrizzle/drizzle_server.h>
+#include <libdrizzle/row_client.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
