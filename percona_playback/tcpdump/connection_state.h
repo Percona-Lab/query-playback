@@ -124,7 +124,7 @@ public:
                           "password",
                           "db",
                           (drizzle_con_options_t)
-                            (DRIZZLE_CON_MYSQL | DRIZZLE_CON_OFFLINE)),
+                            DRIZZLE_CON_MYSQL),
       drizzle_con_free),
     db_thread(NULL)
    {
