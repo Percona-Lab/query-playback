@@ -33,10 +33,10 @@ public:
   virtual ~QueryEntry() {}
 
   void set_shutdown() { shutdown= true; }
-  bool is_shutdown() { return shutdown; }
+  bool is_shutdown() const { return shutdown; }
   virtual bool is_quit()= 0;
 
-  uint64_t getThreadId() { return thread_id; }
+  uint64_t getThreadId() const { return thread_id; }
 
   virtual void execute(DBThread *t)= 0;
 
