@@ -14,8 +14,8 @@ You will need the following packages to build percona-playback:
  * libtbb-dev (Intel Threading Building Blocks)
  * Boost (including boost program_options)
  * intltool
+ * gettext (including gettext-devel on CentOS/RedHat)
  * libpcap-dev
- * libcloog-ppl0
  * libmysqlclient (MySQL Client Libraries) [#n-1]_
 
 
