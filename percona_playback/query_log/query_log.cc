@@ -100,7 +100,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
     if ( (strncmp(p, "# Time", 5) == 0))
       goto next;
 
-    if ((p[0] != '#' && (q-p) >= strlen("started with:\n"))
+    if ((p[0] != '#' && (q-p) >= (ssize_t)strlen("started with:\n"))
 	&& strncmp(q- strlen("started with:\n"), "started with:", strlen("started with:"))==0)
       goto next;
 
