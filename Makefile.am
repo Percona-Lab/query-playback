@@ -125,6 +125,9 @@ bin_percona_playback_LDADD= $(BOOST_LIBS) $(LDADD) $(TBB_LIBS) $(MYSQL_LIBS) $(p
 include doxygen/include.am
 include doc/include.am
 
+clean-local:
+	rm -Rf $(SPHINX_BUILDDIR)
+
 TESTS = $(check_PROGRAMS)
 
 TESTS_ENVIRONMENT = ${top_srcdir}/test_run.sh
