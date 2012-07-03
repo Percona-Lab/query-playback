@@ -5,7 +5,7 @@
 EXTRA_DIST+=	doc/make.bat \
 		doc/source/_static/percona_favicon.ico \
 		doc/source/conf.py \
-		doc/source/*.rst \
+		${top_srcdir}/doc/source/*.rst \
 		doc/source/percona_favicon.ico
 
 # Makefile for Sphinx documentation
