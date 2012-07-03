@@ -40,6 +40,13 @@ class QueryResult {
   {
   }
 
+  void clear()
+  {
+    _rows_sent= _rows_examined= 0;
+    _error= _warning_count= 0;
+    _duration= boost::posix_time::time_duration();
+  }
+
   void setRowsSent(const uint64_t &rows) {
     _rows_sent= rows;
   }

@@ -19,9 +19,17 @@
 #include <percona_playback/plugin.h>
 
 #include <boost/program_options.hpp>
+#include <string>
+
+enum TcpdumpPluginMode
+{
+  TCPDUMP_MODE_FAST,
+  TCPDUMP_MODE_ACCURATE
+};
 
 class TcpDumpParserPlugin : public percona_playback::InputPlugin
 {
+  boost::program_options::options_description options;
 
 public:
   TcpDumpParserPlugin(const std::string &_name) :
@@ -33,11 +41,12 @@ public:
 
   virtual int processOptions(boost::program_options::variables_map &vm);
 
-  virtual void run(percona_playback_run_result  &) {}
-
-
-  std::string file_name;
-  boost::program_options::options_description options;
+  virtual void run(percona_playback_run_result  &result);
 };
+
+extern std::string         g_tcpdump_file_name;
+extern uint16_t            g_tcpdump_port;
+extern TcpdumpPluginMode   g_tcpdump_mode;
+
 
 #endif /* PERCONA_PLAYBACK_TCPDUMP_PARSER_H */

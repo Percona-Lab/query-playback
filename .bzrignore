@@ -42,3 +42,13 @@ percona_playback/test/sqlbench-transactions-slow
 percona_playback/test/sysbench-slow
 percona-theme
 doc/build/*
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
+percona_playback/test/preserve_query_time
+percona_playback/test/tcpdump_accuracy
+percona_playback/test/tcpdump_fragmented_packet
+percona_playback/test/tcpdump_multiple_connections
+percona_playback/test/tcpdump_stress_test
+percona_playback/test/tcpdump_without_handshake
