@@ -184,7 +184,7 @@ public:
       printf("Per Thread results\n");
       printf("------------------\n");
       printf("Conn Id\t\tQueries\n");
-      BOOST_FOREACH(const SortedConnectionQueryCountPair conn_count,
+      BOOST_FOREACH(const SortedConnectionQueryCountPair &conn_count,
 		    sorted_conn_count)
       {
 	printf("%"PRIu64 "\t\t%"PRIu64 "\n",
