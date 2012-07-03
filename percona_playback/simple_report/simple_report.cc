@@ -154,10 +154,10 @@ public:
 
     printf("A total of %" PRIu64 " queries had errors.\n",
 	   uint64_t(nr_error_queries));
-    printf("Expected %" PRIu64 " rows, got %" PRIu64 " (a difference of %" PRId64 ")\n",
+    printf("Expected %" PRIu64 " rows, got %" PRIu64 " (a difference of %lld)\n",
 	   uint64_t(nr_expected_rows_sent),
 	   uint64_t(nr_actual_rows_sent),
-	   labs(int64_t(nr_expected_rows_sent) - int64_t(nr_actual_rows_sent))
+	   llabs(int64_t(nr_expected_rows_sent) - int64_t(nr_actual_rows_sent))
 	   );
     printf("Number of queries where number of rows differed: %" PRIu64 ".\n",
 	   uint64_t(nr_queries_rows_differ));
@@ -176,7 +176,7 @@ public:
     double avg_queries= (double)total_queries / (double)connection_query_counts.size();
 
     printf("\n");
-    printf("Average of %.2f queries per connection (%"PRIu64 " connections).\n", avg_queries, connection_query_counts.size());
+    printf("Average of %.2f queries per connection (%"PRIu64 " connections).\n", avg_queries, uint64_t(connection_query_counts.size()));
     printf("\n");
 
     if (show_connection_query_count)
