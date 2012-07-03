@@ -18,7 +18,7 @@ You will need the following packages to build percona-playback:
 
 Building
 --------
-If you are building from BZR, you will need to run ./cofig/autorun.sh first.
+If you are building from BZR, you will need to run ./config/autorun.sh first.
 
 $ ./configure
 $ make
