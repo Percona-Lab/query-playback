@@ -23,6 +23,13 @@
 #include <boost/program_options.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include "tbb/tbb_stddef.h"
+
+#if TBB_VERSION_MAJOR < 3
+#include <boost/unordered_map.hpp>
+#include "tbb/mutex.h"
+#endif
+
 #include "tbb/atomic.h"
 #include "tbb/concurrent_unordered_map.h"
 #include <percona_playback/plugin.h>
@@ -41,7 +48,13 @@ private:
   tbb::atomic<uint64_t> nr_quicker_queries;
   tbb::atomic<uint64_t> nr_slower_queries;
 
+#if TBB_VERSION_MAJOR < 3
+  tbb::mutex connection_query_count_mutex;
+  typedef boost::unordered_map<uint64_t, tbb::atomic<uint64_t> > ConnectionQueryCountMap;
+#else
   typedef tbb::concurrent_unordered_map<uint64_t, tbb::atomic<uint64_t> > ConnectionQueryCountMap;
+#endif
+
   typedef std::pair<uint64_t, tbb::atomic<uint64_t> > ConnectionQueryCountPair;
   typedef std::map<uint64_t, uint64_t> SortedConnectionQueryCountMap;
   typedef std::pair<uint64_t, uint64_t> SortedConnectionQueryCountPair;
@@ -104,6 +117,9 @@ public:
     }
 
     {
+#if TBB_VERSION_MAJOR < 3
+      tbb::mutex::scoped_lock lock(connection_query_count_mutex);
+#endif
       tbb::atomic<uint64_t> zero;
       zero= 0;
 
@@ -164,6 +180,10 @@ public:
 
     SortedConnectionQueryCountMap sorted_conn_count;
     uint64_t total_queries= 0;
+
+#if TBB_VERSION_MAJOR < 3
+    tbb::mutex::scoped_lock lock(connection_query_count_mutex);
+#endif
 
     BOOST_FOREACH(const ConnectionQueryCountPair conn_count,
 		  connection_query_counts)

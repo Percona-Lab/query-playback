@@ -16,6 +16,7 @@ You will need the following packages to build percona-playback:
  * intltool
  * gettext (including gettext-devel on CentOS/RedHat)
  * libpcap-dev
+ * libcloog-ppl0 (if using GCC 4.6)
  * libmysqlclient (MySQL Client Libraries) [#n-1]_
 
 
