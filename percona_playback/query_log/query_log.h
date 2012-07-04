@@ -57,7 +57,7 @@ public:
   {
     std::vector<std::string>::iterator it;
 
-    for ( it=query.begin() ; it < query.end(); it++ )
+    for ( it=query.begin() ; it < query.end(); ++it )
       std::cerr << "    " << *it << std::endl;
   }
 
