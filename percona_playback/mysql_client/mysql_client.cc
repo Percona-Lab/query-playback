@@ -16,6 +16,7 @@
 #include <percona_playback/plugin.h>
 #include <percona_playback/mysql_client/mysql_client.h>
 #include <percona_playback/query_result.h>
+#include <percona_playback/gettext.h>
 
 #include <boost/program_options.hpp>
 
@@ -98,13 +99,13 @@ public:
   }
 
   virtual boost::program_options::options_description* getProgramOptions() {
-    static po::options_description mysql_options("MySQL Client Options");
+    static po::options_description mysql_options(_("MySQL Client Options"));
     mysql_options.add_options()
-    ("mysql-host", po::value<std::string>(), "Hostname of MySQL server")
-    ("mysql-username", po::value<std::string>(), "Username to connect to MySQL")
-    ("mysql-password", po::value<std::string>(), "Password for MySQL user")
-    ("mysql-schema", po::value<std::string>(), "MySQL Schema to connect to")
-    ("mysql-port", po::value<unsigned int>(), "MySQL port number")
+    ("mysql-host", po::value<std::string>(), _("Hostname of MySQL server"))
+    ("mysql-username", po::value<std::string>(), _("Username to connect to MySQL"))
+    ("mysql-password", po::value<std::string>(), _("Password for MySQL user"))
+    ("mysql-schema", po::value<std::string>(), _("MySQL Schema to connect to"))
+    ("mysql-port", po::value<unsigned int>(), _("MySQL port number"))
     ;
 
     return &mysql_options;
@@ -118,7 +119,7 @@ public:
          vm.count("mysql-schema") ||
          vm.count("mysql-port")))
     {
-      fprintf(stderr, 
+      fprintf(stderr,
               gettext("libmysqlclient plugin is not selected, "
                       "you shouldn't use this plugin-related "
                       "command line options\n"));
