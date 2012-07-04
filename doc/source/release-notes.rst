@@ -5,4 +5,8 @@
 Preview Release
 ===============
 
-Initial public release
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   release-notes/0/*

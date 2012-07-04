@@ -1,0 +1,18 @@
+======================
+ Percona Playback 0.1
+======================
+
+This is the initial release and it's very limited. It should be considered Alpha.
+
+Features:
+---------
+- slow query log parsing
+- mysql client library
+- one thread per client thread
+- basic report as to how the replay went
+- "as fast as possible" playback only. If query execution takes less time on playback server than original one, percona-playback will not pause.
+
+Notable missing features:
+-------------------------
+- wall-time playback: ability to have the same amount of real-world time pass (i.e. a gap of 10seconds between queries will be preserved).
+- parsing of general query log
