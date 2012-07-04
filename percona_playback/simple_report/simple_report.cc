@@ -19,21 +19,21 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#include "boost/foreach.hpp"
+#include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "tbb/tbb_stddef.h"
+#include <tbb/tbb_stddef.h>
 
 /* We're all conditional here because TBB in CentOS 6 is old */
 #if TBB_VERSION_MAJOR < 3
 #include <boost/unordered_map.hpp>
-#include "tbb/mutex.h"
+#include <tbb/mutex.h>
 #else
-#include "tbb/concurrent_unordered_map.h"
+#include <tbb/concurrent_unordered_map.h>
 #endif
 
-#include "tbb/atomic.h"
+#include <tbb/atomic.h>
 #include <percona_playback/plugin.h>
 #include <percona_playback/query_result.h>
 #include <percona_playback/gettext.h>

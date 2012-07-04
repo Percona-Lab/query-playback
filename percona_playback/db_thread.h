@@ -17,10 +17,10 @@
 #define PERCONA_PLAYBACK_DB_THREAD_H
 
 #include "percona_playback/visibility.h"
-#include "boost/thread.hpp"
+#include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
-#include "tbb/concurrent_queue.h"
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_queue.h>
+#include <tbb/concurrent_hash_map.h>
 
 #include "percona_playback/query_entry.h"
 

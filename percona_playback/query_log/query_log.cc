@@ -22,17 +22,17 @@
 #include <fstream>
 #include <stdint.h>
 #include <assert.h>
-#include "boost/thread.hpp"
+#include <boost/thread.hpp>
 #include "query_log.h"
 #include <unistd.h>
 
-#include "tbb/pipeline.h"
-#include "tbb/tick_count.h"
-#include "tbb/task_scheduler_init.h"
-#include "tbb/tbb_allocator.h"
-#include "tbb/atomic.h"
-#include "tbb/concurrent_queue.h"
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/pipeline.h>
+#include <tbb/tick_count.h>
+#include <tbb/task_scheduler_init.h>
+#include <tbb/tbb_allocator.h>
+#include <tbb/atomic.h>
+#include <tbb/concurrent_queue.h>
+#include <tbb/concurrent_hash_map.h>
 
 #include <percona_playback/percona_playback.h>
 #include <percona_playback/plugin.h>
