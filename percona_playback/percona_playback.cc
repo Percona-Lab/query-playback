@@ -78,10 +78,14 @@ const char *percona_playback_get_name(const percona_playback_st *the_percona_pla
 static void version()
 {
   std::cerr << PACKAGE << std::endl
-	    << "Version: " PACKAGE_VERSION
-	    << "-" << PERCONA_PLAYBACK_VERSION_ID
-	    << "-" << PERCONA_PLAYBACK_RELEASE_COMMENT
-	    << std::endl;
+	    << _("Version: ") << PACKAGE_VERSION;
+
+  if (strlen(PERCONA_PLAYBACK_RELEASE_COMMENT) > 0)
+  {
+    std::cerr << "-" << PERCONA_PLAYBACK_RELEASE_COMMENT;
+  }
+
+  std::cerr << std::endl;
 }
 
 static void help(po::options_description &options_description)
