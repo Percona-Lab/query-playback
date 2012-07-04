@@ -17,10 +17,10 @@ AC_CONFIG_MACRO_DIR([m4])
 PANDORA_CANONICAL_TARGET(warnings-always-on, require-cxx)
 
 # Increment if interfaces have been added, removed, or changed.
-LIBPERCONA_PLAYBACK_VERSION_CURRENT=0
+LIBPERCONA_PLAYBACK_VERSION_CURRENT=1
 
 # Increment if source code has changed, set to zero if current is incremented.
-LIBPERCONA_PLAYBACK_VERSION_REVISION=2
+LIBPERCONA_PLAYBACK_VERSION_REVISION=0
 
 # Increment if interfaces have been added, set to zero if interfaces have been
 # removed or changed.
