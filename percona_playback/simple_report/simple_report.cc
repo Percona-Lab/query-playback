@@ -36,6 +36,7 @@
 #include "tbb/atomic.h"
 #include <percona_playback/plugin.h>
 #include <percona_playback/query_result.h>
+#include <percona_playback/gettext.h>
 
 class SimpleReportPlugin : public percona_playback::ReportPlugin
 {
@@ -83,11 +84,11 @@ public:
   virtual boost::program_options::options_description* getProgramOptions() {
     namespace po= boost::program_options;
 
-    static po::options_description simple_report_options("Simple Report Options");
+    static po::options_description simple_report_options(_("Simple Report Options"));
     simple_report_options.add_options()
     ("show-per-connection-query-count",
      po::value<bool>(&show_connection_query_count)->default_value(false)->zero_tokens(),
-     "For each connection, display the number of queries executed.")
+     _("For each connection, display the number of queries executed."))
     ;
 
     return &simple_report_options;
@@ -97,10 +98,10 @@ public:
     if (!active &&
       (vm.count("show-per-connection-query-count")))
       {
-	fprintf(stderr, 
-		gettext("simple_report plugin is not selected, "
-			"you shouldn't use this plugin-related "
-			"command line options\n"));
+	fprintf(stderr,
+		_("simple_report plugin is not selected, "
+		  "you shouldn't use this plugin-related "
+		  "command line options\n"));
 	return -1;
       }
     return 0;
@@ -114,7 +115,7 @@ public:
   {
     if (actual.getError())
     {
-      fprintf(stderr,"Error query: %s\n", query.c_str());
+      fprintf(stderr,_("Error query: %s\n"), query.c_str());
       nr_error_queries++;
     }
 
@@ -135,7 +136,7 @@ public:
     if (actual.getRowsSent() != expected.getRowsSent())
     {
       nr_queries_rows_differ++;
-      fprintf(stderr, "Connection %"PRIu64" Rows Sent: %"PRIu64 " != expected %"PRIu64 " for query: %s\n", thread_id, actual.getRowsSent(), expected.getRowsSent(), query.c_str());
+      fprintf(stderr, _("Connection %"PRIu64" Rows Sent: %"PRIu64 " != expected %"PRIu64 " for query: %s\n"), thread_id, actual.getRowsSent(), expected.getRowsSent(), query.c_str());
     }
 
     nr_queries_executed++;
@@ -156,28 +157,27 @@ public:
 
   virtual void print_report()
   {
-    printf("Report\n");
-    printf("------\n");
-    printf("Executed %" PRIu64 " queries\n", uint64_t(nr_queries_executed));
+    printf(_("Report\n------\n"));
+    printf(_("Executed %" PRIu64 " queries\n"), uint64_t(nr_queries_executed));
 
     boost::posix_time::time_duration total_duration= boost::posix_time::microseconds(total_execution_time_ms);
     boost::posix_time::time_duration expected_duration= boost::posix_time::microseconds(expected_total_execution_time_ms);
-    printf("Spent %s executing queries versus an expected %s time.\n",
+    printf(_("Spent %s executing queries versus an expected %s time.\n"),
            boost::posix_time::to_simple_string(total_duration).c_str(),
            boost::posix_time::to_simple_string(expected_duration).c_str()
            );
-    printf("%"PRIu64 " queries were quicker than expected, %"PRIu64" were slower\n",
+    printf(_("%"PRIu64 " queries were quicker than expected, %"PRIu64" were slower\n"),
            uint64_t(nr_quicker_queries),
            uint64_t(nr_slower_queries));
 
-    printf("A total of %" PRIu64 " queries had errors.\n",
+    printf(_("A total of %" PRIu64 " queries had errors.\n"),
 	   uint64_t(nr_error_queries));
-    printf("Expected %" PRIu64 " rows, got %" PRIu64 " (a difference of %lld)\n",
+    printf(_("Expected %" PRIu64 " rows, got %" PRIu64 " (a difference of %lld)\n"),
 	   uint64_t(nr_expected_rows_sent),
 	   uint64_t(nr_actual_rows_sent),
 	   llabs(int64_t(nr_expected_rows_sent) - int64_t(nr_actual_rows_sent))
 	   );
-    printf("Number of queries where number of rows differed: %" PRIu64 ".\n",
+    printf(_("Number of queries where number of rows differed: %" PRIu64 ".\n"),
 	   uint64_t(nr_queries_rows_differ));
 
     SortedConnectionQueryCountMap sorted_conn_count;
@@ -198,14 +198,14 @@ public:
     double avg_queries= (double)total_queries / (double)connection_query_counts.size();
 
     printf("\n");
-    printf("Average of %.2f queries per connection (%"PRIu64 " connections).\n", avg_queries, uint64_t(connection_query_counts.size()));
+    printf(_("Average of %.2f queries per connection (%"PRIu64 " connections).\n"),
+	   avg_queries, uint64_t(connection_query_counts.size()));
     printf("\n");
 
     if (show_connection_query_count)
     {
-      printf("Per Thread results\n");
-      printf("------------------\n");
-      printf("Conn Id\t\tQueries\n");
+      printf(_("Per Thread results\n------------------\n"));
+      printf(_("Conn Id\t\tQueries\n"));
       BOOST_FOREACH(const SortedConnectionQueryCountPair &conn_count,
 		    sorted_conn_count)
       {
