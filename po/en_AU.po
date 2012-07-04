@@ -1,0 +1,56 @@
+# English (Australia) translation for percona-playback
+# Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
+# This file is distributed under the same license as the percona-playback package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: percona-playback\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2012-07-03 07:56+0000\n"
+"PO-Revision-Date: 2012-07-04 02:17+0000\n"
+"Last-Translator: Stewart Smith <stewart@flamingspork.com>\n"
+"Language-Team: English (Australia) <en_AU@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2012-07-04 05:24+0000\n"
+"X-Generator: Launchpad (build 15544)\n"
+
+#: ../percona_playback/percona_playback.cc:93
+msgid "Bugs: "
+msgstr "Bugs: "
+
+#: ../percona_playback/percona_playback.cc:94
+msgid "Loaded plugins: "
+msgstr "Loaded plugins: "
+
+#: ../percona_playback/percona_playback.cc:102
+msgid "Loaded DB Plugins: "
+msgstr "Loaded DB Plugins: "
+
+#: ../percona_playback/percona_playback.cc:113
+msgid "Selected DB Plugin: "
+msgstr "Selected DB Plugin: "
+
+#: ../percona_playback/percona_playback.cc:115
+msgid "Loaded Input Plugins: "
+msgstr "Loaded Input Plugins: "
+
+#: ../percona_playback/percona_playback.cc:127
+msgid "Selected Input Plugin: "
+msgstr "Selected Input Plugin: "
+
+#: ../percona_playback/percona_playback.cc:137
+msgid "General options"
+msgstr "General options"
+
+#: ../percona_playback/percona_playback.cc:194
+#, c-format
+msgid "Invalid DB plugin\n"
+msgstr "Invalid DB plugin\n"
+
+#: ../percona_playback/percona_playback.cc:223
+#, c-format
+msgid "Invalid Input plugin\n"
+msgstr "Invalid Input plugin\n"
