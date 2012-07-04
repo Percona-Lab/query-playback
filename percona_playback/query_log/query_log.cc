@@ -150,7 +150,7 @@ void QueryLogEntry::execute(DBThread *t)
   std::vector<std::string>::iterator it;
   QueryResult r;
 
-  for ( it=query.begin() ; it < query.end(); it++ )
+  for ( it=query.begin() ; it < query.end(); ++it )
   {
     const std::string timestamp_query("SET timestamp=");
     if(!g_run_set_timestamp
