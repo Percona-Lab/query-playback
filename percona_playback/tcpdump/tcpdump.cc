@@ -17,6 +17,7 @@
 #include "pcap_packets_parser.h"
 
 #include "percona_playback/percona_playback.h"
+#include <percona_playback/gettext.h>
 
 #include <stdio.h>
 #include <pcap.h>
@@ -38,7 +39,7 @@ static std::istream& operator>>(std::istream& in, TcpdumpPluginMode& unit)
     else
       throw
         boost::program_options::invalid_option_value(
-          "Allowed input-type values are (fast|accurate)"
+            _("Allowed input-type values are (fast|accurate)")
         );
     return in;
 }
@@ -49,18 +50,18 @@ TcpDumpParserPlugin::getProgramOptions()
   options.add_options()
     ("tcpdump-file",
      boost::program_options::value<std::string>(&g_tcpdump_file_name),
-     "Tcpdump file name")
+     _("Tcpdump file name"))
     ("tcpdump-port",
      boost::program_options::value<uint16_t>(&g_tcpdump_port)
        ->default_value(3306),
-     "Tcpdump port")
+     _("Tcpdump port"))
     ("tcpdump-mode",
      boost::program_options::value<TcpdumpPluginMode>(&g_tcpdump_mode)
        ->multitoken()->default_value(TCPDUMP_MODE_FAST, "fast"),
-     "The mode of tcpdump plugin (fast|accurate), in 'fast' mode "
+     _("The mode of tcpdump plugin (fast|accurate), in 'fast' mode "
      "the plugin executes queries as fast as it can whereas in "
      "'accurate' mode the plugin preserves queries execution time "
-    "and pauses between queries")
+     "and pauses between queries"))
     ;
 
   return &options;
@@ -75,11 +76,10 @@ TcpDumpParserPlugin::processOptions(
        !vm["tcpdump-port"].defaulted() ||
        !vm["tcpdump-mode"].defaulted()))
   {
-      fprintf(stderr, 
-              gettext("tcpdump plugin is not selected, "
+    fprintf(stderr, _("tcpdump plugin is not selected, "
                       "you shouldn't use this plugin-related "
                       "command line options\n"));
-      return -1;
+    return -1;
   }
 
   if (!active)
@@ -115,8 +115,8 @@ TcpDumpParserPlugin::run(percona_playback_run_result  &r)
 
   if (handle == NULL)
   {
-    std::cerr << "Couldn't open file " <<  g_tcpdump_file_name << ": " 
-              << errbuf << std::endl;
+    fprintf(stderr, _("Couldn't open file %s: %s\n"),
+	    g_tcpdump_file_name.c_str(), errbuf);
     r.err= -1;
     return;
   }
@@ -125,16 +125,16 @@ TcpDumpParserPlugin::run(percona_playback_run_result  &r)
 
   if(pcap_compile(handle, &fp, filter_exp, 0, 0) == -1)
   {
-    std::cerr << "Couldn't parse filter " << filter_exp << ": "
-              << pcap_geterr(handle) << std::endl;
+    fprintf(stderr, _("Couldn't parse filter '%s': %s\n"),
+	    filter_exp, pcap_geterr(handle));
     r.err= -1;
     return;
   }
 
   if (pcap_setfilter(handle, &fp) == -1)
   {
-    std::cerr << "Couldn't install filter " << filter_exp << ": "
-              << pcap_geterr(handle) << std::endl;
+    fprintf(stderr, _("Couldn't install filter '%s': %s\n"),
+	    filter_exp, pcap_geterr(handle));
     r.err= -1;
     return;
   }
