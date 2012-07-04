@@ -140,23 +140,23 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
 
   po::options_description general_options(_("General options"));
   general_options.add_options()
-    ("help",    "Display this message")
-    ("version", "Display version information")
-    ("loop", po::value<unsigned int>(), "Do the whole run N times")
+    ("help",    _("Display this message"))
+    ("version", _("Display version information"))
+    ("loop", po::value<unsigned int>(), _("Do the whole run N times"))
     ;
 
   po::options_description db_options("Database Options");
   db_options.add_options()
-    ("db-plugin", po::value<std::string>(), "Database plugin")
-    ("input-plugin", po::value<std::string>(), "Input plugin")
+    ("db-plugin", po::value<std::string>(), _("Database plugin"))
+    ("input-plugin", po::value<std::string>(), _("Input plugin"))
     ("queue-depth", po::value<unsigned int>(),
-     "Queue depth for DB executor (thread). The larger this number the"
+     _("Queue depth for DB executor (thread). The larger this number the"
      " greater the played-back workload can deviate from the original workload"
-     " as some connections may be up to queue-depth behind. (default 1)")
+     " as some connections may be up to queue-depth behind. (default 1)"))
     ;
 
   std::string basic_usage;
-  basic_usage= "USAGE: " + std::string(PACKAGE) + " [General Options]";
+  basic_usage= _("USAGE: ") + std::string(PACKAGE) + _(" [General Options]");
   po::options_description options_description(basic_usage);
   options_description.add(general_options);
   options_description.add(db_options);
@@ -180,7 +180,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     it= PluginRegistry::singleton().dbclient_plugins.find(vm["db-plugin"].as<std::string>());
     if (it == PluginRegistry::singleton().dbclient_plugins.end())
     {
-      std::cerr << "Invalid DB Plugin" << std::endl;
+      fprintf(stderr, _("Invalid DB Plugin\n"));
       return -1;
     }
     g_dbclient_plugin= it->second;
@@ -195,7 +195,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
       null_it= PluginRegistry::singleton().dbclient_plugins.find("null");
       if (null_it == PluginRegistry::singleton().dbclient_plugins.end())
       {
-	fprintf(stderr, gettext("Invalid DB plugin\n"));
+	fprintf(stderr, _("Invalid DB plugin\n"));
 	return -1;
       }
       g_dbclient_plugin= null_it->second;
@@ -213,7 +213,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     it= PluginRegistry::singleton().input_plugins.find(vm["input-plugin"].as<std::string>());
     if (it == PluginRegistry::singleton().input_plugins.end())
     {
-      std::cerr << "Invalid Input Plugin" << std::endl;
+      fprintf(stderr, _("Invalid Input Plugin\n"));
       return -1;
     }
     g_input_plugin= it->second;
@@ -224,7 +224,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     it= PluginRegistry::singleton().input_plugins.find("query-log");
     if (it == PluginRegistry::singleton().input_plugins.end())
     {
-      fprintf(stderr, gettext("Invalid Input plugin\n"));
+      fprintf(stderr, _("Invalid Input plugin\n"));
       return -1;
     }
     g_input_plugin= it->second;
@@ -290,8 +290,8 @@ struct percona_playback_run_result *percona_playback_run(const percona_playback_
   percona_playback_run_result *r= create_percona_playback_run_result();
   assert(g_dbclient_plugin);
 
-  std::cerr << "Database Plugin: " << g_dbclient_plugin->name << std::endl;
-  std::cerr << " Running..." << std::endl;
+  std::cerr << _("Database Plugin: ") << g_dbclient_plugin->name << std::endl;
+  std::cerr << _(" Running...") << std::endl;
 
   g_input_plugin->run(*r);
 
@@ -312,7 +312,7 @@ int percona_playback_run_all(const percona_playback_st *the_percona_playback)
   {
     if (the_percona_playback->loop > 1)
     {
-      fprintf(stderr, "Run %u of %u\n", run+1, the_percona_playback->loop);
+      fprintf(stderr, _("Run %u of %u\n"), run+1, the_percona_playback->loop);
     }
     r= percona_playback_run(the_percona_playback);
     if (r->err != 0)
