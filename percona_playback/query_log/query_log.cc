@@ -311,7 +311,9 @@ private:
 public:
   QueryLogPlugin(const std::string &_name) :
     InputPlugin(_name),
-    options(_("Query Log Options")) {};
+    options(_("Query Log Options")),
+    read_count(1)
+  {};
 
   virtual boost::program_options::options_description* getProgramOptions() {
       options.add_options()
