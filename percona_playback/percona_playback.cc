@@ -106,7 +106,7 @@ static void help(po::options_description &options_description)
     std::cerr << std::endl << _("Loaded DB Plugins: ");
     for(PluginRegistry::DBClientPluginMap::iterator it= PluginRegistry::singleton().dbclient_plugins.begin();
 	it != PluginRegistry::singleton().dbclient_plugins.end();
-	it++)
+	++it)
     {
       std::cerr << it->first << " ";
     }
