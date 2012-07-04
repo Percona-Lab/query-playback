@@ -33,7 +33,7 @@ config.log
 aclocal.m4
 autom4te.cache
 config/top.h
-bin/percona_playback
+bin/percona-playback
 percona_playback/test/basic
 percona_playback/test/help
 percona_playback/test/basic-queue-depth
