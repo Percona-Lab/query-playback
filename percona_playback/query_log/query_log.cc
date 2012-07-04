@@ -40,6 +40,7 @@
 #include <percona_playback/query_log/query_log.h>
 #include <percona_playback/query_result.h>
 #include "percona_playback/dispatcher.h"
+#include <percona_playback/gettext.h>
 
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
@@ -310,29 +311,29 @@ private:
 public:
   QueryLogPlugin(const std::string &_name) :
     InputPlugin(_name),
-    options("Query Log Options") {};
+    options(_("Query Log Options")) {};
 
   virtual boost::program_options::options_description* getProgramOptions() {
       options.add_options()
       ("query-log-file",
-       po::value<std::string>(), "Query log file")
+       po::value<std::string>(), _("Query log file"))
       ("query-log-read-count",
-       po::value<unsigned int>(&read_count)->default_value(1), 
-       "Query log file read count (how many times to read query log file)")
+       po::value<unsigned int>(&read_count)->default_value(1),
+       _("Query log file read count (how many times to read query log file)"))
       ("query-log-set-timestamp",
        po::value<bool>(&g_run_set_timestamp)->
           default_value(false)->
             zero_tokens(), 
-       "By default, we skip the SET TIMESTAMP=XX; query that the MySQL slow "
+       _("By default, we skip the SET TIMESTAMP=XX; query that the MySQL slow "
        "query log always includes. This may cause some subsequent queries to "
        "fail, depending on your workload. If the --run-set-timestamp option "
-       "is enabled, we run these queries too.")
+       "is enabled, we run these queries too."))
       ("query-log-preserve-query-time",
        po::value<bool>(&g_preserve_query_time)->
         default_value(false)->
           zero_tokens(),
-       "Ensure that each query takes at least Query_time (from slow query log)"
-       " to execute.")
+       _("Ensure that each query takes at least Query_time (from slow query "
+	 "log) to execute."))
       ;
 
     return &options;
@@ -346,25 +347,23 @@ public:
          !vm["query-log-preserve-query-time"].defaulted() ||
          !vm["query-log-set-timestamp"].defaulted()))
     {
-      fprintf(stderr, 
-              gettext("query-log plugin is not selected, "
-                      "you shouldn't use this plugin-related "
-                      "command line options\n"));
+      fprintf(stderr,_(("query-log plugin is not selected, "
+			"you shouldn't use this plugin-related "
+			"command line options\n")));
       return -1;
     }
 
     if (!active)
       return 0;
 
-    if (vm.count("query-log-file"))  
+    if (vm.count("query-log-file"))
       file_name= vm["query-log-file"].as<std::string>();
     else
     {
-      fprintf(stderr, 
-              gettext("ERROR: --query-log-file is a required option.\n"));
+      fprintf(stderr, _("ERROR: --query-log-file is a required option.\n"));
       return -1;
     }
-    
+
     return 0;
   }
 
