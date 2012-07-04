@@ -25,6 +25,7 @@
 #include <percona_playback/plugin.h>
 #include <percona_playback/plugin_load_list.h>
 #include <percona_playback/tokenize.h>
+#include <percona_playback/gettext.h>
 
 /* plugin definition symbols */
 typedef percona_playback::plugin::definition plugin_builtin_list[];
@@ -44,7 +45,7 @@ static void load_plugin(const char *so_file, const std::string &plugin_name)
     if (dl_handle == NULL)
     {
       const char *errmsg= dlerror();
-      fprintf(stderr,"Error loading plugin: %s\n\n", errmsg);
+      fprintf(stderr,_("Error loading plugin: %s\n\n"), errmsg);
       abort();
       return;
     }
@@ -57,7 +58,7 @@ static void load_plugin(const char *so_file, const std::string &plugin_name)
     if (sym == NULL)
     {
       const char *errmsg= dlerror();
-      fprintf(stderr,"Error loading plugin: %s\n\n", errmsg);
+      fprintf(stderr,_("Error loading plugin: %s\n\n"), errmsg);
       abort();
       return;
     }
