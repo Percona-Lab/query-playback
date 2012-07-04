@@ -45,6 +45,8 @@ private:
   std::vector<std::string> query;
 public:
 
+  QueryLogEntry() : rows_sent(0), rows_examined(0), query_time(0) {}
+
   double getQueryTime() { return query_time; }
 
   void add_line(const std::string &s, tbb::atomic<uint64_t> *queries);
