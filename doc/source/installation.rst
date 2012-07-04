@@ -19,6 +19,7 @@ You will need the following packages to build percona-playback:
  * libcloog-ppl0 (if using GCC 4.6)
  * libmysqlclient-dev (MySQL Client Libraries) [#n-1]_
  * libdrizzle-dev
+ * pkg-config
 
 Building
 --------
