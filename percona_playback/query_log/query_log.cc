@@ -319,9 +319,11 @@ public:
       options.add_options()
       ("query-log-file",
        po::value<std::string>(), _("Query log file"))
+/* Disabled for 0.3 until we have something more universal.
       ("query-log-read-count",
        po::value<unsigned int>(&read_count)->default_value(1),
        _("Query log file read count (how many times to read query log file)"))
+*/
       ("query-log-set-timestamp",
        po::value<bool>(&g_run_set_timestamp)->
           default_value(false)->
@@ -345,7 +347,7 @@ public:
   {
     if (!active &&
         (vm.count("query-log-file") ||
-         !vm["query-log-read-count"].defaulted() ||
+//         !vm["query-log-read-count"].defaulted() ||
          !vm["query-log-preserve-query-time"].defaulted() ||
          !vm["query-log-set-timestamp"].defaulted()))
     {

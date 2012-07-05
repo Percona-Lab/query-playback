@@ -142,7 +142,9 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   general_options.add_options()
     ("help",    _("Display this message"))
     ("version", _("Display version information"))
+    /* We will re-enable this "soon"
     ("loop", po::value<unsigned int>(), _("Do the whole run N times"))
+    */
     ;
 
   po::options_description db_options("Database Options");
