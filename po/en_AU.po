@@ -7,50 +7,112 @@ msgid ""
 msgstr ""
 "Project-Id-Version: percona-playback\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-07-03 07:56+0000\n"
+"POT-Creation-Date: 2012-07-05 00:34+0000\n"
 "PO-Revision-Date: 2012-07-04 02:17+0000\n"
 "Last-Translator: Stewart Smith <stewart@flamingspork.com>\n"
 "Language-Team: English (Australia) <en_AU@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-07-04 05:24+0000\n"
+"X-Launchpad-Export-Date: 2012-07-05 05:22+0000\n"
 "X-Generator: Launchpad (build 15544)\n"
 
-#: ../percona_playback/percona_playback.cc:93
+#: ../percona_playback/percona_playback.cc:81
+msgid "Version: "
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:97
 msgid "Bugs: "
 msgstr "Bugs: "
 
-#: ../percona_playback/percona_playback.cc:94
+#: ../percona_playback/percona_playback.cc:98
 msgid "Loaded plugins: "
 msgstr "Loaded plugins: "
 
-#: ../percona_playback/percona_playback.cc:102
+#: ../percona_playback/percona_playback.cc:106
 msgid "Loaded DB Plugins: "
 msgstr "Loaded DB Plugins: "
 
-#: ../percona_playback/percona_playback.cc:113
+#: ../percona_playback/percona_playback.cc:117
 msgid "Selected DB Plugin: "
 msgstr "Selected DB Plugin: "
 
-#: ../percona_playback/percona_playback.cc:115
+#: ../percona_playback/percona_playback.cc:119
 msgid "Loaded Input Plugins: "
 msgstr "Loaded Input Plugins: "
 
-#: ../percona_playback/percona_playback.cc:127
+#: ../percona_playback/percona_playback.cc:131
 msgid "Selected Input Plugin: "
 msgstr "Selected Input Plugin: "
 
-#: ../percona_playback/percona_playback.cc:137
+#: ../percona_playback/percona_playback.cc:141
 msgid "General options"
 msgstr "General options"
 
-#: ../percona_playback/percona_playback.cc:194
+#: ../percona_playback/percona_playback.cc:143
+msgid "Display this message"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:144
+msgid "Display version information"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:145
+msgid "Do the whole run N times"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:150
+msgid "Database plugin"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:151
+msgid "Input plugin"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:153
+msgid ""
+"Queue depth for DB executor (thread). The larger this number the greater the "
+"played-back workload can deviate from the original workload as some "
+"connections may be up to queue-depth behind. (default 1)"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:159
+msgid "USAGE: "
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:159
+msgid " [General Options]"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:183
+#, c-format
+msgid "Invalid DB Plugin\n"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:198
 #, c-format
 msgid "Invalid DB plugin\n"
 msgstr "Invalid DB plugin\n"
 
-#: ../percona_playback/percona_playback.cc:223
+#: ../percona_playback/percona_playback.cc:216
+#, c-format
+msgid "Invalid Input Plugin\n"
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:227
 #, c-format
 msgid "Invalid Input plugin\n"
 msgstr "Invalid Input plugin\n"
+
+#: ../percona_playback/percona_playback.cc:293
+msgid "Database Plugin: "
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:294
+msgid " Running..."
+msgstr ""
+
+#: ../percona_playback/percona_playback.cc:315
+#, c-format
+msgid "Run %u of %u\n"
+msgstr ""
