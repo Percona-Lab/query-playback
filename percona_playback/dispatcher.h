@@ -35,8 +35,7 @@ public:
   boost::shared_ptr<DBThreadState>
     get_thread_state(uint64_t thread_id,
                      boost::function1<void, DBThread *>
-                      run_on_db_thread_create=
-                        boost::function1<void, DBThread *>());
+                      run_on_db_thread_create);
   void dispatch(QueryEntryPtr query_entry);
   bool finish_and_wait(uint64_t thread_id);
   void finish_all_and_wait();

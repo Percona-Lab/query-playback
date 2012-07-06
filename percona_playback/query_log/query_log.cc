@@ -165,7 +165,7 @@ void QueryLogEntry::execute(DBThread *t)
     expected_result.setError(0);
 
     boost::posix_time::time_duration expected_duration=
-      boost::posix_time::microseconds(query_time * 1000000);
+      boost::posix_time::microseconds(long(query_time * 1000000));
     expected_result.setDuration(expected_duration);
 
     boost::posix_time::ptime start_time;
