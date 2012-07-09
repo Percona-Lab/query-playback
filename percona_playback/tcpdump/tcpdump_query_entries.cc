@@ -28,8 +28,8 @@ void
 TcpdumpQueryEntry::execute(DBThread *t)
 {
   QueryResult expected_result;
-  boost::posix_time::ptime start_time;
-  boost::posix_time::ptime end_time;
+  timeval start_time;
+  timeval end_time;
   boost::shared_ptr<DBThreadState> thr_state;
 
   assert(t);
@@ -71,13 +71,16 @@ TcpdumpQueryEntry::execute(DBThread *t)
 
   last_query_info.result.clear();
 
-  start_time= boost::posix_time::microsec_clock::universal_time();
+  gettimeofday(&start_time, NULL);
   t->execute_query(query, &last_query_info.result, expected_result);
-  end_time= boost::posix_time::microsec_clock::universal_time();
+  gettimeofday(&end_time, NULL);
 
-  boost::posix_time::time_period duration(start_time, end_time);
-  last_query_info.result.setDuration(duration.length());
+  last_query_info.result.setDuration(
+      boost::posix_time::microseconds(
+        end_time.tv_sec*1000000 + end_time.tv_usec -
+        start_time.tv_sec*1000000 - start_time.tv_usec));
   last_query_info.begin_pcap_timestamp= pcap_timestamp;
+  last_query_info.end_timestamp= end_time;
   last_query_info.query= query;
 }
 
@@ -85,10 +88,14 @@ void
 TcpdumpResultEntry::execute(DBThread *t)
 {
   timeval query_execution_time;
+  timeval current_time;
+  timeval tv_btw_query_end_and_result_start;
+  boost::posix_time::time_duration total_duration;
+
   boost::shared_ptr<DBThreadState> thr_state;
-  
+
   assert(t);
-  
+
   thr_state= t->get_state();
 
   assert(thr_state.get());
@@ -106,11 +113,22 @@ TcpdumpResultEntry::execute(DBThread *t)
       query_execution_time.tv_usec +
       query_execution_time.tv_sec*1000000));
 
+  gettimeofday(&current_time, NULL);
+  timersub(&current_time,
+           &last_query_info.end_timestamp,
+           &tv_btw_query_end_and_result_start);
+
+  total_duration=
+    last_query_info.result.getDuration() +
+      boost::posix_time::microseconds(
+        tv_btw_query_end_and_result_start.tv_sec*1000000 +
+        tv_btw_query_end_and_result_start.tv_usec);
+
   if (g_tcpdump_mode == TCPDUMP_MODE_ACCURATE &&
-      (expected_result.getDuration() > last_query_info.result.getDuration()))
+      (expected_result.getDuration() > total_duration))
   {
     boost::posix_time::time_duration us_sleep_time=
-      expected_result.getDuration() - last_query_info.result.getDuration();
+      expected_result.getDuration() - total_duration;
 
     usleep(us_sleep_time.total_microseconds());
   }
