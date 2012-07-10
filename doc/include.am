@@ -6,6 +6,16 @@ EXTRA_DIST+=	doc/make.bat \
 		doc/source/_static/percona_favicon.ico \
 		doc/source/conf.py \
 		${top_srcdir}/doc/source/*.rst \
+		${top_srcdir}/doc/source/*/*.rst \
+		${top_srcdir}/doc/source/*/*/*.rst \
+		doc/source/_static/percona_favicon.ico \
+		doc/source/_static/pp_intro.png \
+		${top_srcdir}/doc/source/percona-theme/static/*.png \
+		${top_srcdir}/doc/source/percona-theme/static/*.js \
+		${top_srcdir}/doc/source/percona-theme/static/*.css \
+		${top_srcdir}/doc/source/percona-theme/static/*.css_t \
+		${top_srcdir}/doc/source/percona-theme/*.html \
+		${top_srcdir}/doc/source/percona-theme/theme.conf \
 		doc/source/percona_favicon.ico
 
 # Makefile for Sphinx documentation
