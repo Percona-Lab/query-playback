@@ -1,0 +1,9 @@
+====================
+Percona Playback 0.3
+====================
+
+This release should be considered Alpha quality.
+
+Add basic tcpdump playback and basic documentation.
+Build and test works on increased number of platforms.
+

@@ -1,0 +1,7 @@
+====================
+Percona Playback 0.2
+====================
+
+This release should be considered Alpha quality.
+
+Added --preserve-query-time to ensure that each query takes at least Query_time (from slow query log) to execute by injecting a usleep() call afterwards if needed.
