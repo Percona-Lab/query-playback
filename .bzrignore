@@ -5,8 +5,8 @@ Changelog
 .deps
 .dirstamp
 percona_playback/version.h
-docs/html
-docs/header.html
+doxygen/html
+doxygen/header.html
 percona_playback/plugin_load_list.h
 *.lo
 config/compile
@@ -40,7 +40,7 @@ percona_playback/test/basic-queue-depth
 percona_playback/test/crashme-slow
 percona_playback/test/sqlbench-transactions-slow
 percona_playback/test/sysbench-slow
-doc/build/*
+docs/build/*
 m4/libtool.m4
 m4/ltoptions.m4
 m4/ltversion.m4
@@ -51,4 +51,3 @@ percona_playback/test/tcpdump_fragmented_packet
 percona_playback/test/tcpdump_multiple_connections
 percona_playback/test/tcpdump_stress_test
 percona_playback/test/tcpdump_without_handshake
-!doc/Makefile
