@@ -151,7 +151,7 @@ bin_percona_playback_SOURCES = bin/percona_playback.cc
 bin_percona_playback_LDADD= $(BOOST_LIBS) $(LDADD) $(LTLIBTBB) $(MYSQL_LIBS) $(pandora_plugin_libs) $(PANDORA_DYNAMIC_LDADDS)
 
 include doxygen/include.am
-include doc/include.am
+include docs/include.am
 
 clean-local:
 	rm -Rf $(SPHINX_BUILDDIR)
