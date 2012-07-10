@@ -92,9 +92,13 @@ rst_prolog = '''
 
 .. |xtrabackup|  replace:: :program:`xtrabackup`
 
+.. |percona-playback|  replace:: :program:`percona-playback`
+
 .. |innobackupex|  replace:: :program:`innobackupex`
 
 .. |XtraBackup|  replace:: *XtraBackup*
+
+.. |Percona Playback|  replace:: *Percona Playback*
 
 .. |Percona Server|  replace:: *Percona Server*
 
@@ -105,6 +109,8 @@ rst_prolog = '''
 .. |Drizzle|  replace:: *Drizzle*
 
 .. |MariaDB|  replace:: *MariaDB*
+
+.. |tcpdump|  replace:: :term:`tcpdump`
 
 
 '''
@@ -120,7 +126,7 @@ extlinks = {'bug': ('https://bugs.launchpad.net/percona-playback/+bug/%s',
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'percona-theme'
+html_theme = 'percona-theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

@@ -4,7 +4,20 @@
  Percona Playback User Manual
 ==============================
 
+Plugins
+----------
+
 .. toctree::
    :maxdepth: 1
-   :hidden:
+
+   plugins/tcpdump_plugin
+   plugins/query_log_plugin
+
+References
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   pp_option_reference
 
