@@ -3,20 +3,20 @@
 # All paths should be given relative to the root
 
 EXTRA_DIST+=	docs/make.bat \
-		docs/source/_static/percona_favicon.ico \
-		docs/source/conf.py \
-		${top_srcdir}/docs/source/*.rst \
-		${top_srcdir}/docs/source/*/*.rst \
-		${top_srcdir}/docs/source/*/*/*.rst \
-		docs/source/_static/percona_favicon.ico \
-		docs/source/_static/pp_intro.png \
-		${top_srcdir}/docs/source/percona-theme/static/*.png \
-		${top_srcdir}/docs/source/percona-theme/static/*.js \
-		${top_srcdir}/docs/source/percona-theme/static/*.css \
-		${top_srcdir}/docs/source/percona-theme/static/*.css_t \
-		${top_srcdir}/docs/source/percona-theme/*.html \
-		${top_srcdir}/docs/source/percona-theme/theme.conf \
-		docs/source/percona_favicon.ico
+		docs/_static/percona_favicon.ico \
+		docs/conf.py \
+		${top_srcdir}/docs/*.rst \
+		${top_srcdir}/docs/*/*.rst \
+		${top_srcdir}/docs/*/*/*.rst \
+		docs/_static/percona_favicon.ico \
+		docs/_static/pp_intro.png \
+		${top_srcdir}/docs/percona-theme/static/*.png \
+		${top_srcdir}/docs/percona-theme/static/*.js \
+		${top_srcdir}/docs/percona-theme/static/*.css \
+		${top_srcdir}/docs/percona-theme/static/*.css_t \
+		${top_srcdir}/docs/percona-theme/*.html \
+		${top_srcdir}/docs/percona-theme/theme.conf \
+		docs/percona_favicon.ico
 
 # Makefile for Sphinx documentation
 #
@@ -28,7 +28,7 @@ SPHINX_BUILDDIR      = ${top_builddir}/docs/build
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d $(SPHINX_BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) ${top_srcdir}/docs/source
+ALLSPHINXOPTS   = -d $(SPHINX_BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) ${top_srcdir}/docs/
 
 .PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest doc sphinx-docs
 

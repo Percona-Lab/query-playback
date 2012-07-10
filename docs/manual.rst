@@ -5,13 +5,11 @@
 ==============================
 
 Plugins
-----------
-
+-------
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   plugins/tcpdump_plugin
-   plugins/query_log_plugin
+   plugins/list
 
 References
 ----------
