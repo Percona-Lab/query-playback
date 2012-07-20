@@ -1,0 +1,5 @@
+percona-playback (0.4-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Ignacio Nin <ignacio.nin@percona.com>  Fri, 20 Jul 2012 00:24:10 -0400
