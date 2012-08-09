@@ -50,7 +50,7 @@ TcpDumpParserPlugin::getProgramOptions()
   options.add_options()
     ("tcpdump-file",
      boost::program_options::value<std::string>(&g_tcpdump_file_name),
-     _("Tcpdump file name"))
+     _("Tcpdump file name (produced with \"tcpdump -w file\")"))
     ("tcpdump-port",
      boost::program_options::value<uint16_t>(&g_tcpdump_port)
        ->default_value(3306),
