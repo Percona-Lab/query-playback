@@ -1,0 +1,26 @@
+This work was packaged for Debian by:
+
+    Ignacio Nin <ignacio.nin@percona.com> on Fri, 20 Jul 2012 00:24:10 -0400
+
+It was downloaded from:
+
+    lp:percona-playback
+
+Upstream Author(s):
+
+    Percona Inc. <mysql-dev@percona.com>
+
+Copyright:
+
+    Copyright (C) 2012 Percona Inc.
+
+License:
+
+    GPLv22
+
+The Debian packaging is:
+
+    Copyright (C) 2012 Ignacio Nin <ignacio.nin@percona.com>
+
+and is licensed under the GPL version 3,
+see "/usr/share/common-licenses/GPL-3".

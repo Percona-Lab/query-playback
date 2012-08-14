@@ -1,0 +1,34 @@
+Source: percona-playback
+Priority: extra
+Maintainer: Ignacio Nin <ignacio.nin@percona.com>
+Build-Depends: debhelper (>= 7.0.50~), autoconf, automake, libtool, gettext, intltool,
+	libdrizzle-dev, libpcap-dev, libtbb-dev, libmysqlclient-dev,
+	libboost-program-options-dev, libboost-thread-dev, pkg-config
+Standards-Version: 3.8.4
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/percona-playback.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/percona-playback.git;a=summary
+
+Package: percona-playback-dev
+Section: libdevel
+Architecture: any
+Depends: percona-playback (= ${binary:Version})
+Description: A tool for replaying captured database server load
+ Percona Playback is a tool for replaying the captured load of one database
+ server against another in the most realistic way possible. Captured load can
+ come in the form of MySQL slow query logs or tcpdump capture.
+ It's multithreaded, modular and configurable to allow for flexibility and
+ future extension.
+
+Package: percona-playback
+Section: database
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+	libdrizzle, libpcap, libtbb, mysql, libboost-program-options, libboost-thread
+Description: A tool for replaying captured database server load
+ Percona Playback is a tool for replaying the captured load of one database
+ server against another in the most realistic way possible. Captured load can
+ come in the form of MySQL slow query logs or tcpdump capture.
+ It's multithreaded, modular and configurable to allow for flexibility and
+ future extension.
