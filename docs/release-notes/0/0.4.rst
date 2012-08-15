@@ -1,0 +1,14 @@
+====================
+Percona Playback 0.4
+====================
+
+This release should be considered Alpha quality.
+
+Changes since 0.3
+=================
+
+  * Produce binary packages for CentOS/RHEL and Debian/Ubuntu.
+  * Initial libdrizzle based database client (can be used instead of libmysqlclient).
+  * Fix :bug:`1021577`, improve accurate mode of tcpdump playback.
+  * We now build on CentOS/RHEL 5 (with appropriate libraries)
+  * Documentation updates
