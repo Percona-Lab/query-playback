@@ -8,6 +8,9 @@ The plugin has two modes of work:
  * **accurate** - preserves queries execution time and pauses between queries, it's possible to playback the same load that was recorded on production with some accuracy.
  * **fast** - play queries as fast as possible.
 
+.. note::
+ The |tcpdump| plugin can parse packets only on raw format. The "-w" option must be used for |tcpdump| during capturing to get input files for the tool. 
+
 The example of usage:
 Playback percona_playback/test/tcpdump_accuracy.dump on MySQL server in *accurate* mode and queries queue limit of 10 000 elements: :: 
 

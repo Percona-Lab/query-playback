@@ -51,3 +51,7 @@ percona_playback/test/tcpdump_fragmented_packet
 percona_playback/test/tcpdump_multiple_connections
 percona_playback/test/tcpdump_stress_test
 percona_playback/test/tcpdump_without_handshake
+docs/build/
+docs/plugins/
+po/POTFILES
+
