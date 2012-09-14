@@ -30,7 +30,7 @@ License:        GPL
 URL:            http://www.percona.com/
 Source:         percona-playback-%{version}.tar.gz
 Group:          Applications/Databases
-BuildRequires:  autoconf automake libtool libdrizzle-devel gettext-devel libpcap-devel tbb-devel mysql-devel intltool %{boost_req} pkgconfig
+BuildRequires:  autoconf automake libtool libdrizzle-devel gettext-devel libpcap-devel tbb-devel mysql mysql-devel intltool %{boost_req} pkgconfig
 Requires:       libdrizzle libpcap tbb mysql %{boost_runreq}
 BuildRoot:	%{_tmppath}/%{name}-%{version}-build
 
