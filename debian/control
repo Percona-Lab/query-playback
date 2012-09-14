@@ -6,9 +6,7 @@ Build-Depends: debhelper (>= 7.0.50~), autoconf, automake, libtool, gettext, int
 	libboost-program-options-dev, libboost-thread-dev, pkg-config
 Standards-Version: 3.8.4
 Section: libs
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/percona-playback.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/percona-playback.git;a=summary
+Homepage: http://www.percona.com/
 
 Package: percona-playback-dev
 Section: libdevel
