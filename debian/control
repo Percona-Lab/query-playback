@@ -2,7 +2,7 @@ Source: percona-playback
 Priority: extra
 Maintainer: Ignacio Nin <ignacio.nin@percona.com>
 Build-Depends: debhelper (>= 7.0.50~), autoconf, automake, libtool, gettext, intltool,
-	libdrizzle-dev, libpcap-dev, libtbb-dev, libmysqlclient-dev,
+	libdrizzle-dev, libpcap-dev, libtbb-dev, libmysqlclient16-dev,
 	libboost-program-options-dev, libboost-thread-dev, pkg-config
 Standards-Version: 3.8.4
 Section: libs
@@ -25,7 +25,8 @@ Package: percona-playback
 Section: database
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
-	libdrizzle, libpcap, libtbb, mysql, libboost-program-options, libboost-thread
+	libdrizzle0, libpcap0.8, libtbb2, libmysqlclient16,
+        libboost-program-options1.42.0, libboost-thread1.42.0
 Description: A tool for replaying captured database server load
  Percona Playback is a tool for replaying the captured load of one database
  server against another in the most realistic way possible. Captured load can
