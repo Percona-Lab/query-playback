@@ -61,7 +61,9 @@ public:
       nr_entries(entries_),
       nr_queries(queries_),
       input_file(input_file_),
-      run_count(run_count_)
+      run_count(run_count_),
+      next_line(NULL),
+      next_len(0)
   {};
 
   void* operator() (void*);
@@ -70,6 +72,8 @@ private:
   tbb::atomic<uint64_t> *nr_queries;
   FILE *input_file;
   unsigned int run_count;
+  char *next_line;
+  ssize_t next_len;
 };
 
 void* dispatch(void *input_);
@@ -85,7 +89,14 @@ void* ParseQueryLogFunc::operator() (void*)  {
   size_t buflen = 0;
   ssize_t len;
 
-  if ((len= getline(&line, &buflen, input_file)) == -1)
+  if (next_line)
+  {
+    line= next_line;
+    len= next_len;
+    next_line= NULL;
+    next_len= 0;
+  }
+  else if ((len= getline(&line, &buflen, input_file)) == -1)
   {
     delete entries;
     return NULL;
@@ -108,7 +119,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
     if (p[0] != '#' && strncmp(p, "Tcp port: ", strlen("Tcp port: "))==0)
       goto next;
 
-    if (p[0] != '#' && strncmp(p, "Time    ", strlen("Time    "))==0)
+    if (p[0] != '#' && strncmp(p, "Time Id Command Argument", strlen("Time Id Command Argument"))==0)
       goto next;
 
     /*
@@ -125,7 +136,27 @@ void* ParseQueryLogFunc::operator() (void*)  {
       (*this->nr_entries)++;
     }
 
-    tmp_entry->add_line(std::string(line), nr_queries);
+    if (p[0] == '#')
+      tmp_entry->parse_metadata(std::string(line));
+    else
+    {
+      (*nr_queries)++;
+      tmp_entry->add_query_line(std::string(line));
+      do {
+	if ((len= getline(&line, &buflen, input_file)) == -1)
+	{
+	  break;
+	}
+
+	if (line[0] == '#')
+	{
+	  next_line= line;
+	  next_len= len;
+	  break;
+	}
+	tmp_entry->add_query_line(std::string(line));
+      } while(true);
+    }
   next:
     if (count > 100)
     {
@@ -133,10 +164,11 @@ void* ParseQueryLogFunc::operator() (void*)  {
       //      fseek(input_file,-len, SEEK_CUR);
       break;
     }
-    if ((len= getline(&line, &buflen, input_file)) == -1)
+    if (!next_line && ((len= getline(&line, &buflen, input_file)) == -1))
     {
       break;
     }
+    next_line= NULL;
     p= line;
   }
 
@@ -150,61 +182,75 @@ void QueryLogEntry::execute(DBThread *t)
   std::vector<std::string>::iterator it;
   QueryResult r;
 
-  for ( it=query.begin() ; it < query.end(); ++it )
+  if(g_run_set_timestamp)
   {
-    const std::string timestamp_query("SET timestamp=");
-    if(!g_run_set_timestamp
-       && (*it).compare(0, timestamp_query.length(), timestamp_query) == 0)
-      continue;
-    /*          std::cerr << "thread " << getThreadId()
-		<< " running query " << (*it) << std::endl;*/
-
     QueryResult expected_result;
-    expected_result.setRowsSent(rows_sent);
-    expected_result.setRowsExamined(rows_examined);
+    QueryResult discarded_timestamp_result;
+    expected_result.setRowsSent(0);
+    expected_result.setRowsExamined(0);
     expected_result.setError(0);
+    t->execute_query(set_timestamp_query, &discarded_timestamp_result,
+		     expected_result);
+  }
 
-    boost::posix_time::time_duration expected_duration=
-      boost::posix_time::microseconds(long(query_time * 1000000));
-    expected_result.setDuration(expected_duration);
+  QueryResult expected_result;
+  expected_result.setRowsSent(rows_sent);
+  expected_result.setRowsExamined(rows_examined);
+  expected_result.setError(0);
 
-    boost::posix_time::ptime start_time;
-    start_time= boost::posix_time::microsec_clock::universal_time();
-    t->execute_query(*it, &r, expected_result);
+  boost::posix_time::time_duration expected_duration=
+    boost::posix_time::microseconds(long(query_time * 1000000));
+  expected_result.setDuration(expected_duration);
 
-    boost::posix_time::ptime end_time;
-    end_time= boost::posix_time::microsec_clock::universal_time();
+  boost::posix_time::ptime start_time;
+  start_time= boost::posix_time::microsec_clock::universal_time();
 
-    boost::posix_time::time_period duration(start_time, end_time);
-    r.setDuration(duration.length());
+  t->execute_query(query, &r, expected_result);
 
-    if (g_preserve_query_time
-        && expected_duration > duration.length())
-    {
-      boost::posix_time::time_duration us_sleep_time=
-        expected_duration - duration.length();
+  boost::posix_time::ptime end_time;
+  end_time= boost::posix_time::microsec_clock::universal_time();
 
-      usleep(us_sleep_time.total_microseconds());
-    }
+  boost::posix_time::time_period duration(start_time, end_time);
+  r.setDuration(duration.length());
 
-    BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
-		  percona_playback::PluginRegistry::singleton().report_plugins)
-    {
-      pp.second->query_execution(getThreadId(),
-				 (*it),
-				 expected_result,
-				 r);
-    }
+  if (g_preserve_query_time
+      && expected_duration > duration.length())
+  {
+    boost::posix_time::time_duration us_sleep_time=
+      expected_duration - duration.length();
+
+    usleep(us_sleep_time.total_microseconds());
+  }
+
+  BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
+		percona_playback::PluginRegistry::singleton().report_plugins)
+  {
+    pp.second->query_execution(getThreadId(),
+			       query,
+			       expected_result,
+			       r);
   }
 }
 
-void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *nr_queries)
+void QueryLogEntry::add_query_line(const std::string &s)
 {
+  const std::string timestamp_query("SET timestamp=");
+  if(!g_run_set_timestamp
+     && s.compare(0, timestamp_query.length(), timestamp_query) == 0)
+    set_timestamp_query= s;
+  else
+    query.append(s);
+}
+
+bool QueryLogEntry::parse_metadata(const std::string &s)
+{
+  bool r= false;
   {
     size_t location= s.find("Thread_id: ");
     if (location != std::string::npos)
     {
       thread_id = strtoull(s.c_str() + location + strlen("Thread_Id: "), NULL, 10);
+      r= true;
     }
   }
 
@@ -213,6 +259,7 @@ void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *nr_que
     if (location != std::string::npos)
     {
       rows_sent = strtoull(s.c_str() + location + strlen("Rows_sent: "), NULL, 10);
+      r= true;
     }
   }
 
@@ -221,6 +268,7 @@ void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *nr_que
     if (location != std::string::npos)
     {
       rows_sent = strtoull(s.c_str() + location + strlen("Rows_examined: "), NULL, 10);
+      r= true;
     }
   }
 
@@ -230,16 +278,17 @@ void QueryLogEntry::add_line(const std::string &s, tbb::atomic<uint64_t> *nr_que
     if (location != std::string::npos)
     {
       query_time= strtod(s.c_str() + location + qt_str.length(), NULL);
+      r= true;
     }
   }
 
   if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
-    info.push_back(s);
-  else
   {
-    query.push_back(s);
-    (*nr_queries)++;
+    query.append(s);
+    r= true;
   }
+
+  return r;
 }
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;

@@ -42,30 +42,29 @@ private:
   uint64_t rows_examined;
   double query_time;
   std::vector<std::string> info;
-  std::vector<std::string> query;
+  std::string set_timestamp_query;
+  std::string query;
 public:
 
   QueryLogEntry() : rows_sent(0), rows_examined(0), query_time(0) {}
 
   double getQueryTime() { return query_time; }
 
-  void add_line(const std::string &s, tbb::atomic<uint64_t> *queries);
+  void add_query_line(const std::string &s);
+  bool parse_metadata(const std::string &s);
 
-  std::vector<std::string> *queries() {return &query; };
+  const std::string& getQuery() {return query; };
 
   void display()
   {
     std::vector<std::string>::iterator it;
 
-    for ( it=query.begin() ; it < query.end(); ++it )
-      std::cerr << "    " << *it << std::endl;
+    std::cerr << "    " << query << std::endl;
   }
 
   bool is_quit()
   {
-    return query.size() &&
-      (query[0].compare(0, 30, "# administrator command: Quit;") == 0
-       || (query.size()>1 && query[1].compare(0,30,"# administrator command: Quit;") == 0));
+    return (query.compare(0, 30, "# administrator command: Quit;") == 0);
   }
 
   void execute(DBThread *t);

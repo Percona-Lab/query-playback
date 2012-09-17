@@ -78,7 +78,7 @@ int main(int argc, char **argv)
   assert(duration.length().total_microseconds() > 250000);
 
   assert(r->err == 0);
-  assert(r->n_queries == 4);
+  assert(r->n_queries == 2);
   assert(r->n_log_entries = 2);
 
   percona_playback_destroy(&the_percona_playback);
