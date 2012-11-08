@@ -83,6 +83,7 @@ libpercona_playback_la_DEPENDENCIES = ${noinst_LTLIBRARIES} $(pandora_plugin_lib
 
 check_PROGRAMS += \
   percona_playback/test/basic \
+  percona_playback/test/basic-stdin \
   percona_playback/test/basic-multiline \
   percona_playback/test/basic-queue-depth \
   percona_playback/test/crashme-slow \
@@ -97,6 +98,7 @@ check_PROGRAMS += \
   percona_playback/test/help
 
 percona_playback_test_basic_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_basic_stdin_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_basic_multiline_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_basic_queue_depth_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_crashme_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
@@ -114,6 +116,9 @@ percona_playback_test_help_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 percona_playback_test_basic_SOURCES= percona_playback/test/basic.cc
 percona_playback_test_basic_LDADD= $(LDADD) $(MYSQL_LIBS)
+
+percona_playback_test_basic_stdin_SOURCES= percona_playback/test/basic-stdin.cc
+percona_playback_test_basic_stdin_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 percona_playback_test_basic_multiline_SOURCES= percona_playback/test/basic-multiline.cc
 percona_playback_test_basic_multiline_LDADD= $(LDADD) $(MYSQL_LIBS)
