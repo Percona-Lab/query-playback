@@ -39,7 +39,7 @@ class LibDrizzleDBThread : public DBThread
 
  public:
   LibDrizzleDBThread(uint64_t _thread_id, LibDrizzleOptions *opt) :
-    DBThread(_thread_id),
+    DBThread(_thread_id, boost::shared_ptr<Queries>(new Queries())),
     driz(NULL),
     options(opt)
   {

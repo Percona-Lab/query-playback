@@ -16,6 +16,7 @@
 #ifndef PERCONA_PLAYBACK_DB_THREAD_H
 #define PERCONA_PLAYBACK_DB_THREAD_H
 
+#include <memory>
 #include "percona_playback/visibility.h"
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
@@ -49,10 +50,12 @@ private:
 
 public:
   typedef tbb::concurrent_bounded_queue<QueryEntryPtr> Queries;
-  Queries queries;
+  boost::shared_ptr<Queries> queries;
 
-  DBThread(uint64_t _thread_id) : thread_id(_thread_id)  {
-    queries.set_capacity(g_db_thread_queue_depth);
+  DBThread(uint64_t _thread_id,
+	   boost::shared_ptr<Queries> _queries) :
+	  thread_id(_thread_id), queries(_queries)  {
+    queries->set_capacity(g_db_thread_queue_depth);
   }
 
   virtual ~DBThread() {}

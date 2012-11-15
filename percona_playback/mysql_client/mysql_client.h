@@ -13,7 +13,8 @@ class MySQLDBThread : public DBThread
 
  public:
   MySQLDBThread(uint64_t _thread_id, MySQLOptions *opt) :
-    DBThread(_thread_id),
+    DBThread(_thread_id,
+	     boost::shared_ptr<Queries>(new Queries())),
     options(opt)
   {
   }

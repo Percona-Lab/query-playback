@@ -28,7 +28,7 @@ void DBThread::run()
   QueryEntryPtr query;
   while (true)
   {
-    queries.pop(query);
+    queries->pop(query);
 
     if (query->is_shutdown())
       break;

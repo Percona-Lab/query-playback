@@ -20,8 +20,9 @@
 class NULLDBThread : public DBThread
 {
  public:
-  NULLDBThread(uint64_t _thread_id) : DBThread(_thread_id) {
-  }
+  NULLDBThread(uint64_t _thread_id) :
+	  DBThread(_thread_id,
+		   boost::shared_ptr<Queries>(new Queries())) {}
 
   void connect() {};
   void disconnect() {};

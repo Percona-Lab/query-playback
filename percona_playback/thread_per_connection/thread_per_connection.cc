@@ -73,7 +73,7 @@ ThreadPerConnectionDispatcher::dispatch(QueryEntryPtr query_entry)
       a->second= db_thread;
       db_thread->start_thread();
     }
-    a->second->queries.push(query_entry);
+    a->second->queries->push(query_entry);
   }
 }
 
@@ -93,7 +93,7 @@ ThreadPerConnectionDispatcher::finish_and_wait(uint64_t thread_id)
   if (!db_thread)
     return false;
 
-  db_thread->queries.push(QueryEntryPtr(new FinishEntry()));
+  db_thread->queries->push(QueryEntryPtr(new FinishEntry()));
   db_thread->join();
 
   delete db_thread;
@@ -116,7 +116,7 @@ ThreadPerConnectionDispatcher::finish_all_and_wait()
     }
     executors.erase(thread_id);
 
-    t->queries.push(shutdown_command);
+    t->queries->push(shutdown_command);
     t->join();
 
     delete t;

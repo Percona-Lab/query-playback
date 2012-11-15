@@ -110,7 +110,7 @@ ConnectionState::ProcessMysqlPkts(const u_char      *pkts,
 void
 ConnectionState::ProcessFinishConnection()
 {
-  db_thread->queries.push(QueryEntryPtr(new FinishEntry()));
+  db_thread->queries->push(QueryEntryPtr(new FinishEntry()));
 }
 
 PktResult
@@ -311,7 +311,7 @@ ConnectionState::DispatchQuery(const timeval        &ts,
     query_entry(new TcpdumpQueryEntry(ts,
                                       query,
                                       addr_port));
-  db_thread->queries.push(query_entry);
+  db_thread->queries->push(query_entry);
 }
 
 void
@@ -320,6 +320,6 @@ ConnectionState::DispatchResult(const timeval    &ts,
 {
   boost::shared_ptr<TcpdumpResultEntry> 
     result_entry(new TcpdumpResultEntry(addr_port, ts, last_query_result));
-  db_thread->queries.push(result_entry);
+  db_thread->queries->push(result_entry);
 }
 
