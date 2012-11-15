@@ -16,14 +16,28 @@
 #include "config.h"
 
 #include <percona_playback/db_thread.h>
+#include "percona_playback/query_result.h"
 
 #include <assert.h>
 
 #include <boost/bind.hpp>
 
-void DBThread::run()
+extern std::string g_session_init_query;
+
+void DBThread::connect_and_init_session()
 {
   connect();
+  if (!g_session_init_query.empty())
+  {
+    QueryResult r;
+    QueryResult er;
+    execute_query(g_session_init_query, &r, er);
+  }
+}
+
+void DBThread::run()
+{
+  connect_and_init_session();
 
   QueryEntryPtr query;
   while (true)
@@ -36,7 +50,7 @@ void DBThread::run()
     if (query->is_quit())
     {
       disconnect();
-      connect();
+      connect_and_init_session();
       continue;
     }
 

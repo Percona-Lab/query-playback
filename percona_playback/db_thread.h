@@ -72,6 +72,8 @@ public:
     thread.join();
   }
 
+  void connect_and_init_session();
+
   virtual void connect()= 0;
 
   virtual void disconnect()= 0;
