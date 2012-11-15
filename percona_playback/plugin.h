@@ -20,6 +20,9 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
+#include "percona_playback/query_entry.h"
 #include <percona_playback/visibility.h>
 #include <percona_playback/version.h>
 
@@ -31,6 +34,7 @@ namespace boost {
 }
 
 class DBThread;
+class DBThreadState;
 class QueryResult;
 class percona_playback_run_result;
 
@@ -102,6 +106,24 @@ class InputPlugin : public plugin
 
 };
 
+class DispatcherPlugin : public plugin
+{
+ public:
+  std::string name;
+
+  DispatcherPlugin(const std::string &_name) : name(_name) {}
+
+  virtual
+  boost::shared_ptr<DBThreadState>
+    get_thread_state(uint64_t thread_id,
+                     boost::function1<void, DBThread *>
+                      run_on_db_thread_create)= 0;
+  virtual void dispatch(QueryEntryPtr query_entry)= 0;
+  virtual bool finish_and_wait(uint64_t thread_id)= 0;
+  virtual void finish_all_and_wait()= 0;
+
+};
+
 class PluginRegistry
 {
  public:
@@ -122,6 +144,9 @@ class PluginRegistry
   typedef std::map<std::string, InputPlugin*> InputPluginMap;
   typedef std::pair<std::string, InputPlugin*> InputPluginPair;
 
+  typedef std::map<std::string, DispatcherPlugin*> DispatcherPluginMap;
+  typedef std::pair<std::string, DispatcherPlugin*> DispatcherPluginPair;
+
   typedef std::map<std::string, plugin*> PluginMap;
   typedef std::pair<std::string, plugin*> PluginPair;
 
@@ -129,6 +154,7 @@ class PluginRegistry
   DBClientPluginMap dbclient_plugins;
   ReportPluginMap report_plugins;
   InputPluginMap input_plugins;
+  DispatcherPluginMap dispatcher_plugins;
 
   void add(const std::string &name, plugin* plugin_object)
   {
@@ -152,6 +178,12 @@ class PluginRegistry
   {
     input_plugins.insert(InputPluginPair(name, input_plugin));
     all_plugins.insert(PluginPair(name, input_plugin));
+  }
+
+  void add(const std::string &name, DispatcherPlugin* dispatcher_plugin)
+  {
+    dispatcher_plugins.insert(DispatcherPluginPair(name, dispatcher_plugin));
+    all_plugins.insert(PluginPair(name, dispatcher_plugin));
   }
 
 };

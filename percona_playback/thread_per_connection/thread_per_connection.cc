@@ -12,18 +12,37 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  * END LICENSE */
-#include "percona_playback/dispatcher.h"
-#include "percona_playback/db_thread.h"
+
 #include "percona_playback/plugin.h"
+#include "percona_playback/db_thread.h"
 
-#include <assert.h>
+#include <tbb/concurrent_hash_map.h>
 
-Dispatcher g_dispatcher;
+class ThreadPerConnectionDispatcher :
+	public percona_playback::DispatcherPlugin
+{
+  typedef tbb::concurrent_hash_map<uint64_t, DBThread*> DBExecutorsTable;
+  DBExecutorsTable  executors;
+  void db_thread_func(DBThread *thread);
+  void start_thread(DBThread *thread);
+
+public:
+  ThreadPerConnectionDispatcher(std::string _name) :
+	  DispatcherPlugin(_name) {}
+
+  boost::shared_ptr<DBThreadState>
+    get_thread_state(uint64_t thread_id,
+                     boost::function1<void, DBThread *>
+                      run_on_db_thread_create);
+  void dispatch(QueryEntryPtr query_entry);
+  bool finish_and_wait(uint64_t thread_id);
+  void finish_all_and_wait();
+};
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
 
 boost::shared_ptr<DBThreadState>
-Dispatcher::get_thread_state(
+ThreadPerConnectionDispatcher::get_thread_state(
   uint64_t thread_id,
   boost::function1<void, DBThread *> run_on_db_thread_create)
 {
@@ -43,7 +62,7 @@ Dispatcher::get_thread_state(
 }
 
 void
-Dispatcher::dispatch(QueryEntryPtr query_entry)
+ThreadPerConnectionDispatcher::dispatch(QueryEntryPtr query_entry)
 {
   uint64_t thread_id= query_entry->getThreadId();
   {
@@ -59,7 +78,7 @@ Dispatcher::dispatch(QueryEntryPtr query_entry)
 }
 
 bool
-Dispatcher::finish_and_wait(uint64_t thread_id)
+ThreadPerConnectionDispatcher::finish_and_wait(uint64_t thread_id)
 {
   DBThread *db_thread= NULL;
   {
@@ -83,7 +102,7 @@ Dispatcher::finish_and_wait(uint64_t thread_id)
 }
 
 void
-Dispatcher::finish_all_and_wait()
+ThreadPerConnectionDispatcher::finish_all_and_wait()
 {
   QueryEntryPtr shutdown_command(new FinishEntry());
   while(executors.size())
@@ -103,3 +122,11 @@ Dispatcher::finish_all_and_wait()
     delete t;
   }
 }
+
+static void init_plugin(percona_playback::PluginRegistry &r)
+{
+  r.add("thread-per-connection",
+	new ThreadPerConnectionDispatcher("thread-per-connection"));
+}
+
+PERCONA_PLAYBACK_PLUGIN(init_plugin);

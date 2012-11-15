@@ -39,7 +39,6 @@
 #include <percona_playback/db_thread.h>
 #include <percona_playback/query_log/query_log.h>
 #include <percona_playback/query_result.h>
-#include "percona_playback/dispatcher.h"
 #include <percona_playback/gettext.h>
 
 #include <boost/foreach.hpp>
@@ -50,6 +49,8 @@ namespace po= boost::program_options;
 
 static bool g_run_set_timestamp;
 static bool g_preserve_query_time;
+
+extern percona_playback::DispatcherPlugin *g_dispatcher_plugin;
 
 class ParseQueryLogFunc: public tbb::filter {
 public:
@@ -300,7 +301,7 @@ void* dispatch (void *input_)
     for (unsigned int i=0; i< input->size(); i++)
     {
       //      usleep(10);
-      g_dispatcher.dispatch((*input)[i]);
+      g_dispatcher_plugin->dispatch((*input)[i]);
     }
     delete input;
     return NULL;
@@ -330,7 +331,7 @@ static void LogReaderThread(FILE* input_file, unsigned int run_count, struct per
   p.add_filter(f4);
   p.run(2);
 
-  g_dispatcher.finish_all_and_wait();
+  g_dispatcher_plugin->finish_all_and_wait();
 
   r->n_log_entries= entries;
   r->n_queries= queries;

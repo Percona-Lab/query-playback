@@ -40,6 +40,7 @@ namespace po= boost::program_options;
 
 percona_playback::DBClientPlugin *g_dbclient_plugin= NULL;
 percona_playback::InputPlugin *g_input_plugin= NULL;
+percona_playback::DispatcherPlugin *g_dispatcher_plugin= NULL;
 unsigned int g_db_thread_queue_depth;
 
 using namespace percona_playback;
@@ -131,6 +132,22 @@ static void help(po::options_description &options_description)
     std::cerr << _("Selected Input Plugin: ")
               << g_input_plugin->name
               << std::endl;
+
+    std::cerr << std::endl << _("Loaded Dispatcher Plugins: ");
+
+    BOOST_FOREACH(const PluginRegistry::DispatcherPluginPair &pp,
+		  PluginRegistry::singleton().dispatcher_plugins)
+    {
+      std::cerr << pp.first << " ";
+    }
+
+    std::cerr << std::endl;
+    std::cerr << std::endl;
+
+    assert(g_dispatcher_plugin);
+    std::cerr << _("Selected dispatcher Plugin: ")
+              << g_dispatcher_plugin->name
+              << std::endl;
 }
 
 int percona_playback_argv(percona_playback_st *the_percona_playback,
@@ -151,6 +168,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   db_options.add_options()
     ("db-plugin", po::value<std::string>(), _("Database plugin"))
     ("input-plugin", po::value<std::string>(), _("Input plugin"))
+    ("dispatcher-plugin", po::value<std::string>(), _("Dispatcher plugin"))
     ("queue-depth", po::value<unsigned int>(),
      _("Queue depth for DB executor (thread). The larger this number the"
      " greater the played-back workload can deviate from the original workload"
@@ -232,6 +250,32 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     g_input_plugin= it->second;
   }
   g_input_plugin->active= true;
+
+  if (vm.count("dispatcher-plugin"))
+  {
+    PluginRegistry::DispatcherPluginMap::iterator it;
+    it= PluginRegistry::singleton().dispatcher_plugins.find(
+      vm["dispatcher-plugin"].as<std::string>());
+    if (it == PluginRegistry::singleton().dispatcher_plugins.end())
+    {
+      fprintf(stderr, _("Invalid Dispatcher Plugin\n"));
+      return -1;
+    }
+    g_dispatcher_plugin= it->second;
+  }
+  else
+  {
+    PluginRegistry::DispatcherPluginMap::iterator it;
+    it= PluginRegistry::singleton().dispatcher_plugins.
+      find("thread-per-connection");
+    if (it == PluginRegistry::singleton().dispatcher_plugins.end())
+    {
+      fprintf(stderr, _("Invalid Dispatcher plugin\n"));
+      return -1;
+    }
+    g_dispatcher_plugin= it->second;
+  }
+  g_dispatcher_plugin->active= true;
 
   if (vm.count("help") || argc==1)
   {
