@@ -34,19 +34,12 @@ extern unsigned int g_db_thread_queue_depth;
 
 class QueryResult;
 
-class DBThreadState
-{
-public:
-  virtual ~DBThreadState(){}
-};
-
 class DBThread
 {
 
 private:
   boost::thread thread;
   uint64_t thread_id;
-  boost::shared_ptr<DBThreadState> state;
 
 public:
   typedef tbb::concurrent_bounded_queue<QueryEntryPtr> Queries;
@@ -59,16 +52,6 @@ public:
   }
 
   virtual ~DBThread() {}
-
-  void set_state(boost::shared_ptr<DBThreadState> new_state)
-  {
-    state= new_state;
-  }
-
-  boost::shared_ptr<DBThreadState> get_state() const
-  {
-    return state;
-  }
 
   void join()
   {

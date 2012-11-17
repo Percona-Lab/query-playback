@@ -25,9 +25,11 @@
 #include "percona_playback/plugin.h"
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
+extern percona_playback::DispatcherPlugin *g_dispatcher_plugin;
 
 void
-ConnectionState::ProcessMysqlPkts(const u_char      *pkts,
+ConnectionState::ProcessMysqlPkts(boost::shared_ptr<ConnectionState> cs_ptr,
+				  const u_char      *pkts,
                                   u_int             pkts_len,
                                   const timeval     &ts,
                                   const AddrPort    &addr_port,
@@ -76,13 +78,13 @@ ConnectionState::ProcessMysqlPkts(const u_char      *pkts,
       {
       case PKT_QUERY:
         if (!query.empty())
-          DispatchQuery(ts, query, addr_port);
+          DispatchQuery(cs_ptr, ts, query, addr_port);
         ++stats.nr_of_parsed_queries;
         ++stats.nr_of_parsed_packets;
         break;
 
       case PKT_RESULT:
-        DispatchResult(ts, addr_port);
+        DispatchResult(cs_ptr, ts, addr_port);
         ++stats.nr_of_parsed_packets;
         break;
 
@@ -105,12 +107,6 @@ ConnectionState::ProcessMysqlPkts(const u_char      *pkts,
   if (!fragmented)
     frag_buff.clear();
 
-}
-
-void
-ConnectionState::ProcessFinishConnection()
-{
-  db_thread->queries->push(QueryEntryPtr(new FinishEntry()));
 }
 
 PktResult
@@ -303,23 +299,32 @@ ConnectionState::ClientPacket(IN UCharBuffer   &buff,
 }
 
 void
-ConnectionState::DispatchQuery(const timeval        &ts,
+ConnectionState::DispatchQuery(/* Having shared pointer to "this" as an argument
+				  is just temporary step. We need a shared pointer
+				  to connection state inside of query entry. The
+				  better way to do this is to move code that creates
+				  query entries to the upper layer.
+			       */
+			       boost::shared_ptr<ConnectionState> cs_ptr,
+			       const timeval        &ts,
                                const std::string    &query,
                                const AddrPort       &addr_port)
 {
   boost::shared_ptr<TcpdumpQueryEntry> 
-    query_entry(new TcpdumpQueryEntry(ts,
+    query_entry(new TcpdumpQueryEntry(cs_ptr,
+				      ts,
                                       query,
                                       addr_port));
-  db_thread->queries->push(query_entry);
+  g_dispatcher_plugin->dispatch(query_entry);
 }
 
 void
-ConnectionState::DispatchResult(const timeval    &ts,
+ConnectionState::DispatchResult(boost::shared_ptr<ConnectionState> cs_ptr,
+				const timeval    &ts,
                                 const AddrPort   &addr_port)
 {
   boost::shared_ptr<TcpdumpResultEntry> 
-    result_entry(new TcpdumpResultEntry(addr_port, ts, last_query_result));
-  db_thread->queries->push(result_entry);
+    result_entry(new TcpdumpResultEntry(cs_ptr, addr_port, ts, last_query_result));
+  g_dispatcher_plugin->dispatch(result_entry);
 }
 

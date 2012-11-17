@@ -30,15 +30,10 @@ TcpdumpQueryEntry::execute(DBThread *t)
   QueryResult expected_result;
   timeval start_time;
   timeval end_time;
-  boost::shared_ptr<DBThreadState> thr_state;
 
   assert(t);
 
-  thr_state= t->get_state();
-
-  assert(thr_state.get());
-
-  ConnectionState &state= (ConnectionState &)*thr_state;
+  ConnectionState &state= *connection_state;
 
   LastExecutedQueryInfo &last_query_info= state.last_executed_query_info;
 
@@ -96,12 +91,7 @@ TcpdumpResultEntry::execute(DBThread *t)
 
   assert(t);
 
-  thr_state= t->get_state();
-
-  assert(thr_state.get());
-
-
-  ConnectionState &state= (ConnectionState &)*thr_state;
+  ConnectionState &state= *connection_state;
   LastExecutedQueryInfo &last_query_info= state.last_executed_query_info;
 
   timersub(&pcap_timestamp,
