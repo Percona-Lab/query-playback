@@ -117,6 +117,8 @@ class DispatcherPlugin : public plugin
   virtual bool finish_and_wait(uint64_t thread_id)= 0;
   virtual void finish_all_and_wait()= 0;
 
+  virtual void run() {};
+
 };
 
 class PluginRegistry

@@ -339,6 +339,7 @@ struct percona_playback_run_result *percona_playback_run(const percona_playback_
   std::cerr << _("Database Plugin: ") << g_dbclient_plugin->name << std::endl;
   std::cerr << _(" Running...") << std::endl;
 
+  g_dispatcher_plugin->run();
   g_input_plugin->run(*r);
 
   BOOST_FOREACH(const PluginRegistry::ReportPluginPair pp,
