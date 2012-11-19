@@ -42,6 +42,7 @@ percona_playback::DBClientPlugin *g_dbclient_plugin= NULL;
 percona_playback::InputPlugin *g_input_plugin= NULL;
 percona_playback::DispatcherPlugin *g_dispatcher_plugin= NULL;
 unsigned int g_db_thread_queue_depth;
+std::string g_session_init_query;
 
 using namespace percona_playback;
 
@@ -173,6 +174,9 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
      _("Queue depth for DB executor (thread). The larger this number the"
      " greater the played-back workload can deviate from the original workload"
      " as some connections may be up to queue-depth behind. (default 1)"))
+    ("session-init-query",
+     po::value<std::string>()->default_value(""),
+     _("This query will be executed just after each connect to db"))
     ;
 
   std::string basic_usage;

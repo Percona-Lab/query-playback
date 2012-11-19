@@ -23,7 +23,7 @@
 
 Name:           percona-playback
 Version:        0.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A tool for replaying captured database server load
 
 License:        GPL

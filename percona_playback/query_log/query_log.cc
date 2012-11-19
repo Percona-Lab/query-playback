@@ -337,38 +337,29 @@ static void LogReaderThread(FILE* input_file, unsigned int run_count, struct per
   r->n_queries= queries;
 }
 
-int run_query_log(const std::string &log_file, unsigned int run_count, struct percona_playback_run_result *r)
-{
-  FILE* input_file = fopen(log_file.c_str(),"r");
-  if (input_file == NULL)
-    return -1;
-
-  boost::thread log_reader_thread(LogReaderThread,input_file, run_count, r);
-
-  log_reader_thread.join();
-  fclose(input_file);
-
-  return 0;
-}
-
 class QueryLogPlugin : public percona_playback::InputPlugin
 {
 private:
   po::options_description     options;
   std::string                 file_name;
   unsigned int                read_count;
+  bool			      std_in;
 
 public:
   QueryLogPlugin(const std::string &_name) :
     InputPlugin(_name),
     options(_("Query Log Options")),
-    read_count(1)
+    read_count(1),
+    std_in(false)
   {};
 
   virtual boost::program_options::options_description* getProgramOptions() {
       options.add_options()
       ("query-log-file",
        po::value<std::string>(), _("Query log file"))
+      ("query-log-stdin",
+       po::value<bool>()->default_value(false)->zero_tokens(),
+       _("Read query log from stdin"))
 /* Disabled for 0.3 until we have something more universal.
       ("query-log-read-count",
        po::value<unsigned int>(&read_count)->default_value(1),
@@ -397,6 +388,7 @@ public:
   {
     if (!active &&
         (vm.count("query-log-file") ||
+	 !vm["query-log-stdin"].defaulted() ||
 //         !vm["query-log-read-count"].defaulted() ||
          !vm["query-log-preserve-query-time"].defaulted() ||
          !vm["query-log-set-timestamp"].defaulted()))
@@ -410,8 +402,19 @@ public:
     if (!active)
       return 0;
 
+    if (vm.count("query-log-file") && vm["query-log-stdin"].as<bool>())
+    {
+      fprintf(stderr,  _(("The options --query-log-file and --query-log-stdin "
+			  "can not be used together\n")));
+      return -1;
+    }
+
     if (vm.count("query-log-file"))
       file_name= vm["query-log-file"].as<std::string>();
+    else if (vm["query-log-stdin"].as<bool>())
+    {
+      std_in = true;
+    }
     else
     {
       fprintf(stderr, _("ERROR: --query-log-file is a required option.\n"));
@@ -423,7 +426,31 @@ public:
 
   virtual void run(percona_playback_run_result  &result)
   {
-    run_query_log(file_name, read_count, &result);
+    FILE* input_file;
+
+    if (std_in)
+    {
+      input_file = stdin;
+    }
+    else
+    {
+      input_file = fopen(file_name.c_str(),"r");
+      if (input_file == NULL)
+      {
+        fprintf(stderr,
+		_("ERROR: Error opening file '%s': %s"),
+		file_name.c_str(), strerror(errno));
+	return;
+      }
+    }
+
+    boost::thread log_reader_thread(LogReaderThread,
+				    input_file,
+				    read_count,
+				    &result);
+
+    log_reader_thread.join();
+    fclose(input_file);
   }
 };
 
