@@ -25,9 +25,9 @@ void DBThread::run()
 {
   connect();
 
-  QueryEntryPtr query;
   while (true)
   {
+    QueryEntryPtr query;
     queries->pop(query);
 
     if (query->is_shutdown())
