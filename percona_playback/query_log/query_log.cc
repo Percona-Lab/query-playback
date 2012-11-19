@@ -282,13 +282,13 @@ bool QueryLogEntry::parse_metadata(const std::string &s)
       r= true;
     }
   }
-
+/*
   if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
   {
     query.append(s);
     r= true;
   }
-
+*/
   return r;
 }
 
