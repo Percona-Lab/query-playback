@@ -45,7 +45,7 @@ class LibDrizzleDBThread : public DBThread
   {
   }
 
-  void connect();
+  bool connect();
   void disconnect();
   void execute_query(const std::string &query, QueryResult *r,
 		     const QueryResult &expected_result);
@@ -70,7 +70,7 @@ public:
   unsigned int port;
 };
 
-void LibDrizzleDBThread::connect()
+bool LibDrizzleDBThread::connect()
 {
   driz= drizzle_create(NULL);
   assert(driz != NULL);
@@ -81,6 +81,7 @@ void LibDrizzleDBThread::connect()
 			      options->user.c_str(),
 			      options->password.c_str(),
 			      options->schema.c_str(), DRIZZLE_CON_MYSQL);
+  return true;
 }
 
 void LibDrizzleDBThread::disconnect()

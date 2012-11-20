@@ -42,7 +42,7 @@ public:
   unsigned int port;
 };
 
-void MySQLDBThread::connect()
+bool MySQLDBThread::connect()
 {
   mysql_init(&handle);
   if (!mysql_real_connect(&handle,
@@ -56,7 +56,9 @@ void MySQLDBThread::connect()
   {
     fprintf(stderr, "Can't connect to server: %s\n",
 	    mysql_error(&handle));
+    return false;
   }
+  return true;
 }
 
 void MySQLDBThread::disconnect()
@@ -67,30 +69,24 @@ void MySQLDBThread::disconnect()
 void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
 				  const QueryResult &)
 {
-  unsigned tries = 10;
-  for(;;)
+  int mr;
+  for(unsigned i = 0; i < max_err_num; ++i)
   {
-    int mr= mysql_real_query(&handle, query.c_str(), query.length());
+    mr= mysql_real_query(&handle, query.c_str(), query.length());
+    r->setError(mr);
     if(mr != 0)
     {
       fprintf(stderr,
 	      "Error during query: %s, number of tries %u\n",
 	      mysql_error(&handle),
-	      tries);
+	      i);
       disconnect();
-      connect();
-      --tries;
-      if (!tries)
-      {
-        r->setError(mr);
-	break;
-      }
+      connect_and_init_session();
     }
     else
     {
       MYSQL_RES* mysql_res= NULL;
 
-      r->setError(mr);
       r->setWarningCount(mysql_warning_count(&handle));
 
       mysql_res= mysql_store_result(&handle);
@@ -100,7 +96,8 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
       else
         r->setRowsSent(0);
 
-      mysql_free_result(mysql_res);
+      if (mysql_res)
+        mysql_free_result(mysql_res);
       break;
     }
   }

@@ -58,9 +58,18 @@ public:
     thread.join();
   }
 
-  void connect_and_init_session();
+  bool connect_and_init_session()
+  {
+    if (connect())
+    {
+      init_session();
+      return true;
+    }
+    return false;
+  }
 
-  virtual void connect()= 0;
+  void    init_session();
+  virtual bool connect()= 0;
 
   virtual void disconnect()= 0;
   virtual void execute_query(const std::string &query,
