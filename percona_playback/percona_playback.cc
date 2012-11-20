@@ -175,7 +175,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
      " greater the played-back workload can deviate from the original workload"
      " as some connections may be up to queue-depth behind. (default 1)"))
     ("session-init-query",
-     po::value<std::string>()->default_value(""),
+     po::value<std::string>(&g_session_init_query)->default_value(""),
      _("This query will be executed just after each connect to db"))
     ;
 
