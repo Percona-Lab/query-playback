@@ -84,7 +84,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
     new std::vector<boost::shared_ptr<QueryLogEntry> >();
 
   boost::shared_ptr<QueryLogEntry> tmp_entry(new QueryLogEntry());
-  entries->push_back(tmp_entry);
+ // entries->push_back(tmp_entry);
 
   char *line= NULL;
   size_t buflen = 0;
@@ -131,9 +131,10 @@ void* ParseQueryLogFunc::operator() (void*)  {
 
     if (strncmp(p, "# User@Host", strlen("# User@Host")) == 0)
     {
+      if (!tmp_entry->getQuery().empty())
+        entries->push_back(tmp_entry);
       count++;
       tmp_entry.reset(new QueryLogEntry());
-      entries->push_back(tmp_entry);
       (*this->nr_entries)++;
     }
 
@@ -172,6 +173,9 @@ void* ParseQueryLogFunc::operator() (void*)  {
     next_line= NULL;
     p= line;
   }
+
+  if (!tmp_entry->getQuery().empty())
+    entries->push_back(tmp_entry);
 
   free(line);
   return entries;
