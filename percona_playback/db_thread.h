@@ -76,7 +76,7 @@ public:
 			     QueryResult *r,
 			     const QueryResult &expected_result)= 0;
 
-  void run();
+  virtual void run();
 
   void start_thread();
 };

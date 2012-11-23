@@ -103,6 +103,13 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
   }
 }
 
+void MySQLDBThread::run()
+{
+  mysql_thread_init();
+  DBThread::run();
+  mysql_thread_end();
+}
+
 class MySQLDBClientPlugin : public percona_playback::DBClientPlugin
 {
 private:
@@ -140,6 +147,21 @@ public:
               gettext("libmysqlclient plugin is not selected, "
                       "you shouldn't use this plugin-related "
                       "command line options\n"));
+      return -1;
+    }
+
+    if (!active)
+      return 0;
+
+    if (!mysql_thread_safe())
+    {
+      fprintf(stderr, "libmysqlclient is not thread safe\n");
+      return -1;
+    }
+
+    if (mysql_library_init(0, NULL, NULL))
+    {
+      fprintf(stderr, "could not initialize mysql library\n");
       return -1;
     }
 
