@@ -52,7 +52,7 @@ bool MySQLDBThread::connect()
 		          options->schema.c_str(),
 		          options->port,
 		          "",
-		          0))
+		          CLIENT_MULTI_STATEMENTS))
   {
     fprintf(stderr, "Can't connect to server: %s\n",
 	    mysql_error(&handle));
@@ -85,19 +85,22 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
     }
     else
     {
-      MYSQL_RES* mysql_res= NULL;
-
       r->setWarningCount(mysql_warning_count(&handle));
+      r->setRowsSent(0);
+      do
+      {
+        MYSQL_RES* mysql_res= NULL;
 
-      mysql_res= mysql_store_result(&handle);
+        mysql_res= mysql_store_result(&handle);
 
-      if (mysql_res != NULL)
-        r->setRowsSent(mysql_num_rows(mysql_res));
-      else
-        r->setRowsSent(0);
+        if (mysql_res != NULL)
+	{
+          r->setRowsSent(mysql_num_rows(mysql_res));
+          mysql_free_result(mysql_res);
+	}
 
-      if (mysql_res)
-        mysql_free_result(mysql_res);
+      } while(!mysql_next_result(&handle));
+
       break;
     }
   }
