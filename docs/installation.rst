@@ -1,43 +1,26 @@
-=============================
- Installing Percona Playback
-=============================
+===========================================
+ Installing Percona Playback from Binaries
+===========================================
+
+Before installing, you might want to read the :doc:`release-notes`.
+
+Ready-to-use binaries are available from the |Percona Playback| `download page <http://www.percona.com/downloads/Percona-Playback/>`_, including:
+
+ * ``RPM`` packages for *RHEL* 5 and *RHEL* 6 (including compatible distributions such as CentOS and Oracle Enterprise Linux)
+
+ * *Debian* packages for *Debian* and *Ubuntu*
+
+ * Generic ``.tar.gz`` binary packages
+
+Using Percona Software Repositories
+===================================
 
 .. toctree::
-   :hidden:
+   :maxdepth: 1
 
-Compiling from Source
-=====================
+   installation/apt_repo
+   installation/yum_repo
 
-Build Dependencies
-------------------
-You will need the following packages to build percona-playback:
- * libtbb-dev (Intel Threading Building Blocks)
- * Boost (including boost program_options)
- * intltool
- * gettext (including gettext-devel on CentOS/RedHat)
- * libpcap-dev
- * libcloog-ppl0 (if using GCC 4.6)
- * libmysqlclient-dev (MySQL Client Libraries) [#n-1]_
- * libdrizzle-dev
- * pkg-config
+|Percona| provides repositories for :program:`yum` (``RPM`` packages for *Red Hat Enterprise Linux* and compatible distributions such as *CentOS*, *Oracle Enterprise Linux*, *Amazon Linux AMI*, and *Fedora*) and :program:`apt` (:file:`.deb` packages for *Ubuntu* and *Debian*) for software such as |Percona Server|, |XtraDB|, |XtraBackup|, and |Percona Toolkit|. This makes it easy to install and update your software and its dependencies through your operating system's package manager.
 
-Building
---------
-If you are building from BZR, you will need to run :file:`./config/autorun.sh` first. :: 
-
-  $ ./configure
-  $ make
-
-There are several tests included, these use a dummy database client plugin to mainly test that parsing of the logs is correct. ::
-
-  $ make check
-
-After that you can install the percona-playback with: :: 
-
-  $ sudo make install
-
-In some cases you'll still need to manually link the libraries
-
-.. rubric:: Footnotes
-
-.. [#n-1] Not strictly needed, but if you don't have it, you don't get to do the play back part.
+This is the recommend way of installing where possible.

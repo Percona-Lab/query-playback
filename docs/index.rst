@@ -17,10 +17,11 @@ Installation
 ============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :glob:
 
    installation
+   installation/compiling_playback
 
 User's Manual
 =============

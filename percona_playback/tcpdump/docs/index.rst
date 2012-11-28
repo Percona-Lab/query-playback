@@ -11,10 +11,35 @@ The plugin has two modes of work:
 .. note::
  The |tcpdump| plugin can parse packets only on raw format. The "-w" option must be used for |tcpdump| during capturing to get input files for the tool. 
 
-The example of usage:
-Playback percona_playback/test/tcpdump_accuracy.dump on MySQL server in *accurate* mode and queries queue limit of 10 000 elements: :: 
+Example
+=======
 
-  $ bin/percona-playback --input-plugin=tcpdump --tcpdump-file=percona-playback/test/tcpdump_accuracy.dump \
-   --tcpdump-mode=accurate --db-plugin=libmysqlclient --mysql-host=some_host --mysql-port=3307 \
-   --mysql-username=test_user --mysql-password=passW0rd --mysql-schema=test1 --queue-depth 10000
+1) Queries will be captured with :program:`tcpdump` to the :file:`example.dump`: 
+ 
+.. code-block:: bash
+ 
+  $ tcpdump -i any port 3306 -w example.dump
+
+2) |Percona Playback| is started with tcpdump plugin reading the example.dump file, connecting to remote |MySQL| server in *accurate* mode: 
+
+.. code-block:: bash
+
+  $ percona-playback --input-plugin=tcpdump --tcpdump-file=example.dump --tcpdump-mode=accurate \
+  --db-plugin=libmysqlclient --mysql-host=10.8.2.10 --mysql-username=root \
+  --mysql-password=passW0rd --mysql-schema=imdb
+
+3) After the |Percona Playback| is done, report is generated that looks like this:  
+
+.. code-block:: bash
+
+  Report
+  ------
+  Executed 22 queries
+  Spent 00:00:32.844442 executing queries versus an expected 00:00:00.503753 time.
+  1 queries were quicker than expected, 21 were slower
+  A total of 0 queries had errors.
+  Expected 30298 rows, got 30298 (a difference of 0)
+  Number of queries where number of rows differed: 0.
+
+  Average of 22.00 queries per connection (1 connections).
 
