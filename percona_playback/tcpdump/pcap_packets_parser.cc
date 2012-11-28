@@ -18,7 +18,6 @@
 
 #include "percona_playback/db_thread.h"
 #include "percona_playback/plugin.h"
-#include "percona_playback/dispatcher.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -29,6 +28,7 @@
 #define SNAP_LEN            16500  // pcap's max capture size
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
+extern percona_playback::DispatcherPlugin *g_dispatcher_plugin;
 
 void
 PcapPacketsParser::ParsePkt(const struct pcap_pkthdr *header,
@@ -81,7 +81,7 @@ PcapPacketsParser::ParsePkt(const struct pcap_pkthdr *header,
   if (size_mysql == 0 &&
       ((tcp->th_flags & TH_FIN) || (tcp->th_flags & TH_RST)))
   {
-    g_dispatcher.finish_and_wait(addr_port.ThreadId());
+    g_dispatcher_plugin->finish_and_wait(addr_port.ThreadId());
     return;
   }
 
@@ -98,7 +98,7 @@ PcapPacketsParser::ParsePkt(const struct pcap_pkthdr *header,
 
   /* If there is no DBThread with such id create it */
   boost::shared_ptr<DBThreadState>
-    state= g_dispatcher.get_thread_state(addr_port.ThreadId(),
+    state= g_dispatcher_plugin->get_thread_state(addr_port.ThreadId(),
       boost::bind(&PcapPacketsParser::CreateConnectionState,
                   this,
                   _1));
@@ -116,7 +116,7 @@ PcapPacketsParser::ParsePkt(const struct pcap_pkthdr *header,
 void
 PcapPacketsParser::WaitForUnfinishedTasks()
 {
-  g_dispatcher.finish_all_and_wait();
+  g_dispatcher_plugin->finish_all_and_wait();
 }
 
 void
