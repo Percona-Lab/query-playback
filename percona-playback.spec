@@ -22,7 +22,7 @@
 %endif
 
 Name:           percona-playback
-Version:        0.4
+Version:        0.5
 Release:        2%{?dist}
 Summary:        A tool for replaying captured database server load
 
