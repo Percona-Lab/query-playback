@@ -1,5 +1,5 @@
 /* BEGIN LICENSE
- * Copyright (C) 2011 Stewart Smith <stewart@flamingspork.com>
+ * Copyright (C) 2011-2012 Percona Inc.
  * This program is free software: you can redistribute it and/or modify it 
  * under the terms of the GNU General Public License version 3, as published 
  * by the Free Software Foundation.
