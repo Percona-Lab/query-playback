@@ -9,12 +9,30 @@ see ./bin/percona-playback --help for details
 
 Build Dependencies
 ------------------
-You will need the following packages to build percona-playback:
- * libtbb (Intel Threading Building Blocks)
- * Boost (including boost program_options)
- * libmysqlclient (MySQL Client Libraries) [1]
+Percona Playback is mostly comprised of plugins, some of which have their
+own build dependencies (and simply won't be built if you don't have the
+required libraries).
 
-[1] Not strictly needed, but if you don't have it, you don't get to do the play back part.
+You will need the 'development' packages for all of these (often suffixed by
+'-devel' for RedHat or '-dev' for Debian derived distributions).
+
+The core of Percona Playback requires:
+ * libtbb (Intel Threading Building Blocks)
+ * Boost (including boost program_options) at least 1.41
+ * libtool
+ * gettext
+ * intltool
+ * pkg-config
+
+The plugin that uses the MySQL client library needs:
+ * libmysqlclient (MySQL Client Libraries)
+
+For using the libdrizzle client library to speak to MySQL or Drizzle:
+ * libdrizzle
+
+For playing back tcpdump captured load:
+ * libpcap
+ * libdrizzle
 
 Building
 --------
