@@ -84,7 +84,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
     new std::vector<boost::shared_ptr<QueryLogEntry> >();
 
   boost::shared_ptr<QueryLogEntry> tmp_entry(new QueryLogEntry());
-  entries->push_back(tmp_entry);
+ // entries->push_back(tmp_entry);
 
   char *line= NULL;
   size_t buflen = 0;
@@ -131,9 +131,10 @@ void* ParseQueryLogFunc::operator() (void*)  {
 
     if (strncmp(p, "# User@Host", strlen("# User@Host")) == 0)
     {
+      if (!tmp_entry->getQuery().empty())
+        entries->push_back(tmp_entry);
       count++;
       tmp_entry.reset(new QueryLogEntry());
-      entries->push_back(tmp_entry);
       (*this->nr_entries)++;
     }
 
@@ -172,6 +173,9 @@ void* ParseQueryLogFunc::operator() (void*)  {
     next_line= NULL;
     p= line;
   }
+
+  if (!tmp_entry->getQuery().empty())
+    entries->push_back(tmp_entry);
 
   free(line);
   return entries;
@@ -240,7 +244,19 @@ void QueryLogEntry::add_query_line(const std::string &s)
      && s.compare(0, timestamp_query.length(), timestamp_query) == 0)
     set_timestamp_query= s;
   else
-    query.append(s);
+  {
+    //Append space insead of \r\n
+    std::string::const_iterator end = s.end() - 1;
+    if (s.length() >= 2 && *(s.end() - 2) == '\r')
+      --end;
+    //Remove initial spaces for best query viewing in reports
+    std::string::const_iterator begin;
+    for (begin = s.begin(); begin != end; ++begin)
+      if (*begin != ' ' && *begin != '\t')
+        break;
+    query.append(begin, end);
+    query.append(" ");
+  }
 }
 
 bool QueryLogEntry::parse_metadata(const std::string &s)
@@ -282,13 +298,13 @@ bool QueryLogEntry::parse_metadata(const std::string &s)
       r= true;
     }
   }
-
+/*
   if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
   {
     query.append(s);
     r= true;
   }
-
+*/
   return r;
 }
 

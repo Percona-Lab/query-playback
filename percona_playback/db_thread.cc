@@ -24,25 +24,23 @@
 
 extern std::string g_session_init_query;
 
-void DBThread::connect_and_init_session()
+void DBThread::init_session()
 {
-  connect();
-  if (!g_session_init_query.empty())
-  {
-    QueryResult r;
-    QueryResult er;
-    execute_query(g_session_init_query, &r, er);
-  }
+  if (g_session_init_query.empty())
+    return;
+  QueryResult r;
+  QueryResult er;
+  execute_query(g_session_init_query, &r, er);
 }
 
 void DBThread::run()
 {
   connect_and_init_session();
 
-  QueryEntryPtr query;
   while (true)
   {
-    queries.pop(query);
+    QueryEntryPtr query;
+    queries->pop(query);
 
     if (query->is_shutdown())
       break;

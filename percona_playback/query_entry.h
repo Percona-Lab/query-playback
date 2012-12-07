@@ -45,7 +45,8 @@ public:
 class FinishEntry : public QueryEntry
 {
 public:
-  FinishEntry() { set_shutdown(); }
+  FinishEntry(uint64_t _thread_id) :
+    QueryEntry (_thread_id, true) {}
   bool is_quit() { return false; }
 
   void execute(DBThread *) {}

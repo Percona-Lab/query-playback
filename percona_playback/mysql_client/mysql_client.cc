@@ -42,17 +42,23 @@ public:
   unsigned int port;
 };
 
-void MySQLDBThread::connect()
+bool MySQLDBThread::connect()
 {
   mysql_init(&handle);
-  mysql_real_connect(&handle,
-		     options->host.c_str(),
-		     options->user.c_str(),
-		     options->password.c_str(),
-		     options->schema.c_str(),
-		     options->port,
-		     "",
-		     0);
+  if (!mysql_real_connect(&handle,
+			  options->host.c_str(),
+			  options->user.c_str(),
+		          options->password.c_str(),
+		          options->schema.c_str(),
+		          options->port,
+		          "",
+		          CLIENT_MULTI_STATEMENTS))
+  {
+    fprintf(stderr, "Can't connect to server: %s\n",
+	    mysql_error(&handle));
+    return false;
+  }
+  return true;
 }
 
 void MySQLDBThread::disconnect()
@@ -63,27 +69,48 @@ void MySQLDBThread::disconnect()
 void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
 				  const QueryResult &)
 {
-  int mr= mysql_real_query(&handle, query.c_str(), query.length());
-  if(mr != 0)
+  int mr;
+  for(unsigned i = 0; i < max_err_num; ++i)
   {
+    mr= mysql_real_query(&handle, query.c_str(), query.length());
     r->setError(mr);
-  }
-  else
-  {
-    MYSQL_RES* mysql_res= NULL;
-
-    r->setError(mr);
-    r->setWarningCount(mysql_warning_count(&handle));
-
-    mysql_res= mysql_store_result(&handle);
-
-    if (mysql_res != NULL)
-      r->setRowsSent(mysql_num_rows(mysql_res));
+    if(mr != 0)
+    {
+      fprintf(stderr,
+	      "Error during query: %s, number of tries %u\n",
+	      mysql_error(&handle),
+	      i);
+      disconnect();
+      connect_and_init_session();
+    }
     else
+    {
+      r->setWarningCount(mysql_warning_count(&handle));
       r->setRowsSent(0);
+      do
+      {
+        MYSQL_RES* mysql_res= NULL;
 
-    mysql_free_result(mysql_res);
+        mysql_res= mysql_store_result(&handle);
+
+        if (mysql_res != NULL)
+	{
+          r->setRowsSent(mysql_num_rows(mysql_res));
+          mysql_free_result(mysql_res);
+	}
+
+      } while(!mysql_next_result(&handle));
+
+      break;
+    }
   }
+}
+
+void MySQLDBThread::run()
+{
+  mysql_thread_init();
+  DBThread::run();
+  mysql_thread_end();
 }
 
 class MySQLDBClientPlugin : public percona_playback::DBClientPlugin
@@ -123,6 +150,21 @@ public:
               gettext("libmysqlclient plugin is not selected, "
                       "you shouldn't use this plugin-related "
                       "command line options\n"));
+      return -1;
+    }
+
+    if (!active)
+      return 0;
+
+    if (!mysql_thread_safe())
+    {
+      fprintf(stderr, "libmysqlclient is not thread safe\n");
+      return -1;
+    }
+
+    if (mysql_library_init(0, NULL, NULL))
+    {
+      fprintf(stderr, "could not initialize mysql library\n");
       return -1;
     }
 
