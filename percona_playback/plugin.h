@@ -113,14 +113,11 @@ class DispatcherPlugin : public plugin
 
   DispatcherPlugin(const std::string &_name) : name(_name) {}
 
-  virtual
-  boost::shared_ptr<DBThreadState>
-    get_thread_state(uint64_t thread_id,
-                     boost::function1<void, DBThread *>
-                      run_on_db_thread_create)= 0;
   virtual void dispatch(QueryEntryPtr query_entry)= 0;
   virtual bool finish_and_wait(uint64_t thread_id)= 0;
   virtual void finish_all_and_wait()= 0;
+
+  virtual void run() {};
 
 };
 

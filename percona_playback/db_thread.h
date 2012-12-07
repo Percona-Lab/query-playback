@@ -16,6 +16,7 @@
 #ifndef PERCONA_PLAYBACK_DB_THREAD_H
 #define PERCONA_PLAYBACK_DB_THREAD_H
 
+#include <memory>
 #include "percona_playback/visibility.h"
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
@@ -33,55 +34,49 @@ extern unsigned int g_db_thread_queue_depth;
 
 class QueryResult;
 
-class DBThreadState
-{
-public:
-  virtual ~DBThreadState(){}
-};
-
 class DBThread
 {
 
 private:
   boost::thread thread;
   uint64_t thread_id;
-  boost::shared_ptr<DBThreadState> state;
 
 public:
   typedef tbb::concurrent_bounded_queue<QueryEntryPtr> Queries;
-  Queries queries;
+  boost::shared_ptr<Queries> queries;
 
-  DBThread(uint64_t _thread_id) : thread_id(_thread_id)  {
-    queries.set_capacity(g_db_thread_queue_depth);
+  DBThread(uint64_t _thread_id,
+	   boost::shared_ptr<Queries> _queries) :
+	  thread_id(_thread_id), queries(_queries)  {
+    queries->set_capacity(g_db_thread_queue_depth);
   }
 
   virtual ~DBThread() {}
-
-  void set_state(boost::shared_ptr<DBThreadState> new_state)
-  {
-    state= new_state;
-  }
-
-  boost::shared_ptr<DBThreadState> get_state() const
-  {
-    return state;
-  }
 
   void join()
   {
     thread.join();
   }
 
-  void connect_and_init_session();
+  bool connect_and_init_session()
+  {
+    if (connect())
+    {
+      init_session();
+      return true;
+    }
+    return false;
+  }
 
-  virtual void connect()= 0;
+  void    init_session();
+  virtual bool connect()= 0;
 
   virtual void disconnect()= 0;
   virtual void execute_query(const std::string &query,
 			     QueryResult *r,
 			     const QueryResult &expected_result)= 0;
 
-  void run();
+  virtual void run();
 
   void start_thread();
 };

@@ -30,36 +30,12 @@ public:
   ThreadPerConnectionDispatcher(std::string _name) :
 	  DispatcherPlugin(_name) {}
 
-  boost::shared_ptr<DBThreadState>
-    get_thread_state(uint64_t thread_id,
-                     boost::function1<void, DBThread *>
-                      run_on_db_thread_create);
   void dispatch(QueryEntryPtr query_entry);
   bool finish_and_wait(uint64_t thread_id);
   void finish_all_and_wait();
 };
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
-
-boost::shared_ptr<DBThreadState>
-ThreadPerConnectionDispatcher::get_thread_state(
-  uint64_t thread_id,
-  boost::function1<void, DBThread *> run_on_db_thread_create)
-{
-  DBExecutorsTable::accessor a;
-
-  if (executors.insert(a, thread_id))
-  {
-    DBThread *db_thread= g_dbclient_plugin->create(thread_id);
-    assert(db_thread);
-    a->second= db_thread;
-    if (!run_on_db_thread_create.empty())
-      run_on_db_thread_create(db_thread);
-    db_thread->start_thread();
-  }
-
-  return a->second->get_state();
-}
 
 void
 ThreadPerConnectionDispatcher::dispatch(QueryEntryPtr query_entry)
@@ -73,7 +49,7 @@ ThreadPerConnectionDispatcher::dispatch(QueryEntryPtr query_entry)
       a->second= db_thread;
       db_thread->start_thread();
     }
-    a->second->queries.push(query_entry);
+    a->second->queries->push(query_entry);
   }
 }
 
@@ -93,7 +69,7 @@ ThreadPerConnectionDispatcher::finish_and_wait(uint64_t thread_id)
   if (!db_thread)
     return false;
 
-  db_thread->queries.push(QueryEntryPtr(new FinishEntry()));
+  db_thread->queries->push(QueryEntryPtr(new FinishEntry(thread_id)));
   db_thread->join();
 
   delete db_thread;
@@ -104,7 +80,8 @@ ThreadPerConnectionDispatcher::finish_and_wait(uint64_t thread_id)
 void
 ThreadPerConnectionDispatcher::finish_all_and_wait()
 {
-  QueryEntryPtr shutdown_command(new FinishEntry());
+  QueryEntryPtr shutdown_command(new FinishEntry(0));
+
   while(executors.size())
   {
     uint64_t thread_id;
@@ -116,7 +93,7 @@ ThreadPerConnectionDispatcher::finish_all_and_wait()
     }
     executors.erase(thread_id);
 
-    t->queries.push(shutdown_command);
+    t->queries->push(shutdown_command);
     t->join();
 
     delete t;

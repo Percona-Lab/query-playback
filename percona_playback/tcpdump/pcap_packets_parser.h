@@ -23,6 +23,8 @@
 #include <tbb/concurrent_queue.h>
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/shared_ptr.hpp>
 
 class DBThread;
 
@@ -32,10 +34,14 @@ class PcapPacketsParser
   timeval                    first_packet_timestamp;
   timeval                    first_packet_pcap_timestamp;
   bool                       was_first_packet;
+  typedef boost::unordered_map<uint64_t,
+			       boost::shared_ptr<ConnectionState> >
+          Connections;
+  Connections		     connections;
 
 public:
 
-  PcapPacketsParser() : was_first_packet(false)
+  PcapPacketsParser() : was_first_packet(false), connections(10000)
   {
     first_packet_timestamp.tv_sec= first_packet_timestamp.tv_usec= 0;
     first_packet_pcap_timestamp.tv_sec= first_packet_pcap_timestamp.tv_usec= 0;
@@ -52,9 +58,11 @@ public:
 
   void WaitForUnfinishedTasks();
 
-  void CreateConnectionState(DBThread *db_thread);
 
 private:
+  boost::shared_ptr<ConnectionState> CreateConnectionState(uint64_t thread_id);
+  boost::shared_ptr<ConnectionState> GetConnectionState(uint64_t thread_id);
+  void RemoveConnectionState(uint64_t thread_id);
 
   void ParsePkt(const struct pcap_pkthdr *header,
                 const u_char *packet);

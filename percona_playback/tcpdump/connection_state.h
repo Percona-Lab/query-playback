@@ -94,8 +94,7 @@ struct LastExecutedQueryInfo
 };
 
 
-class ConnectionState : public DBThreadState
-
+class ConnectionState
 {
 
 public:
@@ -107,7 +106,7 @@ public:
     SERVER
   };
 
-  ConnectionState() :
+  ConnectionState(uint64_t _thread_id) :
     current_origin(UNDEF),
     fragmented(false),
     handshake_from_client(false),
@@ -126,7 +125,7 @@ public:
                           (drizzle_con_options_t)
                             DRIZZLE_CON_MYSQL),
       drizzle_con_free),
-    db_thread(NULL)
+    thread_id(_thread_id)
    {
      drizzle_con->result= NULL;
    }
@@ -136,18 +135,15 @@ public:
     drizzle_result_free_all(drizzle_con.get());
   }
 
-  void ProcessMysqlPkts(const u_char                 *pkts,
+  void ProcessMysqlPkts(boost::shared_ptr<ConnectionState> cs_ptr,
+			const u_char                 *pkts,
                         u_int                        total_len,
                         const timeval                &ts,
                         const AddrPort               &addr_port,
                         OUT TcpdumpMysqlParserStats  &stats);
 
-  void ProcessFinishConnection();
-
   void SetCurrentOrigin(Origin o) { current_origin = o; }
 
-  void SetDBThread(DBThread *t) { db_thread= t; }
-  
   LastExecutedQueryInfo   last_executed_query_info;
 
 private:
@@ -159,11 +155,13 @@ private:
   PktResult ServerPacket(IN UCharBuffer &buff);
   PktResult ClientPacket(IN UCharBuffer &buff, OUT std::string &query);
 
-  void DispatchQuery(const timeval      &ts,
+  void DispatchQuery(boost::shared_ptr<ConnectionState> cs_ptr,
+		     const timeval      &ts,
                      const std::string  &query,
                      const AddrPort     &addr_port);
 
-  void DispatchResult(const timeval     &ts,
+  void DispatchResult(boost::shared_ptr<ConnectionState> cs_ptr,
+		      const timeval     &ts,
                       const AddrPort    &addr_port);
 
   Origin            current_origin;
@@ -179,7 +177,7 @@ private:
 
   QueryResult       last_query_result;
 
-  DBThread          *db_thread;
+  uint64_t          thread_id;
 
 };
 

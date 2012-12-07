@@ -175,7 +175,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
      " greater the played-back workload can deviate from the original workload"
      " as some connections may be up to queue-depth behind. (default 1)"))
     ("session-init-query",
-     po::value<std::string>()->default_value(""),
+     po::value<std::string>(&g_session_init_query)->default_value(""),
      _("This query will be executed just after each connect to db"))
     ;
 
@@ -343,6 +343,7 @@ struct percona_playback_run_result *percona_playback_run(const percona_playback_
   std::cerr << _("Database Plugin: ") << g_dbclient_plugin->name << std::endl;
   std::cerr << _(" Running...") << std::endl;
 
+  g_dispatcher_plugin->run();
   g_input_plugin->run(*r);
 
   BOOST_FOREACH(const PluginRegistry::ReportPluginPair pp,

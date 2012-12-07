@@ -82,6 +82,7 @@ PcapPacketsParser::ParsePkt(const struct pcap_pkthdr *header,
       ((tcp->th_flags & TH_FIN) || (tcp->th_flags & TH_RST)))
   {
     g_dispatcher_plugin->finish_and_wait(addr_port.ThreadId());
+    RemoveConnectionState(addr_port.ThreadId());
     return;
   }
 
@@ -97,20 +98,18 @@ PcapPacketsParser::ParsePkt(const struct pcap_pkthdr *header,
   }
 
   /* If there is no DBThread with such id create it */
-  boost::shared_ptr<DBThreadState>
-    state= g_dispatcher_plugin->get_thread_state(addr_port.ThreadId(),
-      boost::bind(&PcapPacketsParser::CreateConnectionState,
-                  this,
-                  _1));
+  boost::shared_ptr<ConnectionState>
+    state= GetConnectionState(addr_port.ThreadId());
 
   assert(state.get());
 
-  ((ConnectionState *)state.get())->SetCurrentOrigin(origin);
-  ((ConnectionState *)state.get())->ProcessMysqlPkts(mysql,
-                                                     size_mysql,
-                                                     header->ts,
-                                                     addr_port,
-                                                     stats);
+  state->SetCurrentOrigin(origin);
+  state->ProcessMysqlPkts(state,
+			  mysql,
+                          size_mysql,
+                          header->ts,
+                          addr_port,
+                          stats);
 }
 
 void
@@ -119,15 +118,30 @@ PcapPacketsParser::WaitForUnfinishedTasks()
   g_dispatcher_plugin->finish_all_and_wait();
 }
 
-void
-PcapPacketsParser::CreateConnectionState(DBThread *db_thread)
+boost::shared_ptr<ConnectionState>
+PcapPacketsParser::GetConnectionState(uint64_t thread_id)
 {
-  assert(db_thread);
-  boost::shared_ptr<ConnectionState> state(new ConnectionState());
+  Connections::iterator it = connections.find(thread_id);
+  if (it == connections.end())
+    return CreateConnectionState(thread_id);
+  return it->second;
+}
+
+boost::shared_ptr<ConnectionState>
+PcapPacketsParser::CreateConnectionState(uint64_t thread_id)
+{
+  boost::shared_ptr<ConnectionState> state(new ConnectionState(thread_id));
   state->last_executed_query_info.end_pcap_timestamp=
     first_packet_pcap_timestamp;
   state->last_executed_query_info.end_timestamp=
     first_packet_timestamp;
-  db_thread->set_state(state);
-  state->SetDBThread(db_thread);
+  connections[thread_id] = state;
+  return state;
 }
+
+void
+PcapPacketsParser::RemoveConnectionState(uint64_t thread_id)
+{
+  connections.erase(thread_id);
+}
+

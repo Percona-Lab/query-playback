@@ -87,6 +87,7 @@ check_PROGRAMS += \
   percona_playback/test/crashme-slow \
   percona_playback/test/sqlbench-transactions-slow \
   percona_playback/test/sysbench-slow \
+  percona_playback/test/thread-pool-sysbench-slow \
   percona_playback/test/preserve_query_time \
   percona_playback/test/tcpdump_without_handshake \
   percona_playback/test/tcpdump_fragmented_packet \
@@ -102,6 +103,7 @@ percona_playback_test_basic_queue_depth_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${sr
 percona_playback_test_crashme_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_sqlbench_transactions_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_sysbench_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
+percona_playback_test_thread_pool_sysbench_slow_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_preserve_query_time_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_tcpdump_without_handshake_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
 percona_playback_test_tcpdump_fragmented_packet_CXXFLAGS= $(AM_CXXFLAGS) -DSRCDIR=\"${srcdir}\"
@@ -132,6 +134,9 @@ percona_playback_test_sqlbench_transactions_slow_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 percona_playback_test_sysbench_slow_SOURCES= percona_playback/test/sysbench-slow.cc
 percona_playback_test_sysbench_slow_LDADD= $(LDADD) $(MYSQL_LIBS)
+
+percona_playback_test_thread_pool_sysbench_slow_SOURCES= percona_playback/test/sysbench-slow.cc
+percona_playback_test_thread_pool_sysbench_slow_LDADD= $(LDADD) $(MYSQL_LIBS)
 
 percona_playback_test_preserve_query_time_SOURCES= percona_playback/test/preserve_query_time.cc
 percona_playback_test_preserve_query_time_LDADD= $(LDADD) $(MYSQL_LIBS)

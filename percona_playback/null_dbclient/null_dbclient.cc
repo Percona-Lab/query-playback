@@ -20,10 +20,11 @@
 class NULLDBThread : public DBThread
 {
  public:
-  NULLDBThread(uint64_t _thread_id) : DBThread(_thread_id) {
-  }
+  NULLDBThread(uint64_t _thread_id) :
+	  DBThread(_thread_id,
+		   boost::shared_ptr<Queries>(new Queries())) {}
 
-  void connect() {};
+  bool connect() { return true; };
   void disconnect() {};
   void execute_query(const std::string &, QueryResult *r,
 		     const QueryResult &expected_result) {

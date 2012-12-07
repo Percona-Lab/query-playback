@@ -21,9 +21,12 @@
 #include "connection_state.h"
 
 #include <sys/time.h>
+#include <boost/shared_ptr.hpp>
 
 class TcpdumpQueryEntry : public QueryEntry
 {
+
+  boost::shared_ptr<ConnectionState> connection_state;
   timeval       pcap_timestamp;
   std::string   query;
 
@@ -34,10 +37,12 @@ public:
     pcap_timestamp.tv_sec= pcap_timestamp.tv_usec= 0;
   }
 
-  TcpdumpQueryEntry(const timeval       &_pcap_timestamp,
+  TcpdumpQueryEntry(boost::shared_ptr<ConnectionState> _connection_state,
+		    const timeval       &_pcap_timestamp,
                     const std::string   &_query,
                     const AddrPort      &addr_port) :
     QueryEntry(addr_port.ThreadId(), false),
+    connection_state(_connection_state),
     pcap_timestamp(_pcap_timestamp),
     query(_query)
   {}
@@ -50,15 +55,18 @@ public:
 class TcpdumpResultEntry : public QueryEntry
 {
 
+  boost::shared_ptr<ConnectionState> connection_state;
   timeval       pcap_timestamp;
   QueryResult   expected_result;
 
 public:
   TcpdumpResultEntry() {}
-  TcpdumpResultEntry(const AddrPort     &addr_port,
+  TcpdumpResultEntry(boost::shared_ptr<ConnectionState> _connection_state,
+		     const AddrPort     &addr_port,
                      const timeval      &_pcap_timestamp,
                      const QueryResult  &_expected_result) :
     QueryEntry(addr_port.ThreadId(), false),
+    connection_state(_connection_state),
     pcap_timestamp(_pcap_timestamp),
     expected_result(_expected_result)
   {}
