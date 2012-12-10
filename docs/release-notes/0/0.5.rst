@@ -2,16 +2,19 @@
 Percona Playback 0.5
 ====================
 
+Percona is glad to announce the release of |Percona Playback| 0.5 on November 26th, 2012. Downloads are available from our download site `here <http://www.percona.com/downloads/Percona-Playback/Percona-Playback-0.5/>`_ and :doc:`Percona Software Repositories </installation>`.
+
 This release should be considered Alpha quality.
 
-Changes since 0.4
-=================
+New features
+=============
 
-New features:
-  * Extended reports
-  * Can read slow query log from stdin instead of file
-  * Can provide session-init-query, a query to be sent on each new database connection before replaying any queries.
+  * Reports have been extended and now return the list of queries with a response time longer than the ones run on the original. Additional statistics, like the query types (SELECT, UPDATE,...) with the proportion off faster and slower statement for each categories, has been added as well. 
+  * |Percona Playback| now supports reading the slow query log from standard input (``stdin``) instead of log file.
+  * New option :option:`--session-init-query` has been added. It allows |Percona Playback| to execute some query just after connection is established. This can be used to initialize some session variables.
 
-Bugs fixed:
-  * :bug:`1035217` multi-line queries in the slow query log didn't work correctly.
-  * :bug:`1034527` raw tcpdump format wasn't documented
+Bugs fixed
+===========
+
+  * Multi-line queries in the slow query log didn't work correctly. Bug fixed :bug:`1035217` (*Stewart Smith*).
+  * Raw tcpdump format wasn't documented. Bug fixed :bug:`1034527` (*Hrvoje Matijakovic*).
