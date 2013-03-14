@@ -9,7 +9,7 @@
 # the COPYING file in this directory for full text.
 #
 
-AC_INIT([percona-playback],[0.5],[https://bugs.launchpad.net/percona-playback])
+AC_INIT([percona-playback],[0.6],[https://bugs.launchpad.net/percona-playback])
 AC_CONFIG_SRCDIR([percona_playback/percona_playback.h])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
@@ -17,7 +17,7 @@ AC_CONFIG_MACRO_DIR([m4])
 PANDORA_CANONICAL_TARGET(warnings-always-on, require-cxx)
 
 # Increment if interfaces have been added, removed, or changed.
-LIBPERCONA_PLAYBACK_VERSION_CURRENT=1
+LIBPERCONA_PLAYBACK_VERSION_CURRENT=2
 
 # Increment if source code has changed, set to zero if current is incremented.
 LIBPERCONA_PLAYBACK_VERSION_REVISION=0
