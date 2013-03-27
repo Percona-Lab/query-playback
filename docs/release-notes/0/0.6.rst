@@ -1,0 +1,23 @@
+====================
+Percona Playback 0.6
+====================
+
+Percona is glad to announce the release of |Percona Playback| 0.6 on April 9th, 2013. Downloads are available from our download site `here <http://www.percona.com/downloads/Percona-Playback/Percona-Playback-0.5/>`_ and :doc:`Percona Software Repositories </installation>`.
+
+This release should be considered *BETA* quality.
+
+New features
+=============
+
+ New ``Pool of threads`` feature has been implemented which can be used for dispatching queries to database servers.
+
+Bugs fixed
+===========
+
+ |Percona Playback| now shows error when it's unable to connect to the database server. Bug fixed :bug:`1070824` (*Vlad Lesin*).
+
+ Multi-line query parsing has been improved. Bug fixed :bug:`1080648` (*Vlad Lesin*).
+
+ Missing build dependences have been added to the ``README`` file. Bug fixed :bug:`1072845` (*Stewart Smith*).
+
+ |Percona Playback| wouldn't reconnect or log the error if the connection was broken during the query. Bug fixed :bug:`1080654` (*Vlad Lesin*).
