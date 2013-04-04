@@ -25,6 +25,10 @@ Database Options:
 
    This options tells |percona-playback| which database plugin to use. 
 
+.. option:: --dispatcher-plugin=DISPATCHER
+
+   Dispatcher plugin used to replay queries.
+
 .. option:: --input-plugin=NAME
 
    This options tells |percona-playback| which input plugin to use. 
@@ -32,6 +36,33 @@ Database Options:
 .. option:: --queue-depth[=#]
 
   Queue depth for DB executor (thread). The larger this number is the greater the played-back workload can deviate from the original workload as some connections may be up to queue-depth behind. If no values is specified default is 1.
+
+.. option:: --session-init-query
+
+ This query will be executed just after each connect to database
+
+libdrizzle Client Options:
+--------------------------
+.. option::  --libdrizzle-host=HOST
+
+   Hostname of MySQL/Drizzle server
+
+.. option:: --libdrizzle-username=USERNAME
+
+   Username to connect to MySQL/Drizzle
+
+.. option:: --libdrizzle-password=PASSWORD
+
+   Password for MySQL/Drizzle user
+
+.. option:: --libdrizzle-schema=SCHEMA
+
+   Schema to connect to
+
+.. option:: --libdrizzle-port=PORT
+
+   Port number the server is listening on
+
 
 MySQL Client Options:
 ---------------------
@@ -81,8 +112,21 @@ Simple Report Options:
 
 |tcpdump| Options:
 ------------------
-
 .. option::  --tcpdump-file=FILNAME
 
    Tcpdump file name.
+
+.. option:: --tcpdump-port=PORT
+
+   Tcpdump port (default 3306).
+
+.. option::  --tcpdump-mode=MODE
+
+   The mode of tcpdump plugin (fast|accurate), in 'fast' mode the plugin executes queries as fast as it can whereas in 'accurate' mode the plugin preserves queries execution time and pauses between queries (default FAST).
+
+Threads-pool Options:
+---------------------
+.. option::  --thread-pool-threads-count=[#]
+
+   The number of threads in thread pool. If this options is omitted the number of threads equals to hardware concurrency.
 

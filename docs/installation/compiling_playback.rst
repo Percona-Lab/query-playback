@@ -19,7 +19,7 @@ The following packages and tools must be installed to compile *Percona XtraBacku
 
 In Debian-based distributions, you need to: ::
 
-  # apt-get install debhelper (>= 7.0.50~) autoconf automake libtool \
+  # apt-get install debhelper libcloog-ppl0 autoconf automake libtool \
   gettext intltool libdrizzle-dev libpcap-dev libtbb-dev libmysqlclient-dev \ 
   libboost-program-options-dev libboost-thread-dev pkg-config
 
