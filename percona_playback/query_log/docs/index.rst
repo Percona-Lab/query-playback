@@ -7,6 +7,6 @@ This plugin parses queries from query log files. It can preserve query execution
 The example of usage:
 Run percona_playback/test/basic-slow.log on default libmysqlplugin settings: ::
 
- $ percona_playback --db-plugin=libmysqlclient --slow-query-log-file=./percona_playback/test/basic-slow.log
+ $ percona_playback --db-plugin=libmysqlclient --query-log-file=./percona_playback/test/basic-slow.log
 
 The other options description can be found in "help" message.
