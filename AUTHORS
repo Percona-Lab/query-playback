@@ -1,4 +1,4 @@
-Copyright (C) 2011-2012 Percona Inc.
+Copyright (C) 2011-2013 Percona Inc.
 
 Written by:
  Stewart Smith
@@ -6,3 +6,7 @@ Written by:
 
 Documentation by:
  Hrvoje Matijakovic
+
+Packaging:
+ Ignacio Nin
+ Stewart Smith
