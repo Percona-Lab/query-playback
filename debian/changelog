@@ -1,3 +1,9 @@
+percona-playback (0.6) unstable; urgency=low
+
+  * Add a dependency to libcloog-ppl0, which is needed by boost for compiling
+    certain constructs
+
+ -- Ignacio Nin <ignacio.nin@percona.com>  Thu,  4 Apr 2013 20:14:54 -0300
 percona-playback (0.5) unstable; urgency=low
 
   * Remove an obsolete `files' file

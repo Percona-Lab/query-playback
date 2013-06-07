@@ -3,7 +3,8 @@ Priority: extra
 Maintainer: Ignacio Nin <ignacio.nin@percona.com>
 Build-Depends: debhelper (>= 7.0.50~), autoconf, automake, libtool, gettext, intltool,
 	libdrizzle-dev, libpcap-dev, libtbb-dev, libmysqlclient-dev,
-	libboost-program-options-dev, libboost-thread-dev, pkg-config
+	libboost-program-options-dev, libboost-thread-dev, pkg-config,
+	libcloog-ppl0
 Standards-Version: 3.8.4
 Section: libs
 Homepage: http://www.percona.com/
