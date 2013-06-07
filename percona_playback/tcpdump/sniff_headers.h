@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * Copyright (C) 2006 Daniel Nichter
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published

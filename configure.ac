@@ -1,6 +1,8 @@
 #
 # Percona Playback
 #
+# (C) 2011-2013 Percona Ireland Ltd.
+#
 # Portions of auto-foo:
 # Copyright (C) 2009-2010 Monty Taylor, Eric Day
 # All rights reserved.

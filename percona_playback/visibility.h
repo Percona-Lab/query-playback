@@ -1,6 +1,7 @@
 /*
  * Percona Playback
  *
+ * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * Copyright (C) 2010 Eric Day (eday@oddments.org)
  * All rights reserved.
  *
