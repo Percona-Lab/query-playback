@@ -32,6 +32,7 @@ CLEANFILES =
 DISTCLEANFILES = \
   config/top.h
 EXTRA_DIST = \
+  REVNO \
   LICENSE \
   COPYING.BSD2 \
   COPYING.BSD3 \
@@ -71,6 +72,9 @@ nobase_dist_pkginclude_HEADERS= percona_playback/version.h
 #
 # libpercona_playback
 #
+
+REVNO:
+	bzr revno > REVNO
 
 lib_LTLIBRARIES += libpercona_playback.la
 
