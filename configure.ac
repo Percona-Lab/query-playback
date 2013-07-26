@@ -11,7 +11,7 @@
 # the COPYING file in this directory for full text.
 #
 
-AC_INIT([percona-playback],[0.6],[https://bugs.launchpad.net/percona-playback])
+AC_INIT([percona-playback],[0.7],[https://bugs.launchpad.net/percona-playback])
 AC_CONFIG_SRCDIR([percona_playback/percona_playback.h])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
