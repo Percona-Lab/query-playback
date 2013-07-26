@@ -12,6 +12,8 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  * END LICENSE */
+
+#include <config.h>
 #include <pcap.h>
 #include <iostream>
 #ifdef HAVE_LIBDRIZZLE_1_0_DRIZZLE_CLIENT_H
