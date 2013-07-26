@@ -22,7 +22,11 @@
 #include <string>
 #include <string.h>
 #include <boost/shared_ptr.hpp>
+#ifdef HAVE_LIBDRIZZLE_1_0_DRIZZLE_CLIENT_H
+#include <libdrizzle-1.0/drizzle_client.h>
+#else
 #include <libdrizzle/drizzle_client.h>
+#endif
 
 #include "percona_playback/query_result.h"
 #include "percona_playback/db_thread.h"

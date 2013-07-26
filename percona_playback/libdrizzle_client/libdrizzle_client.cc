@@ -24,8 +24,13 @@ namespace po= boost::program_options;
 
 
 #include <percona_playback/db_thread.h>
+#ifdef HAVE_LIBDRIZZLE_1_0_DRIZZLE_CLIENT_H
+#include <libdrizzle-1.0/drizzle.h>
+#include <libdrizzle-1.0/drizzle_client.h>
+#else
 #include <libdrizzle/drizzle.h>
 #include <libdrizzle/drizzle_client.h>
+#endif
 
 class QueryResult;
 class LibDrizzleOptions;

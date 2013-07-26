@@ -16,6 +16,11 @@ AC_DEFUN([_PANDORA_SEARCH_LIBDRIZZLE_1_0],[
     [ac_enable_libdrizzle="$enableval"],
     [ac_enable_libdrizzle="yes"])
 
+  AC_CHECK_HEADERS([libdrizzle/drizzle_client.h libdrizzle-1.0/drizzle_client.h],
+	[break],
+	[]
+	)
+
   AS_IF([test "x$ac_enable_libdrizzle" = "xyes"],[
     AC_LIB_HAVE_LINKFLAGS(drizzle,,[
       #include <libdrizzle/drizzle_client.h>
