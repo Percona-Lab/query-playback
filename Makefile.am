@@ -52,8 +52,6 @@ EXTRA_DIST = \
   packaging/debian/rules \
   packaging/debian/copyright \
   packaging/debian/control \
-  packaging/debian/patches/series \
-  packaging/debian/patches/fix-libdrizzle-includes.patch \
   percona_playback/test/basic-multiline.log \
   percona_playback/test/basic-slow.log \
   percona_playback/test/crashme-slow.log \
