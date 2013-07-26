@@ -4,7 +4,8 @@ Maintainer: Debian MySQL Maintainers <pkg-mysql-maint@lists.alioth.debian.org>
 Uploaders: Stewart Smith <stewart.smith@percona.com>, Ignacio Nin <ignacio.nin@percona.com>, Clint Byrum <clint@fewbar.com>
 Build-Depends: debhelper (>= 7.0.50~), autoconf, automake, libtool, gettext, intltool,
 	libdrizzle-dev, libpcap-dev, libtbb-dev, libmysqlclient-dev,
-	libboost-program-options-dev, libboost-thread-dev, pkg-config
+	libboost-program-options-dev, libboost-thread-dev, pkg-config,
+	python
 Standards-Version: 3.9.4
 Section: database
 Homepage: http://www.percona.com/
