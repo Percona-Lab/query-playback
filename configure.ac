@@ -63,6 +63,7 @@ AC_DEFINE_UNQUOTED([PERCONA_PLAYBACK_MODULE_EXT], ["$acl_cv_shlibext"],
 AM_CXXFLAGS="${AM_CXXFLAGS} ${NO_EFF_CXX} ${NO_OLD_STYLE_CAST} ${NO_VISIBILITY}"
 AC_CONFIG_FILES(Makefile dnl po/Makefile.in
  percona_playback/version.h dnl
+ VERSION dnl
  doxygen/header.html)
 
 AC_OUTPUT

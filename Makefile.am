@@ -33,6 +33,7 @@ DISTCLEANFILES = \
   config/top.h
 EXTRA_DIST = \
   REVNO \
+  VERSION \
   LICENSE \
   COPYING.BSD2 \
   COPYING.BSD3 \
