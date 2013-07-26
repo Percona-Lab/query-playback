@@ -36,6 +36,22 @@ EXTRA_DIST = \
   COPYING.BSD2 \
   COPYING.BSD3 \
   README \
+  packaging/percona-playback.spec \
+  packaging/debian/source/format \
+  packaging/debian/changelog \
+  packaging/debian/compat \
+  packaging/debian/docs \
+  packaging/debian/percona-playback.dirs \
+  packaging/debian/percona-playback.install \
+  packaging/debian/percona-playback-dev.dirs \
+  packaging/debian/percona-playback-dev.install \
+  packaging/debian/README.Debian \
+  packaging/debian/README.source \
+  packaging/debian/rules \
+  packaging/debian/copyright \
+  packaging/debian/control \
+  packaging/debian/patches/series \
+  packaging/debian/patches/fix-libdrizzle-includes.patch \
   percona_playback/test/basic-multiline.log \
   percona_playback/test/basic-slow.log \
   percona_playback/test/crashme-slow.log \
