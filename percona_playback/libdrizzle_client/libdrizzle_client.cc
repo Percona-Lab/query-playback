@@ -13,6 +13,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  * END LICENSE */
 
+#include <config.h>
 #include <percona_playback/plugin.h>
 #include <percona_playback/query_result.h>
 #include <percona_playback/gettext.h>
