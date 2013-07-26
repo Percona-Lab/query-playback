@@ -33,6 +33,8 @@ DISTCLEANFILES = \
   config/top.h
 EXTRA_DIST = \
   LICENSE \
+  COPYING.BSD2 \
+  COPYING.BSD3 \
   README \
   percona_playback/test/basic-multiline.log \
   percona_playback/test/basic-slow.log \

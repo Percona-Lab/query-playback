@@ -1,18 +1,18 @@
 Source: percona-playback
 Priority: extra
-Maintainer: Ignacio Nin <ignacio.nin@percona.com>
+Maintainer: Debian MySQL Maintainers <pkg-mysql-maint@lists.alioth.debian.org>
+Uploaders: Stewart Smith <stewart.smith@percona.com>, Ignacio Nin <ignacio.nin@percona.com>, Clint Byrum <clint@fewbar.com>
 Build-Depends: debhelper (>= 7.0.50~), autoconf, automake, libtool, gettext, intltool,
 	libdrizzle-dev, libpcap-dev, libtbb-dev, libmysqlclient-dev,
-	libboost-program-options-dev, libboost-thread-dev, pkg-config,
-	libcloog-ppl0
-Standards-Version: 3.8.4
-Section: libs
+	libboost-program-options-dev, libboost-thread-dev, pkg-config
+Standards-Version: 3.9.4
+Section: database
 Homepage: http://www.percona.com/
 
 Package: percona-playback-dev
 Section: libdevel
 Architecture: any
-Depends: percona-playback (= ${binary:Version})
+Depends: percona-playback (= ${binary:Version}), ${misc:Depends}
 Description: A tool for replaying captured database server load
  Percona Playback is a tool for replaying the captured load of one database
  server against another in the most realistic way possible. Captured load can
