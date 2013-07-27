@@ -12,6 +12,8 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  * END LICENSE */
+
+#include <config.h>
 #include "tcpdump_query_entries.h"
 #include "tcpdump.h"
 #include "percona_playback/db_thread.h"
