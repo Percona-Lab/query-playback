@@ -18,7 +18,11 @@ Example
  
 .. code-block:: bash
  
-  $ tcpdump -i any port 3306 -w example.dump
+  $ tcpdump -i eth0 port 3306 -w example.dump
+
+.. note::
+
+   |Percona Playback| currently doesn't support ``any`` as and tcpdump interface option. If "-i any" is used for capturing tcpdump parser works wrong.
 
 2) |Percona Playback| is started with tcpdump plugin reading the example.dump file, connecting to remote |MySQL| server in *accurate* mode: 
 
