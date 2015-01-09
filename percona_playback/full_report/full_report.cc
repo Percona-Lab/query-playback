@@ -21,6 +21,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <tbb/tbb_stddef.h>
 
@@ -58,6 +59,7 @@ private:
   tbb::atomic<uint64_t> nr_drop;
   tbb::atomic<uint64_t> nr_drop_faster;
   tbb::atomic<uint64_t> nr_drop_slower;
+  tbb::atomic<uint64_t> nr_other;
   tbb::atomic<uint64_t> total_execution_time_ms;
   tbb::atomic<uint64_t> expected_total_execution_time_ms;
 
@@ -97,6 +99,7 @@ public:
     nr_drop= 0;
     nr_drop_faster= 0;
     nr_drop_slower= 0;
+    nr_other= 0;
     total_execution_time_ms= 0;
     expected_total_execution_time_ms= 0;
   }
@@ -130,45 +133,47 @@ public:
       }
     }
 
-    std::string new_query = boost::to_upper_copy(query);
+    std::string new_query = boost::trim_copy(boost::to_upper_copy(query));
 
-    if (new_query.find("\nSELECT ") != std::string::npos)
+    if (boost::starts_with(new_query, "SELECT "))
     {
 		nr_select++;
 		nr_select_faster+= faster;
 		nr_select_slower+= slower;
     }
-    else if (new_query.find("\nUPDATE ") != std::string::npos)
+    else if (boost::starts_with(new_query, "UPDATE "))
     {
 	       	nr_update++;
 		nr_update_faster+= faster;
 		nr_update_slower+= slower;		
     }
-    else if (new_query.find("\nINSERT ") != std::string::npos)
+    else if (boost::starts_with(new_query, "INSERT "))
     {
 	        nr_insert++;
 		nr_insert_faster+= faster;
 		nr_insert_slower+= slower;
     }
-    else if (new_query.find("\nDELETE ") != std::string::npos)
+    else if (boost::starts_with(new_query, "DELETE "))
     {
 	        nr_delete++;
 		nr_delete_faster+= faster;
 		nr_delete_slower+= slower;
     }
-    else if (new_query.find("\nREPLACE ") != std::string::npos)
+    else if (boost::starts_with(new_query, "REPLACE "))
     {
 	        nr_replace++;
 		nr_replace_faster+= faster;
 		nr_replace_slower+= slower;
     }
-    else if (new_query.find("\nDROP ") != std::string::npos)
+    else if (boost::starts_with(new_query, "DROP "))
     {
  	        nr_drop++;
 		nr_drop_faster+= faster;
 		nr_drop_slower+= slower;
     }
-
+    else {
+ 	        nr_other++;
+    }
   }
 
   virtual void print_report()
@@ -179,7 +184,8 @@ public:
     printf(_("UPDATEs  : %" PRIu64 " queries (%" PRIu64 " faster, %" PRIu64 " slower)\n"), uint64_t(nr_update), uint64_t(nr_update_faster), uint64_t(nr_update_slower));
     printf(_("DELETEs  : %" PRIu64 " queries (%" PRIu64 " faster, %" PRIu64 " slower)\n"), uint64_t(nr_delete), uint64_t(nr_delete_faster), uint64_t(nr_delete_slower));
     printf(_("REPLACEs : %" PRIu64 " queries (%" PRIu64 " faster, %" PRIu64 " slower)\n"), uint64_t(nr_replace), uint64_t(nr_replace_faster), uint64_t(nr_replace_slower));
-    printf(_("DROPs    : %" PRIu64 " queries (%" PRIu64 " faster, %" PRIu64 " slower)\n\n\n"), uint64_t(nr_drop), uint64_t(nr_drop_faster), uint64_t(nr_drop_slower));
+    printf(_("DROPs    : %" PRIu64 " queries (%" PRIu64 " faster, %" PRIu64 " slower)\n"), uint64_t(nr_drop), uint64_t(nr_drop_faster), uint64_t(nr_drop_slower));
+    printf(_("Other    : %" PRIu64 " queries\n\n\n"), uint64_t(nr_other));
   }
 
 };
