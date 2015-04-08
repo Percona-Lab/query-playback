@@ -9,7 +9,8 @@ Plugins
 .. toctree::
    :maxdepth: 2
 
-   plugins/list
+   query_log
+   tcpdump
 
 References
 ----------
