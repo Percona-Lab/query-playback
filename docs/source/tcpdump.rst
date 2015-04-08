@@ -24,9 +24,9 @@ Example
 
 .. note::
 
-   |Percona Playback| currently doesn't support ``any`` as and tcpdump interface option. If "-i any" is used for capturing tcpdump parser works wrong.
+   *Playback* currently doesn't support ``any`` as and tcpdump interface option. If "-i any" is used for capturing tcpdump parser works wrong.
 
-2) |Percona Playback| is started with tcpdump plugin reading the example.dump file, connecting to remote |MySQL| server in *accurate* mode: 
+2) *Playback* is started with tcpdump plugin reading the example.dump file, connecting to remote |MySQL| server in *accurate* mode: 
 
 .. code-block:: bash
 
@@ -34,7 +34,7 @@ Example
   --db-plugin=libmysqlclient --mysql-host=10.8.2.10 --mysql-username=root \
   --mysql-password=passW0rd --mysql-schema=imdb
 
-3) After the |Percona Playback| is done, report is generated that looks like this:  
+3) After the *Playback* is done, report is generated that looks like this:  
 
 .. code-block:: bash
 

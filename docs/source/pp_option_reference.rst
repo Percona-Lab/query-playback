@@ -1,6 +1,6 @@
-==================================
-Percona Playback Option Reference
-==================================
+===========================
+ Playback Option Reference
+===========================
 
 This page documents the command-line options for the :program:`percona-playback`.
 

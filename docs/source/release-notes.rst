@@ -1,6 +1,6 @@
-==================================
- |Percona| Playback release notes
-==================================
+========================
+ Playback release notes
+========================
 
 .. toctree::
    :maxdepth: 1

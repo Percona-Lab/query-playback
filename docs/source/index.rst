@@ -1,8 +1,8 @@
-==================
- Percona Playback
-==================
+==========
+ Playback
+==========
 
-|Percona Playback| is a tool for replaying the load of one database server to another. Currently it can read queries from |MySQL| query-log and |tcpdump| files and run them on other MySQL server. It has plugin architecture and can be extended with different plugins.
+Playback is an open source tool designed for Percona internal use. It is provided as a courtesy to users and customers, however it is not supported under a Percona Support subscription. To get the best experience and results from Playback, users and customers are encouraged to work with the `Percona Consulting team <http://www.percona.com/services/mysql-consulting>`_ on project specific needs and requirements.
 
 Introduction
 ============
@@ -30,7 +30,9 @@ User's Manual
    :maxdepth: 4
    :glob:
 
+   overview
    manual
+   known_issues
 
 Miscellaneous
 =============

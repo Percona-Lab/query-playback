@@ -1,10 +1,10 @@
-============================================================
-Compiling and  Installing Percona Playback from Source Code
-============================================================
+===================================================
+Compiling and Installing Playback from Source Code
+===================================================
 
-The source code is available from the *Launchpad* project `here <https://launchpad.net/percona-playback>`_. The easiest way to get the code is with :command:`bzr branch` of the desired release, such as the following: ::
-
-  bzr branch lp:percona-playback
+The source code is available from the *Github* project `here <https://github.com/percona/percona-playback>`_. The easiest way to get the code is with :command:`git clone` of the desired release, such as the following: ::
+ 
+  git clone https://github.com/percona/percona-playback
 
 You should then have a directory named after the release you branched, such as ``percona-playback``.
 
@@ -15,7 +15,7 @@ Compiling on Linux
 Prerequisites
 --------------
 
-The following packages and tools must be installed to compile *Percona XtraBackup* from source. These might vary from system to system.
+The following packages and tools must be installed to compile *Playback* from source. These might vary from system to system.
 
 In Debian-based distributions, you need to: ::
 
@@ -33,7 +33,7 @@ Package ``libmysqlclient-dev`` is not strictly needed for compiling, but if you 
 
 Building
 --------
-If you are building from BZR, you will need to run :file:`./config/autorun.sh` first. :: 
+If you are building from git, you will need to run :file:`./config/autorun.sh` first. :: 
 
   $ ./configure
   $ make
