@@ -1,0 +1,13 @@
+====================
+Percona Playback 0.7
+====================
+
+Percona is glad to announce the release of |Percona Playback| 0.7 on October 21st, 2013. Downloads are available from our download site `here <http://www.percona.com/downloads/Percona-Playback/Percona-Playback-0.7/>`_ and :doc:`Percona Software Repositories </installation>`.
+
+This release should be considered *BETA* quality.
+
+Bugs fixed
+==========
+
+
+This release fixes various packaging and documentation issues and updates copyright notices. The primary goal of this release was to ensure that |Percona Playback| is ready to be packaged for Debian, Ubuntu and other Linux distributions.
