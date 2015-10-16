@@ -1,11 +1,11 @@
 Percona Playback
 ----------------
-(C) 2011-2012 Percona Inc.
-See LICENSE for full text of the GPL.
+© 2011-2012 Percona Inc.
+See [LICENSE](LICENSE) for full text of the GPL.
 
 Percona Playback is a tool for replaying the load of one database server to another.
 
-see ./bin/percona-playback --help for details
+see `./bin/percona-playback --help` for details
 
 Build Dependencies
 ------------------
@@ -17,8 +17,9 @@ You will need the 'development' packages for all of these (often suffixed by
 '-devel' for RedHat or '-dev' for Debian derived distributions).
 
 The core of Percona Playback requires:
+
  * libtbb (Intel Threading Building Blocks)
- * Boost (including boost program_options) at least 1.41
+ * Boost (including boost `program_options`) at least 1.41
  * libtool
  * gettext
  * intltool
@@ -38,24 +39,32 @@ Building
 --------
 If you are building from BZR, you will need to run ./config/autorun.sh first.
 
-$ ./configure
-$ make
+    $ ./configure
+    $ make
 
 Test Suite
 ----------
 There are several tests included, these use a dummy database client plugin to mainly test that parsing of the logs is correct.
 
-$ make check
+    $ make check
 
 Building release tarball
 ------------------------
 
-$ make dist
+    $ make dist
 
 Capturing everything in the slow log
 ------------------------------------
 To capture queries for Percona Playback to play back, you will need to run MySQL, MariaDB or Percona Server with the slow query log capturing the queries you wish to run. You will need the following options to mysqld:
 
---slow-query-log --log-slow-admin-statements --log-slow-verbosity=microtime --long-query-time=0
+    --slow-query-log --log-slow-admin-statements --log-slow-verbosity=microtime --long-query-time=0
 
+Alternatively it is possible to use tcpdump to capture the traffic.
 
+Documentation
+-------------
+
+You can build the documentation by running make in the docs directory.
+
+The online documentation is available here:
+https://www.percona.com/doc/percona-playback/index.html
