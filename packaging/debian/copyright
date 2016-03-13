@@ -9,7 +9,6 @@ Files: ./bin/percona_playback.cc
  ./percona_playback/db_thread.h
  ./percona_playback/error_report/error_report.cc
  ./percona_playback/full_report/full_report.cc
- ./percona_playback/libdrizzle_client/libdrizzle_client.cc
  ./percona_playback/mysql_client/mysql_client.cc
  ./percona_playback/mysql_client/mysql_client.h
  ./percona_playback/null_dbclient/null_dbclient.cc
@@ -22,15 +21,6 @@ Files: ./bin/percona_playback.cc
  ./percona_playback/query_log/query_log.h
  ./percona_playback/query_result.h
  ./percona_playback/simple_report/simple_report.cc
- ./percona_playback/tcpdump/connection_state.cc
- ./percona_playback/tcpdump/connection_state.h
- ./percona_playback/tcpdump/pcap_packets_parser.cc
- ./percona_playback/tcpdump/pcap_packets_parser.h
- ./percona_playback/tcpdump/tcpdump.cc
- ./percona_playback/tcpdump/tcpdump.h
- ./percona_playback/tcpdump/tcpdump_mysql_parser_stats.h
- ./percona_playback/tcpdump/tcpdump_query_entries.cc
- ./percona_playback/tcpdump/tcpdump_query_entries.h
  ./percona_playback/test/basic-multiline.cc
  ./percona_playback/test/basic-queue-depth.cc
  ./percona_playback/test/basic-stdin.cc
@@ -40,11 +30,6 @@ Files: ./bin/percona_playback.cc
  ./percona_playback/test/preserve_query_time.cc
  ./percona_playback/test/sqlbench-transactions-slow.cc
  ./percona_playback/test/sysbench-slow.cc
- ./percona_playback/test/tcpdump_accuracy.cc
- ./percona_playback/test/tcpdump_fragmented_packet.cc
- ./percona_playback/test/tcpdump_multiple_connections.cc
- ./percona_playback/test/tcpdump_stress_test.cc
- ./percona_playback/test/tcpdump_without_handshake.cc
  ./percona_playback/test/thread-pool-sysbench-slow.cc
  ./percona_playback/thread_per_connection/thread_per_connection.cc
  ./percona_playback/thread_pool/thread_pool.cc
@@ -60,11 +45,6 @@ License: BSD-2-clause
 Files: ./config/autorun.sh
 Copyright: 2011, Brian Aker
 License: BSD (3 clause)
-
-Files: ./percona_playback/tcpdump/sniff_headers.h
-Copyright: 2006, Daniel Nichter
-  2011-2013, Percona Ireland Ltd
-License: GPL-2
 
 Files: ./percona_playback/gettext.h
 Copyright: 1995-1998, 2000-2002, 2004-2006, Free Software Foundation, Inc

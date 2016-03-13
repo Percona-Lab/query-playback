@@ -110,11 +110,7 @@ rst_prolog = '''
 
 .. |MySQL|  replace:: *MySQL*
 
-.. |Drizzle|  replace:: *Drizzle*
-
 .. |MariaDB|  replace:: *MariaDB*
-
-.. |tcpdump|  replace:: :term:`tcpdump`
 
 
 '''

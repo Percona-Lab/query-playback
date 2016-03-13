@@ -28,13 +28,6 @@ The core of Query Playback requires:
 The plugin that uses the MySQL client library needs:
  * libmysqlclient (MySQL Client Libraries)
 
-For using the libdrizzle client library to speak to MySQL or Drizzle:
- * libdrizzle
-
-For playing back tcpdump captured load:
- * libpcap
- * libdrizzle
-
 Building
 --------
 If you are building from BZR, you will need to run ./config/autorun.sh first.
@@ -58,8 +51,6 @@ Capturing everything in the slow log
 To capture queries for Query Playback to play back, you will need to run MySQL, MariaDB or Percona Server with the slow query log capturing the queries you wish to run. You will need the following options to mysqld:
 
     --slow-query-log --log-slow-admin-statements --log-slow-verbosity=microtime --long-query-time=0
-
-Alternatively it is possible to use tcpdump to capture the traffic.
 
 Documentation
 -------------

@@ -30,16 +30,15 @@ License:        GPL
 URL:            http://www.percona.com/
 Source:         percona-playback-%{version}.tar.gz
 Group:          Applications/Databases
-BuildRequires:  autoconf automake libtool libdrizzle-devel gettext-devel libpcap-devel tbb-devel mysql mysql-devel intltool %{boost_req} pkgconfig
-Requires:       libdrizzle libpcap tbb mysql %{boost_runreq}
+BuildRequires:  autoconf automake libtool gettext-devel libpcap-devel tbb-devel mysql mysql-devel intltool %{boost_req} pkgconfig
+Requires:       libpcap tbb mysql %{boost_runreq}
 BuildRoot:	%{_tmppath}/%{name}-%{version}-build
 
 %description
 Percona Playback is a tool for replaying the captured load of one database
 server against another in the most realistic way possible. Captured load can
-come in the form of MySQL slow query logs or tcpdump capture.
-It's multithreaded, modular and configurable to allow for flexibility and
-future extension.
+come in the form of MySQL query logs.  It's multithreaded, modular and
+configurable to allow for flexibility and future extension.
 
 %package        devel
 Summary:        Development files for %{name}

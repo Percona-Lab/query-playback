@@ -2,7 +2,7 @@
  About Playback
 ================
 
-*Playback* is a tool for replaying the load of one database server to another. Currently it can read queries from |MySQL| query-log and |tcpdump| files and run them on other |MySQL| server. It has plugin architecture and can be extended with different plugins. Playback is an open source tool designed for Percona internal use. It is provided as a courtesy to users and customers, however it is not supported under a Percona Support subscription. To get the best experience and results from Playback, users and customers are encouraged to work with the `Percona Consulting team <http://www.percona.com/services/mysql-consulting>`_ on project specific needs and requirements.
+*Playback* is a tool for replaying the load of one database server to another. Currently it can read queries from |MySQL| query-log files and run them on other |MySQL| server. It has plugin architecture and can be extended with different plugins. Playback is an open source tool designed for Percona internal use. It is provided as a courtesy to users and customers, however it is not supported under a Percona Support subscription. To get the best experience and results from Playback, users and customers are encouraged to work with the `Percona Consulting team <http://www.percona.com/services/mysql-consulting>`_ on project specific needs and requirements.
 
 There are following categories of plugins for |percona-playback|:
 
@@ -19,17 +19,15 @@ At this moment the following plugins are implemented:
  1) `input`
 
    * query_log - reads queries from query-log files
-   * tcpdump - reads queries from tcpdump files
 
  2) `dispatcher`
 
    * thread-per-connection - this plugin uses one thread per connection for replaying the queries.
-   * thread-pool - uses :option:`--thread-pool-threads-count` to enable more queries per connection by utilizing the thread pool. When used with a non-blocking client library such as *libdrizzle* or the *MariaDB* one, this should be much more efficient than the thread-per-connection plugin.
+   * thread-pool - uses :option:`--thread-pool-threads-count` to enable more queries per connection by utilizing the thread pool. 
 
  3) `db`
 
    * libmysqlclient - plays queries in |MySQL| server
-   * libdrizzle - plays queries in |MySQL| or *Drizzle* server
    * null - doesn't play queries anywhere but useful for testing
 
  4) `report`

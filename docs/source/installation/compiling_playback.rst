@@ -13,19 +13,19 @@ Compiling on Linux
 ==================
 
 Prerequisites
---------------
+-------------
 
 The following packages and tools must be installed to compile *Playback* from source. These might vary from system to system.
 
 In Debian-based distributions, you need to: ::
 
-  # apt-get install debhelper libcloog-ppl0 autoconf automake libtool \
-  gettext intltool libdrizzle-dev libpcap-dev libtbb-dev libmysqlclient-dev \ 
+  # apt-get install debhelper autoconf automake libtool \
+  gettext intltool libpcap-dev libtbb-dev libmysqlclient-dev \ 
   libboost-program-options-dev libboost-thread-dev pkg-config
 
 In ``RPM``-based distributions, you need to: ::
 
-  # yum install autoconf automake libtool libdrizzle-devel gettext-devel \
+  # yum install autoconf automake libtool gettext-devel \
   libpcap-devel tbb-devel mysql mysql-devel intltool \
   boost-program-options-devel boost-thread-devel pkgconfig
 
