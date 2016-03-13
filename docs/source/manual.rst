@@ -10,7 +10,6 @@ Plugins
    :maxdepth: 2
 
    query_log
-   tcpdump
 
 References
 ----------

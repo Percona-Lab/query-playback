@@ -3,8 +3,7 @@
 ===================
 
 :program:`percona-playback` is a utility for replaying database server load.
-It currently supports replaying load captured either via a |MySQL| slow query
-log file or from |tcpdump| capture of the |MySQL| network protocol.
+It currently supports replaying load captured via a |MySQL| query log file.
 
 Inaccuracies in playback
 ========================

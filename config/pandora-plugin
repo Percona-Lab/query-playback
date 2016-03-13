@@ -362,7 +362,7 @@ def expand_plugin_ini(plugin):
       plugin['library_type']= 'noinst'
 
 def find_testsuite(plugin_dir):
-  for testdir in ['drizzle-tests','tests']:
+  for testdir in ['tests']:
     if os.path.isdir(os.path.join(plugin_dir,testdir)):
       return testdir
   if os.path.isdir(os.path.join('tests','suite',os.path.basename(plugin_dir))):

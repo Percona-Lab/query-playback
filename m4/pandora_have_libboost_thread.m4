@@ -17,13 +17,13 @@ AC_DEFUN([_PANDORA_SEARCH_BOOST_THREAD],[
   CXXFLAGS="${PTHREAD_CFLAGS} ${CXXFLAGS}"
 
   AC_LANG_PUSH(C++)
-  AC_LIB_HAVE_LINKFLAGS(boost_thread-mt,,[
+  AC_LIB_HAVE_LINKFLAGS(boost_thread-mt,boost_system-mt,[
     #include <boost/thread.hpp>
   ],[
     boost::thread id;
   ])
   AS_IF([test "x${ac_cv_libboost_thread_mt}" = "xno"],[
-    AC_LIB_HAVE_LINKFLAGS(boost_thread,,[
+  AC_LIB_HAVE_LINKFLAGS(boost_thread,boost_system,[
       #include <boost/thread.hpp>
     ],[
       boost::thread id;

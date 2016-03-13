@@ -41,29 +41,6 @@ Database Options:
 
  This query will be executed just after each connect to database
 
-libdrizzle Client Options:
---------------------------
-.. option::  --libdrizzle-host=HOST
-
-   Hostname of MySQL/Drizzle server
-
-.. option:: --libdrizzle-username=USERNAME
-
-   Username to connect to MySQL/Drizzle
-
-.. option:: --libdrizzle-password=PASSWORD
-
-   Password for MySQL/Drizzle user
-
-.. option:: --libdrizzle-schema=SCHEMA
-
-   Schema to connect to
-
-.. option:: --libdrizzle-port=PORT
-
-   Port number the server is listening on
-
-
 MySQL Client Options:
 ---------------------
 .. option::  --mysql-host=HOST
@@ -109,20 +86,6 @@ Simple Report Options:
 .. option::  --show-per-connection-query-count
 
    Display the number of queries executed for each connection.
-
-|tcpdump| Options:
-------------------
-.. option::  --tcpdump-file=FILNAME
-
-   Tcpdump file name.
-
-.. option:: --tcpdump-port=PORT
-
-   Tcpdump port (default 3306).
-
-.. option::  --tcpdump-mode=MODE
-
-   The mode of tcpdump plugin (fast|accurate), in 'fast' mode the plugin executes queries as fast as it can whereas in 'accurate' mode the plugin preserves queries execution time and pauses between queries (default FAST).
 
 Threads-pool Options:
 ---------------------
