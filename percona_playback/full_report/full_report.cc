@@ -132,37 +132,37 @@ public:
 
     std::string new_query = boost::to_upper_copy(query);
 
-    if (new_query.find("\nSELECT ") != std::string::npos)
+    if (new_query.find("SELECT ") != std::string::npos)
     {
 		nr_select++;
 		nr_select_faster+= faster;
 		nr_select_slower+= slower;
     }
-    else if (new_query.find("\nUPDATE ") != std::string::npos)
+    else if (new_query.find("UPDATE ") != std::string::npos)
     {
 	       	nr_update++;
 		nr_update_faster+= faster;
 		nr_update_slower+= slower;		
     }
-    else if (new_query.find("\nINSERT ") != std::string::npos)
+    else if (new_query.find("INSERT ") != std::string::npos)
     {
 	        nr_insert++;
 		nr_insert_faster+= faster;
 		nr_insert_slower+= slower;
     }
-    else if (new_query.find("\nDELETE ") != std::string::npos)
+    else if (new_query.find("DELETE ") != std::string::npos)
     {
 	        nr_delete++;
 		nr_delete_faster+= faster;
 		nr_delete_slower+= slower;
     }
-    else if (new_query.find("\nREPLACE ") != std::string::npos)
+    else if (new_query.find("REPLACE ") != std::string::npos)
     {
 	        nr_replace++;
 		nr_replace_faster+= faster;
 		nr_replace_slower+= slower;
     }
-    else if (new_query.find("\nDROP ") != std::string::npos)
+    else if (new_query.find("DROP ") != std::string::npos)
     {
  	        nr_drop++;
 		nr_drop_faster+= faster;
