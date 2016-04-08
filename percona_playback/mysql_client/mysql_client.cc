@@ -31,6 +31,7 @@ public:
     user("root"),
     password(""),
     schema("test"),
+    socket("/var/lib/mysql/mysql.sock"),
     port(3306)
   {
   }
@@ -39,6 +40,7 @@ public:
   std::string user;
   std::string password;
   std::string schema;
+  std::string socket;
   unsigned int port;
 };
 
@@ -51,7 +53,7 @@ bool MySQLDBThread::connect()
 		          options->password.c_str(),
 		          options->schema.c_str(),
 		          options->port,
-		          "",
+		          options->socket.c_str(),
 		          CLIENT_MULTI_STATEMENTS))
   {
     fprintf(stderr, "Can't connect to server: %s\n",
@@ -132,6 +134,7 @@ public:
     ("mysql-username", po::value<std::string>(), _("Username to connect to MySQL"))
     ("mysql-password", po::value<std::string>(), _("Password for MySQL user"))
     ("mysql-schema", po::value<std::string>(), _("MySQL Schema to connect to"))
+    ("mysql-socket", po::value<std::string>(), _("MySQL Socket to connect to when mysql-host=localhost"))
     ("mysql-port", po::value<unsigned int>(), _("MySQL port number"))
     ;
 
@@ -144,6 +147,7 @@ public:
          vm.count("mysql-username") ||
          vm.count("mysql-password") ||
          vm.count("mysql-schema") ||
+         vm.count("mysql-socket") ||
          vm.count("mysql-port")))
     {
       fprintf(stderr,
@@ -186,6 +190,11 @@ public:
     if (vm.count("mysql-schema"))
     {
       options.schema= vm["mysql-schema"].as<std::string>();
+    }
+
+    if (vm.count("mysql-socket"))
+    {
+      options.socket= vm["mysql-socket"].as<std::string>();
     }
 
     if (vm.count("mysql-port"))
