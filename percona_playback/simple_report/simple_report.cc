@@ -65,6 +65,7 @@ private:
   ConnectionQueryCountMap connection_query_counts;
 
   bool show_connection_query_count;
+  bool ignore_row_result_diffs;
 
 public:
   SimpleReportPlugin(std::string _name) : ReportPlugin(_name)
@@ -75,6 +76,7 @@ public:
     nr_queries_rows_differ= 0;
     nr_error_queries= 0;
     show_connection_query_count= false;
+    ignore_row_result_diffs = false;
     total_execution_time_ms= 0;
     expected_total_execution_time_ms= 0;
     nr_quicker_queries= 0;
@@ -89,6 +91,9 @@ public:
     ("show-per-connection-query-count",
      po::value<bool>(&show_connection_query_count)->default_value(false)->zero_tokens(),
      _("For each connection, display the number of queries executed."))
+     ("ignore-row-result-diffs",
+      po::value<bool>(&ignore_row_result_diffs)->default_value(false)->zero_tokens(),
+      _("Ignore differences in the number of rows returned."))
     ;
 
     return &simple_report_options;
@@ -96,7 +101,7 @@ public:
 
   virtual int processOptions(boost::program_options::variables_map &vm) {
     if (!active &&
-      (vm.count("show-per-connection-query-count")))
+      (vm.count("show-per-connection-query-count") || vm.count("ignore-row-result-diffs")) )
       {
 	fprintf(stderr,
 		_("simple_report plugin is not selected, "
@@ -133,7 +138,7 @@ public:
     }
 
 
-    if (actual.getRowsSent() != expected.getRowsSent())
+    if (!ignore_row_result_diffs && actual.getRowsSent() != expected.getRowsSent())
     {
       nr_queries_rows_differ++;
       fprintf(stderr, _("Connection %"PRIu64" Rows Sent: %"PRIu64 " != expected %"PRIu64 " for query: %s\n"), thread_id, actual.getRowsSent(), expected.getRowsSent(), query.c_str());
