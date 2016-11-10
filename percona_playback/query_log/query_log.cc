@@ -57,14 +57,16 @@ public:
   ParseQueryLogFunc(FILE *input_file_,
 		    unsigned int run_count_,
 		    tbb::atomic<uint64_t> *entries_,
-		    tbb::atomic<uint64_t> *queries_)
+		    tbb::atomic<uint64_t> *queries_,
+                    bool p_is_ro_mode = false)
     : tbb::filter(true),
       nr_entries(entries_),
       nr_queries(queries_),
       input_file(input_file_),
       run_count(run_count_),
       next_line(NULL),
-      next_len(0)
+      next_len(0),
+      is_ro_mode(p_is_ro_mode)
   {};
 
   void* operator() (void*);
@@ -75,11 +77,13 @@ private:
   unsigned int run_count;
   char *next_line;
   ssize_t next_len;
+  bool is_ro_mode;
 };
 
 void* dispatch(void *input_);
 
 void* ParseQueryLogFunc::operator() (void*)  {
+      
   std::vector<boost::shared_ptr<QueryLogEntry> > *entries=
     new std::vector<boost::shared_ptr<QueryLogEntry> >();
 
@@ -137,13 +141,16 @@ void* ParseQueryLogFunc::operator() (void*)  {
       tmp_entry.reset(new QueryLogEntry());
       (*this->nr_entries)++;
     }
-
+    
     if (p[0] == '#')
       tmp_entry->parse_metadata(std::string(line));
     else
     {
-      (*nr_queries)++;
-      tmp_entry->add_query_line(std::string(line));
+      if((is_ro_mode && (strncmp("select", line, strlen("select")) == 0 || strncmp("SELECT", line, strlen("SELECT")) == 0)) || !is_ro_mode) 
+      {
+        (*nr_queries)++;
+        tmp_entry->add_query_line(std::string(line));
+      }
       do {
 	if ((len= getline(&line, &buflen, input_file)) == -1)
 	{
@@ -156,7 +163,9 @@ void* ParseQueryLogFunc::operator() (void*)  {
 	  next_len= len;
 	  break;
 	}
-	tmp_entry->add_query_line(std::string(line));
+        
+        if((is_ro_mode && (strncmp("select", line, strlen("select")) == 0 || strncmp("SELECT", line, strlen("SELECT")) == 0)) || !is_ro_mode) 
+            tmp_entry->add_query_line(std::string(line));
       } while(true);
     }
   next:
@@ -333,7 +342,7 @@ public:
   }
 };
 
-static void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_playback_run_result *r)
+static void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_playback_run_result *r, bool is_ro_mode = false)
 {
   tbb::pipeline p;
   tbb::atomic<uint64_t> entries;
@@ -341,7 +350,7 @@ static void LogReaderThread(FILE* input_file, unsigned int run_count, struct per
   entries=0;
   queries=0;
 
-  ParseQueryLogFunc f2(input_file, run_count, &entries, &queries);
+  ParseQueryLogFunc f2(input_file, run_count, &entries, &queries, is_ro_mode);
   DispatchQueriesFunc f4;
   p.add_filter(f2);
   p.add_filter(f4);
@@ -360,6 +369,7 @@ private:
   std::string                 file_name;
   unsigned int                read_count;
   bool			      std_in;
+  bool                        is_ro_mode;
 
 public:
   QueryLogPlugin(const std::string &_name) :
@@ -373,6 +383,8 @@ public:
       options.add_options()
       ("query-log-file",
        po::value<std::string>(), _("Query log file"))
+      ("read-only",
+      po::value<bool>(), _("Read only mode"))
       ("query-log-stdin",
        po::value<bool>()->default_value(false)->zero_tokens(),
        _("Read query log from stdin"))
@@ -436,6 +448,10 @@ public:
       fprintf(stderr, _("ERROR: --query-log-file is a required option.\n"));
       return -1;
     }
+    
+    // sets read only mode
+    if(vm.count("read-only"))
+        is_ro_mode = vm["read-only"].as<bool>();
 
     return 0;
   }
@@ -443,7 +459,7 @@ public:
   virtual void run(percona_playback_run_result  &result)
   {
     FILE* input_file;
-
+    
     if (std_in)
     {
       input_file = stdin;
@@ -463,7 +479,8 @@ public:
     boost::thread log_reader_thread(LogReaderThread,
 				    input_file,
 				    read_count,
-				    &result);
+				    &result,
+                                    is_ro_mode);
 
     log_reader_thread.join();
     fclose(input_file);
