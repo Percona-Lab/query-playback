@@ -146,11 +146,8 @@ void* ParseQueryLogFunc::operator() (void*)  {
       tmp_entry->parse_metadata(std::string(line));
     else
     {
-      if((is_ro_mode && (strncmp("select", line, strlen("select")) == 0 || strncmp("SELECT", line, strlen("SELECT")) == 0)) || !is_ro_mode) 
-      {
-        (*nr_queries)++;
-        tmp_entry->add_query_line(std::string(line));
-      }
+      (*nr_queries)++;
+      tmp_entry->add_query_line(std::string(line));
       do {
 	if ((len= getline(&line, &buflen, input_file)) == -1)
 	{
