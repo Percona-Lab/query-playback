@@ -148,6 +148,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
     {
       (*nr_queries)++;
       tmp_entry->add_query_line(std::string(line));
+      
       do {
 	if ((len= getline(&line, &buflen, input_file)) == -1)
 	{
@@ -160,7 +161,6 @@ void* ParseQueryLogFunc::operator() (void*)  {
 	  next_len= len;
 	  break;
 	}
-        
         if((is_ro_mode && (strncmp("select", line, strlen("select")) == 0 || strncmp("SELECT", line, strlen("SELECT")) == 0)) || !is_ro_mode) 
             tmp_entry->add_query_line(std::string(line));
       } while(true);
