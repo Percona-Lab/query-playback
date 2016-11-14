@@ -82,8 +82,7 @@ private:
 
 void* dispatch(void *input_);
 
-void* ParseQueryLogFunc::operator() (void*)  {
-      
+void* ParseQueryLogFunc::operator() (void*)  {      
   std::vector<boost::shared_ptr<QueryLogEntry> > *entries=
     new std::vector<boost::shared_ptr<QueryLogEntry> >();
 
@@ -141,7 +140,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
       tmp_entry.reset(new QueryLogEntry());
       (*this->nr_entries)++;
     }
-    
+
     if (p[0] == '#')
       tmp_entry->parse_metadata(std::string(line));
     else
@@ -161,7 +160,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
 	  next_len= len;
 	  break;
 	}
-        if((is_ro_mode && (strncmp("select", line, strlen("select")) == 0 || strncmp("SELECT", line, strlen("SELECT")) == 0)) || !is_ro_mode) 
+        if((is_ro_mode && strnicmp("select", line, strlen("select")) == 0) || !is_ro_mode) 
             tmp_entry->add_query_line(std::string(line));
       } while(true);
     }
@@ -444,8 +443,7 @@ public:
     {
       fprintf(stderr, _("ERROR: --query-log-file is a required option.\n"));
       return -1;
-    }
-    
+    }    
     // sets read only mode
     if(vm.count("read-only"))
         is_ro_mode = vm["read-only"].as<bool>();
@@ -456,7 +454,7 @@ public:
   virtual void run(percona_playback_run_result  &result)
   {
     FILE* input_file;
-    
+
     if (std_in)
     {
       input_file = stdin;
