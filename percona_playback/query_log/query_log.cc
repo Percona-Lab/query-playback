@@ -293,7 +293,7 @@ bool QueryLogEntry::parse_metadata(const std::string &s)
     size_t location= s.find("Rows_Examined: ");
     if (location != std::string::npos)
     {
-      rows_sent = strtoull(s.c_str() + location + strlen("Rows_examined: "), NULL, 10);
+      rows_examined = strtoull(s.c_str() + location + strlen("Rows_examined: "), NULL, 10);
       r= true;
     }
   }
