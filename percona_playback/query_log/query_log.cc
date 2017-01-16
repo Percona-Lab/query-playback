@@ -270,6 +270,15 @@ bool QueryLogEntry::parse_metadata(const std::string &s)
       r= true;
     }
   }
+  {
+    // starting from MySQL 5.6.2 (bug #53630) the thread id is included as "Id:"
+    size_t location= s.find("Id: ");
+    if (location != std::string::npos)
+    {
+      thread_id = strtoull(s.c_str() + location + strlen("Id: "), NULL, 10);
+      r= true;
+    }
+  }
 
   {
     size_t location= s.find("Rows_sent: ");
