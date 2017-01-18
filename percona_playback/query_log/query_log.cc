@@ -79,6 +79,10 @@ private:
 
 void* dispatch(void *input_);
 
+static inline bool startswith(const char* str, const char* substr) {
+  return strncmp(str, substr, strlen(substr)) == 0;
+}
+
 void* ParseQueryLogFunc::operator() (void*)  {
   std::vector<boost::shared_ptr<QueryLogEntry> > *entries=
     new std::vector<boost::shared_ptr<QueryLogEntry> >();
@@ -110,17 +114,17 @@ void* ParseQueryLogFunc::operator() (void*)  {
   for (;;) {
     q= line+len;
 
-    if ( (strncmp(p, "# Time", 5) == 0))
+    if (startswith(p, "# Time"))
       goto next;
 
     if ((p[0] != '#' && (q-p) >= (ssize_t)strlen("started with:\n"))
-	&& strncmp(q- strlen("started with:\n"), "started with:", strlen("started with:"))==0)
+    && startswith(q- strlen("started with:\n"), "started with:"))
       goto next;
 
-    if (p[0] != '#' && strncmp(p, "Tcp port: ", strlen("Tcp port: "))==0)
+    if (p[0] != '#' && startswith(p, "Tcp port: "))
       goto next;
 
-    if (p[0] != '#' && strncmp(p, "Time Id Command Argument", strlen("Time Id Command Argument"))==0)
+    if (p[0] != '#' && startswith(p, "Time Id Command Argument"))
       goto next;
 
     /*
@@ -129,7 +133,7 @@ void* ParseQueryLogFunc::operator() (void*)  {
       goto next;
     */
 
-    if (strncmp(p, "# User@Host", strlen("# User@Host")) == 0)
+    if (startswith(p, "# User@Host"))
     {
       if (!tmp_entry->getQuery().empty())
         entries->push_back(tmp_entry);
