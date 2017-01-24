@@ -17,7 +17,7 @@
 #define PERCONA_PLAYBACK_VERSION_H
 
 /* Machine comsumable version number. */
-#define PERCONA_PLAYBACK_VERSION_ID @PANDORA_RELEASE_ID@
+#define PERCONA_PLAYBACK_VERSION_ID @MAJOR_VERSION@@MINOR_VERSION@
 
 /* A release comment about the branch that was built */
 #define PERCONA_PLAYBACK_RELEASE_COMMENT "@PANDORA_RELEASE_COMMENT@"

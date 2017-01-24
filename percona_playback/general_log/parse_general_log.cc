@@ -2,6 +2,9 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <boost/smart_ptr.hpp>
+
+#include <percona_playback/general_log/general_log_entry.h>
 
 #include <percona_playback/general_log/parse_general_log.h>
 

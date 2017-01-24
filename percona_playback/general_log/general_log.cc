@@ -14,8 +14,8 @@
 #include <percona_playback/percona_playback.h>
 #include <percona_playback/plugin.h>
 #include <percona_playback/general_log/general_log.h>
-#include <percona_playback/general_log/general_log_entry.cc>
-#include <percona_playback/general_log/parse_general_log.cc>
+#include <percona_playback/general_log/general_log_entry.h>
+#include <percona_playback/general_log/parse_general_log.h>
 #include <percona_playback/gettext.h>
 
 #include <boost/program_options.hpp>

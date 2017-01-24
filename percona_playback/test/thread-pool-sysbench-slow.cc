@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
   char dbplugin[]="--db-plugin=null";
   char querylog[]="--query-log-file="SRCDIR"/percona_playback/test/sysbench-slow.log";
-  char threadpool[]="--dispatcher-plugin=thread-pool"
+  char threadpool[]="--dispatcher-plugin=thread-pool";
 
   char **dbplugin_argv= new char*[4];
   dbplugin_argv[0]= argv[0];
