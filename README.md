@@ -34,7 +34,7 @@ Building
 
     $ mkdir build_dir
     $ cd build_dir
-    $ cmake ..
+    $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     $ make
 
 Test Suite

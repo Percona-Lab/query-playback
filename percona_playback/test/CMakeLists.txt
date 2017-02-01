@@ -14,6 +14,10 @@ list(APPEND tests "thread-pool-sysbench-slow")
 FOREACH(test ${tests})
   add_executable(test-${test} "${test}.cc")
   target_link_libraries(test-${test} libpercona-playback)
-  add_definitions(-DSRCDIR="${PROJECT_SOURCE_DIR}" )
+  add_definitions(-DSRCDIR="${PROJECT_SOURCE_DIR}")
+ 
+  # we need to undefine NDEBUG so that assert don't get removed
+  add_definitions(-UNDEBUG)
+
   add_test(test-${test} ${PROJECT_BINARY_DIR}/percona_playback/test/test-${test})
 ENDFOREACH(test)
