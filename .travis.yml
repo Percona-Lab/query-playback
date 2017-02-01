@@ -1,0 +1,35 @@
+language: cpp
+
+compiler:
+  - gcc
+
+sudo: false
+
+env:
+  matrix:
+    - TRAVIS_BUILD_TYPE=Debug
+    - TRAVIS_BUILD_TYPE=Release
+
+addons:
+  apt:
+    sources:
+      - kubuntu-backports
+
+    packages:
+      - cmake
+      - libboost-program-options-dev
+      - libboost-regex-dev
+      - libboost-system-dev
+      - libboost-thread-dev
+      - libmysqlclient-dev
+      - libtbb-dev
+
+script: 
+  - mkdir build_dir
+  - cd build_dir
+  - cmake -DCMAKE_BUILD_TYPE=${TRAVIS_BUILD_TYPE} ..
+  - make
+  - make test
+
+os:
+  - linux
