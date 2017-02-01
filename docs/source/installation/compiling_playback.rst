@@ -36,7 +36,7 @@ Building
 
   $ mkdir build_dir
   $ cd build_dir
-  $ cmake ..
+  $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
   $ make
   
 For a debug build run cmake with ``-DCMAKE_BUILD_TYPE=Debug`` and if you would like to compile the plugins as shared libraries use `-DBUILD_SHARED_LIBS:BOOL=ON`.
