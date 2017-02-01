@@ -1,16 +1,10 @@
-Portions are under BSD-2 and BSD-3 found in COPYING.BSD2 and COPYING.BSD3
+Portions are under BSD-2 found in COPYING.BSD2
 respectively.
 
 Files: ./percona_playback/visibility.h
- ./test_run.sh
 Copyright: 2010, Eric Day (eday@oddments.org)
   2011-2013, Percona Ireland Ltd
 License: BSD-2-clause
-
-Files: ./config/autorun.sh
-Copyright: 2011, Brian Aker
-License: BSD (3 clause)
-
 
 All other code is under GPL-2:
 

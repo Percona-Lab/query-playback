@@ -1,0 +1,6 @@
+#include <stdint.h>
+
+#define PACKAGE_VERSION "@VERSION@"
+#define PACKAGE "@PACKAGE@"
+#define PACKAGE_BUGREPORT "@BUGREPORT@"
+

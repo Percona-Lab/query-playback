@@ -21,26 +21,30 @@ In Debian-based distributions, you need to: ::
 
   # apt-get install debhelper autoconf automake libtool \
   gettext intltool libpcap-dev libtbb-dev libmysqlclient-dev \ 
-  libboost-program-options-dev libboost-thread-dev pkg-config
+  libboost-program-options-dev libboost-thread-dev pkg-config cmake
 
 In ``RPM``-based distributions, you need to: ::
 
   # yum install autoconf automake libtool gettext-devel \
   libpcap-devel tbb-devel mysql mysql-devel intltool \
-  boost-program-options-devel boost-thread-devel pkgconfig
+  boost-program-options-devel boost-thread-devel pkgconfig cmake
 
 Package ``libmysqlclient-dev`` is not strictly needed for compiling, but if you don't have it, you don't get to do the play back part.
 
 Building
 --------
-If you are building from git, you will need to run :file:`./config/autorun.sh` first. :: 
 
-  $ ./configure
+  $ mkdir build_dir
+  $ cd build_dir
+  $ cmake ..
   $ make
+  
+For a debug build run cmake with ``-DCMAKE_BUILD_TYPE=Debug`` and if you would like to compile the plugins as shared libraries use `-DBUILD_SHARED_LIBS:BOOL=ON`.
+
 
 There are several tests included, these use a dummy database client plugin to mainly test that parsing of the logs is correct. ::
 
-  $ make check
+  $ make test
 
 After that you can install the percona-playback with: :: 
 

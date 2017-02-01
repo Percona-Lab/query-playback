@@ -24,15 +24,17 @@ The core of Query Playback requires:
  * gettext
  * intltool
  * pkg-config
+ * cmake
 
 The plugin that uses the MySQL client library needs:
  * libmysqlclient (MySQL Client Libraries)
 
 Building
 --------
-If you are building from BZR, you will need to run ./config/autorun.sh first.
 
-    $ ./configure
+    $ mkdir build_dir
+    $ cd build_dir
+    $ cmake ..
     $ make
 
 Test Suite
@@ -44,7 +46,12 @@ There are several tests included, these use a dummy database client plugin to ma
 Building release tarball
 ------------------------
 
-    $ make dist
+    $ cpack ..
+
+Building release debian package:
+------------------------
+
+    $ cpack -G DEB ..
 
 Capturing everything in the slow log
 ------------------------------------
