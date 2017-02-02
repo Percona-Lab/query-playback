@@ -1,6 +1,6 @@
 Query Playback
 ----------------
-© 2011-2016 Percona Inc.
+© 2011-2017 Percona LLC.
 See [LICENSE](LICENSE) for full text of the GPL.
 
 Query Playback is a tool for replaying the load of one database server to another.
