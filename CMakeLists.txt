@@ -21,7 +21,7 @@ add_subdirectory(percona_playback)
 # main percona-playback executable
 include_directories(${PROJECT_SOURCE_DIR})
 add_executable(percona-playback bin/percona_playback.cc)
-target_link_libraries(percona-playback libpercona-playback)
+target_link_libraries(percona-playback libpercona-playback ssl crypto)
 install(TARGETS percona-playback RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
 
 # let one use 'make check' as a synonym for 'make test'
