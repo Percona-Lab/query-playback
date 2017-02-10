@@ -124,7 +124,8 @@ void* ParseQueryLogFunc::operator() (void*)  {
     if (p[0] != '#' && startswith(p, "Tcp port: "))
       goto next;
 
-    if (p[0] != '#' && startswith(p, "Time Id Command Argument"))
+    // skip lines like: "Time[ ]+Id[ ]+Command[ ]+Argument"
+    if (p[0] != '#' && startswith(p, "Time"))
       goto next;
 
     /*
