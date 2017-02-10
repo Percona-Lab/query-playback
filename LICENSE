@@ -6,6 +6,24 @@ Copyright: 2010, Eric Day (eday@oddments.org)
   2011-2013, Percona Ireland Ltd
 License: BSD-2-clause
 
+Files: ./doxygen/CMakeLists.txt
+./percona_playback/thread_per_connection/CMakeLists.txt
+./percona_playback/error_report/CMakeLists.txt
+./percona_playback/test/CMakeLists.txt
+./percona_playback/general_log/CMakeLists.txt
+./percona_playback/mysql_client/CMakeLists.txt
+./percona_playback/full_report/CMakeLists.txt
+./percona_playback/query_log/CMakeLists.txt
+./percona_playback/thread_pool/CMakeLists.txt
+./percona_playback/null_dbclient/CMakeLists.txt
+./percona_playback/simple_report/CMakeLists.txt
+./percona_playback/CMakeLists.txt
+./percona_playback/plugin.cmake
+./CMakeLists.txt
+Copyright (c) 2017 Dropbox, Inc.
+License: BSD-2-clause
+
+
 All other code is under GPL-2:
 
 
