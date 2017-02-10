@@ -44,7 +44,6 @@ public:
 	  options("Threads-pool Options") {}
 
   virtual void dispatch(QueryEntryPtr query_entry);
-  virtual bool finish_and_wait(uint64_t) { return true; }
   virtual void finish_all_and_wait();
   virtual void run();
 

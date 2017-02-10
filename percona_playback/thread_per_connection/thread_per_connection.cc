@@ -31,7 +31,6 @@ public:
 	  DispatcherPlugin(_name) {}
 
   void dispatch(QueryEntryPtr query_entry);
-  bool finish_and_wait(uint64_t thread_id);
   void finish_all_and_wait();
 };
 
@@ -51,30 +50,6 @@ ThreadPerConnectionDispatcher::dispatch(QueryEntryPtr query_entry)
     }
     a->second->queries->push(query_entry);
   }
-}
-
-bool
-ThreadPerConnectionDispatcher::finish_and_wait(uint64_t thread_id)
-{
-  DBThread *db_thread= NULL;
-  {
-    DBExecutorsTable::accessor a;
-    if (executors.find(a, thread_id))
-    {
-      db_thread= a->second;
-      executors.erase(a);
-    }
-  }
-
-  if (!db_thread)
-    return false;
-
-  db_thread->queries->push(QueryEntryPtr(new FinishEntry(thread_id)));
-  db_thread->join();
-
-  delete db_thread;
-
-  return true;
 }
 
 void
