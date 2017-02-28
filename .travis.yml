@@ -33,3 +33,7 @@ script:
 
 os:
   - linux
+
+notifications:
+  email:
+    on_success: never
