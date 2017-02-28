@@ -35,13 +35,14 @@ Package ``libmysqlclient-dev`` is not strictly needed for compiling, but if you 
 
 Building
 --------
+::
 
   $ mkdir build_dir
   $ cd build_dir
   $ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
   $ make
   
-For a debug build run cmake with ``-DCMAKE_BUILD_TYPE=Debug`` and if you would like to compile the plugins as shared libraries use `-DBUILD_SHARED_LIBS:BOOL=ON`.
+For a debug build run cmake with ``-DCMAKE_BUILD_TYPE=Debug`` and if you would like to compile the plugins as shared libraries use ``-DBUILD_SHARED_LIBS:BOOL=ON``.
 
 
 There are several tests included, these use a dummy database client plugin to mainly test that parsing of the logs is correct. ::
