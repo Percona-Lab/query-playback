@@ -49,7 +49,7 @@ endif(${BUILD_SHARED_LIBS})
 # build plugins
 file(GLOB_RECURSE plugins "${CMAKE_CURRENT_LIST_DIR}//*/plugin.ini")
 foreach(plugin_cmakefile ${plugins})
-  get_filename_component(plugin_path ${plugin_cmakefile} DIRECTORY)
+  get_filename_component(plugin_path ${plugin_cmakefile} PATH)
   get_filename_component(plugin_name ${plugin_path} NAME)
   
   message("Processing plugin ${plugin_name}")
