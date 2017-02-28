@@ -28,6 +28,6 @@ find_path(MYSQL_INC "mysql/mysql.h")
 include_directories("${MYSQL_INC}/mysql")
 
 add_library(mysql_client mysql_client.cc)
-target_link_libraries(mysql_client mysqlclient_r)
+target_link_libraries(mysql_client mysqlclient_r crypto ssl)
 
 setup_plugin("mysql_client")
