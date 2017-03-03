@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -113,7 +114,7 @@ class DispatcherPlugin : public plugin
 
   DispatcherPlugin(const std::string &_name) : name(_name) {}
 
-  virtual void dispatch(QueryEntryPtr query_entry)= 0;
+  virtual void dispatch(QueryEntriesPtr query_entries)= 0;
   virtual void finish_all_and_wait()= 0;
 
   virtual void run() {};

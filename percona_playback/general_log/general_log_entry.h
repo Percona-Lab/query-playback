@@ -19,6 +19,7 @@ extern "C"
 class GeneralLogEntry : public QueryEntry
 {
     private:
+      uint64_t thread_id;
       uint64_t rows_sent;
       uint64_t rows_examined;
       double query_time;
@@ -27,7 +28,9 @@ class GeneralLogEntry : public QueryEntry
       std::string query;
     public:
 
-      GeneralLogEntry() : rows_sent(0), rows_examined(0), query_time(0) {}
+      GeneralLogEntry() : thread_id(0), rows_sent(0), rows_examined(0), query_time(0) {}
+
+      virtual uint64_t getThreadId() const { return thread_id; }
 
       inline double getQueryTime() { return query_time; }
 
@@ -37,7 +40,7 @@ class GeneralLogEntry : public QueryEntry
 
       inline void display() { std::cerr << "    " << query << std::endl; }
 
-      inline bool is_quit() { return (query.compare(0, 30, "# administrator command: Quit;") == 0); }
+      inline bool is_quit() const { return (query.compare(0, 30, "# administrator command: Quit;") == 0); }
 
       void execute(DBThread *t);
 };

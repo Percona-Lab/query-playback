@@ -27,7 +27,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # setup db_thread lib which all plugins depend on
-find_package(Boost COMPONENTS system thread regex program_options REQUIRED)
+find_package(Boost COMPONENTS system thread regex program_options chrono REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 add_library(db_thread STATIC db_thread.cc)
