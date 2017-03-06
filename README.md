@@ -19,12 +19,12 @@ You will need the 'development' packages for all of these (often suffixed by
 The core of Query Playback requires:
 
  * libtbb (Intel Threading Building Blocks)
- * Boost (including boost `program_options`) at least 1.41
+ * Boost >= 1.52
  * libtool
  * gettext
  * intltool
  * pkg-config
- * cmake
+ * cmake >= 2.8.7
 
 The plugin that uses the MySQL client library needs:
  * libmysqlclient (MySQL Client Libraries)

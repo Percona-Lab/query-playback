@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -24,33 +25,40 @@ class DBThread;
 class QueryEntry
 {
 protected:
-  uint64_t thread_id;
   bool shutdown;
 public:
-  QueryEntry() : thread_id(0), shutdown(false) {};
-  QueryEntry(uint64_t _thread_id, bool _shutdown) :
-    thread_id(_thread_id), shutdown(_shutdown) {}
+  QueryEntry(bool _shutdown = false) : shutdown(_shutdown) {}
   virtual ~QueryEntry() {}
 
   void set_shutdown() { shutdown= true; }
   bool is_shutdown() const { return shutdown; }
-  virtual bool is_quit()= 0;
+  virtual bool is_quit() const= 0;
 
-  uint64_t getThreadId() const { return thread_id; }
+  virtual uint64_t getThreadId() const  = 0;
 
   virtual void execute(DBThread *t)= 0;
-
 };
 
-class FinishEntry : public QueryEntry
-{
-public:
-  FinishEntry(uint64_t _thread_id) :
-    QueryEntry (_thread_id, true) {}
-  bool is_quit() { return false; }
+class QueryEntries {
+private:
+  uint64_t num_entries, num_queries;
 
-  void execute(DBThread *) {}
+public:
+  QueryEntries() : num_entries(0), num_queries(0) {}
+  virtual ~QueryEntries() {}
+
+  uint64_t getNumEntries() const { return num_entries; }
+  uint64_t getNumQueries() const { return num_queries; }
+  void setNumEntries(uint64_t num) { num_entries = num; }
+  void setNumQueries(uint64_t num) { num_queries = num; }
+
+  // this method returns the next query and a null ptr when no entry is left
+  virtual boost::shared_ptr<QueryEntry> popEntry() = 0;
+
+  // sets shutdown to true on the last query of every connection/thread id.
+  virtual void setShutdownOnLastQueryOfConn() = 0;
 };
 
 typedef boost::shared_ptr<QueryEntry> QueryEntryPtr;
+typedef boost::shared_ptr<QueryEntries> QueryEntriesPtr;
 #endif /* PERCONA_PLAYBACK_QUERY_ENTRY_H */

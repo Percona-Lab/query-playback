@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -21,7 +22,6 @@
 #include <boost/crc.hpp>
 #include <vector>
 
-#include <tbb/concurrent_hash_map.h>
 #include <stdio.h>
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
@@ -43,8 +43,7 @@ public:
 	  threads_count(0),
 	  options("Threads-pool Options") {}
 
-  virtual void dispatch(QueryEntryPtr query_entry);
-  virtual bool finish_and_wait(uint64_t) { return true; }
+  virtual void dispatch(QueryEntriesPtr query_entries);
   virtual void finish_all_and_wait();
   virtual void run();
 
@@ -63,24 +62,35 @@ void ThreadPoolDispatcher::run()
   }
 }
 
-void ThreadPoolDispatcher::dispatch(QueryEntryPtr query_entry)
+void ThreadPoolDispatcher::dispatch(QueryEntriesPtr query_entries)
 {
-  /*
-    Each worker has its own queue. For some types of input plugins
-    it is important to execute query entries with the same thread id
-    by the same worker. That is why we choose worker by simple hash from
-    thread id.
-  */
-  uint64_t thread_id= query_entry->getThreadId();
-  boost::crc_32_type crc;
-  crc.process_bytes(&thread_id, sizeof(thread_id));
-  uint32_t worker_index = crc.checksum() % workers.size();
-  workers[worker_index]->queries->push(query_entry);
+  while (QueryEntryPtr entry = query_entries->popEntry()) {
+    /*
+     Each worker has its own queue. For some types of input plugins
+     it is important to execute query entries with the same thread id
+     by the same worker. That is why we choose worker by simple hash from
+     thread id.
+    */
+    uint64_t thread_id= entry->getThreadId();
+    boost::crc_32_type crc;
+    crc.process_bytes(&thread_id, sizeof(thread_id));
+    uint32_t worker_index = crc.checksum() % workers.size();
+    workers[worker_index]->queries->push(entry);
+  }
 }
+
+class FinishEntry : public QueryEntry
+{
+public:
+  FinishEntry() : QueryEntry (true) {}
+  virtual bool is_quit() const { return false; }
+  virtual uint64_t getThreadId() const { return 0; }
+  virtual void execute(DBThread *) {}
+};
 
 void ThreadPoolDispatcher::finish_all_and_wait()
 {
-  QueryEntryPtr shutdown_command(new FinishEntry(0));
+  QueryEntryPtr shutdown_command(new FinishEntry);
   for (Workers::iterator i = workers.begin(), end = workers.end(); i != end; ++i)
     (*i)->queries->push(shutdown_command);
   for (Workers::iterator i = workers.begin(), end = workers.end(); i != end; ++i)

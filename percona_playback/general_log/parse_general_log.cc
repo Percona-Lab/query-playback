@@ -3,15 +3,42 @@
 #include <string>
 #include <vector>
 #include <boost/smart_ptr.hpp>
+#include <boost/unordered_set.hpp>
 
 #include <percona_playback/general_log/general_log_entry.h>
 
 #include <percona_playback/general_log/parse_general_log.h>
 
-void* ParseGeneralLog::operator() (void*)
+class GeneralLogQueryEntries : public QueryEntries {
+public:
+  typedef std::vector<boost::shared_ptr<GeneralLogEntry> > Entries;
+  Entries entries;
+  Entries::size_type pos;
+
+  GeneralLogQueryEntries() : pos(0) {}
+
+  virtual boost::shared_ptr<QueryEntry> popEntry() {
+    boost::shared_ptr<QueryEntry> entry;
+    if (pos < entries.size()) {
+      entry = entries[pos++];
+    }
+    return entry;
+  }
+
+  virtual void setShutdownOnLastQueryOfConn() {
+    // automatically close threads after last request
+    boost::unordered_set<uint64_t> thread_ids;
+    for (Entries::reverse_iterator it = entries.rbegin(), end = entries.rend(); it != end; ++it) {
+      if (thread_ids.insert((*it)->getThreadId()).second)
+        (*it)->set_shutdown();
+    }
+  }
+};
+
+boost::shared_ptr<QueryEntries> ParseGeneralLog::getEntries()
 {
-    std::vector<boost::shared_ptr<GeneralLogEntry> > *entries = new std::vector<boost::shared_ptr<GeneralLogEntry> >();
-    boost::shared_ptr<GeneralLogEntry> tmp_entry(new GeneralLogEntry());
+    boost::shared_ptr<GeneralLogQueryEntries> entries = boost::make_shared<GeneralLogQueryEntries>();
+    boost::shared_ptr<GeneralLogEntry> tmp_entry = boost::make_shared<GeneralLogEntry>();
 
     char *line= NULL;
     size_t buflen = 0;
@@ -26,8 +53,7 @@ void* ParseGeneralLog::operator() (void*)
     }
     else if ((len = getline(&line, &buflen, input_file)) == -1)
     {
-        delete entries;
-        return NULL;
+        return entries;
     }
 
     char *p = line;
@@ -54,9 +80,7 @@ void* ParseGeneralLog::operator() (void*)
             tmp_entry->add_query_line(std::string(line));
             if (!tmp_entry->getQuery().empty())
             {
-                entries->push_back(tmp_entry);
-                (*nr_queries)++;
-                (*nr_entries)++;
+                entries->entries.push_back(tmp_entry);
                 tmp_entry.reset(new GeneralLogEntry());
             }
         }
@@ -71,5 +95,9 @@ void* ParseGeneralLog::operator() (void*)
     } while(true);
 
     free(line);
+
+    entries->setNumEntries(entries->entries.size());
+    entries->setNumQueries(entries->entries.size());
+
     return entries;
 }

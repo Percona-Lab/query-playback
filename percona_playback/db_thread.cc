@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -37,13 +38,10 @@ void DBThread::run()
 {
   connect_and_init_session();
 
-  while (true)
+  QueryEntryPtr query;
+  do
   {
-    QueryEntryPtr query;
     queries->pop(query);
-
-    if (query->is_shutdown())
-      break;
 
     if (query->is_quit())
     {
@@ -53,7 +51,8 @@ void DBThread::run()
     }
 
     query->execute(this);
-  }
+
+  } while (!query->is_shutdown());
 
   disconnect();
   return;

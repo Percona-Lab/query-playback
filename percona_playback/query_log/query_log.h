@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -19,11 +20,12 @@
 #include <percona_playback/visibility.h>
 #include "percona_playback/query_entry.h"
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <vector>
+#include <deque>
 
-#include <tbb/atomic.h>
+#include <boost/chrono.hpp>
+#include <boost/utility/string_ref.hpp>
+#include <boost/make_shared.hpp>
 
 PERCONA_PLAYBACK_API
 int run_query_log(const std::string &log_file, unsigned int read_count, struct percona_playback_run_result *r);
@@ -37,39 +39,65 @@ class DBThread;
 
 class QueryLogEntry : public QueryEntry
 {
-private:
-  uint64_t rows_sent;
-  uint64_t rows_examined;
-  double query_time;
-  std::vector<std::string> info;
-  std::string set_timestamp_query;
-  std::string query;
 public:
+  typedef boost::chrono::duration<int64_t, boost::nano> Duration;
+  typedef boost::chrono::system_clock::time_point TimePoint;
 
-  QueryLogEntry() : rows_sent(0), rows_examined(0), query_time(0) {}
+private:
+  boost::string_ref data; // query including metadata
+  TimePoint start_time; // only valid if g_preserve_query_starttime is enabled
 
-  double getQueryTime() { return query_time; }
+public:
+  QueryLogEntry(boost::string_ref data, TimePoint end_time)
+    : data(data), start_time(end_time - boost::chrono::microseconds((long)(parseQueryTime() * boost::micro::den))) {
+  }
 
-  void add_query_line(const std::string &s);
-  bool parse_metadata(const std::string &s);
+  virtual uint64_t getThreadId() const {
+    return parseThreadId();
+  }
 
-  const std::string& getQuery() {return query; };
+  virtual void execute(DBThread *t);
+
+  virtual bool is_quit() const
+  {
+    return data.find("\n# administrator command: Quit;") != boost::string_ref::npos;
+  }
+
+  uint64_t parseThreadId() const;
+  uint64_t parseRowsSent() const;
+  uint64_t parseRowsExamined() const;
+  double parseQueryTime() const;
+
+  // only valid if g_preserve_query_starttime is enabled
+  TimePoint getStartTime() const;
+
+  std::string getQuery(bool remove_timestamp);
 
   void display()
   {
-    std::vector<std::string>::iterator it;
-
-    std::cerr << "    " << query << std::endl;
+    std::cerr << "    " << getQuery(true) << std::endl;
   }
 
-  bool is_quit()
-  {
-    return (query.compare(0, 30, "# administrator command: Quit;") == 0);
-  }
-
-  void execute(DBThread *t);
+  bool operator <(const QueryLogEntry& second) const;
 };
 
+
+class QueryLogEntries : public QueryEntries {
+public:
+  typedef std::deque<QueryLogEntry> Entries;
+  Entries entries;
+
+  boost::shared_ptr<QueryEntry> popEntry() {
+    boost::shared_ptr<QueryEntry> entry;
+    if (!entries.empty()) {
+      entry = boost::make_shared<QueryLogEntry>(entries.front());
+      entries.pop_front();
+    }
+    return entry;
+  }
+
+  virtual void setShutdownOnLastQueryOfConn();
+};
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -25,14 +26,13 @@
 #include <boost/thread.hpp>
 #include "query_log.h"
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/io.h>
+#include <sys/mman.h>
 
-#include <tbb/pipeline.h>
-#include <tbb/tick_count.h>
-#include <tbb/task_scheduler_init.h>
-#include <tbb/tbb_allocator.h>
 #include <tbb/atomic.h>
-#include <tbb/concurrent_queue.h>
-#include <tbb/concurrent_hash_map.h>
 
 #include <percona_playback/percona_playback.h>
 #include <percona_playback/plugin.h>
@@ -44,177 +44,185 @@
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/unordered_set.hpp>
 
 namespace po= boost::program_options;
 
 static bool g_run_set_timestamp;
 static bool g_preserve_query_time;
+static bool g_accurate_mode;
+
+static boost::atomic<long long> g_max_behind_ns;
 
 extern percona_playback::DispatcherPlugin *g_dispatcher_plugin;
 
-class ParseQueryLogFunc: public tbb::filter {
-public:
-  ParseQueryLogFunc(FILE *input_file_,
-		    unsigned int run_count_,
-		    tbb::atomic<uint64_t> *entries_,
-		    tbb::atomic<uint64_t> *queries_)
-    : tbb::filter(true),
-      nr_entries(entries_),
-      nr_queries(queries_),
-      input_file(input_file_),
-      run_count(run_count_),
-      next_line(NULL),
-      next_len(0)
-  {};
-
-  void* operator() (void*);
-private:
-  tbb::atomic<uint64_t> *nr_entries;
-  tbb::atomic<uint64_t> *nr_queries;
-  FILE *input_file;
-  unsigned int run_count;
-  char *next_line;
-  ssize_t next_len;
-};
-
-void* dispatch(void *input_);
-
-static inline bool startswith(const char* str, const char* substr) {
-  return strncmp(str, substr, strlen(substr)) == 0;
+// returns next line starting from current position inside the data and updating it.
+// a empty string signals that the end is reached.
+static boost::string_ref readline(boost::string_ref data, boost::string_ref::size_type& pos) {
+  boost::string_ref line;
+  if (pos == boost::string_ref::npos || pos >= data.size())
+    return line;
+  boost::string_ref::size_type new_pos = data.substr(pos).find('\n');
+  if (new_pos != boost::string_ref::npos)
+    ++new_pos;
+  line = data.substr(pos, new_pos);
+  pos = (new_pos == boost::string_ref::npos) ? new_pos : pos + new_pos;
+  return line;
 }
 
-void* ParseQueryLogFunc::operator() (void*)  {
-  std::vector<boost::shared_ptr<QueryLogEntry> > *entries=
-    new std::vector<boost::shared_ptr<QueryLogEntry> >();
+// removes the spefified chars from the string from the left and right side
+static boost::string_ref trim(boost::string_ref str, boost::string_ref chars = " \n\r\t") {
+  boost::string_ref::size_type start_pos = str.find_first_not_of(chars);
+  if (start_pos == boost::string_ref::npos)
+    return boost::string_ref();
+  return str.substr(start_pos, str.find_last_not_of(chars) + 1 - start_pos);
+}
 
-  boost::shared_ptr<QueryLogEntry> tmp_entry(new QueryLogEntry());
- // entries->push_back(tmp_entry);
+static bool parse_time(boost::string_ref s, QueryLogEntry::TimePoint& start_time) {
+  // Time can look like this
+  //   # Time: 090402 9:23:36
+  // or like this if microseconds granularity is configured.
+  //   # Time: 090402 9:23:36.123456
+  long long msecs = 0;
+  std::tm td;
+  memset(&td, 0, sizeof(td));
+  int num_read = sscanf(s.to_string().c_str(), "# Time: %02d%02d%02d %2d:%02d:%02d.%06lld",
+                        &td.tm_year, &td.tm_mon, &td.tm_mday, &td.tm_hour, &td.tm_min, &td.tm_sec, &msecs);
+  if (num_read < 6)
+    return false;
 
-  char *line= NULL;
-  size_t buflen = 0;
-  ssize_t len;
+  // months [0, 11]
+  td.tm_mon -= 1;
+  // years since 1900
+  td.tm_year += td.tm_year < 70 ? 100 : 0;
+  start_time = boost::chrono::system_clock::from_time_t(std::mktime(&td));
+  start_time += boost::chrono::microseconds(msecs);
 
-  if (next_line)
-  {
-    line= next_line;
-    len= next_len;
-    next_line= NULL;
-    next_len= 0;
-  }
-  else if ((len= getline(&line, &buflen, input_file)) == -1)
-  {
-    delete entries;
-    return NULL;
-  }
+  return true;
+}
 
-  char *p= line;
-  char *q;
-  int count= 0;
+boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
+  boost::shared_ptr<QueryLogEntries> entries = boost::make_shared<QueryLogEntries>();
 
+  QueryLogEntry::TimePoint current_timestamp;
+  boost::string_ref::size_type pos = 0;
+
+  boost::string_ref line, next_line;
   for (;;) {
-    q= line+len;
-
-    if (startswith(p, "# Time"))
-      goto next;
-
-    if ((p[0] != '#' && (q-p) >= (ssize_t)strlen("started with:\n"))
-    && startswith(q- strlen("started with:\n"), "started with:"))
-      goto next;
-
-    if (p[0] != '#' && startswith(p, "Tcp port: "))
-      goto next;
-
-    // skip lines like: "Time[ ]+Id[ ]+Command[ ]+Argument"
-    if (p[0] != '#' && startswith(p, "Time"))
-      goto next;
-
-    /*
-      # fixme, process admin commands.
-      if (strcmp(p,"# administrator command: Prepare;\n") == 0)
-      goto next;
-    */
-
-    if (startswith(p, "# User@Host"))
-    {
-      if (!tmp_entry->getQuery().empty())
-        entries->push_back(tmp_entry);
-      count++;
-      tmp_entry.reset(new QueryLogEntry());
-      (*this->nr_entries)++;
+    if (next_line.empty()) {
+      line = readline(data, pos);
+      if (line.empty())
+        break;
+    } else {
+      line = next_line;
+      next_line.clear();
     }
 
-    if (p[0] == '#')
-      tmp_entry->parse_metadata(std::string(line));
-    else
-    {
-      (*nr_queries)++;
-      tmp_entry->add_query_line(std::string(line));
+    if (!line.starts_with('#')) {
+      // skip lines like: "/usr/sbin/mysqld, ... started with:"
+      if (line.ends_with("started with:\n"))
+        continue;
+
+      // skip lines like: "Tcp port: 3306 Unix socket: /var/lib/mysql/mysql.sock"
+      if (line.starts_with("Tcp port: "))
+        continue;
+
+      // skip lines like: "Time[ ]+Id[ ]+Command[ ]+Argument"
+      if (line.starts_with("Time "))
+        continue;
+    } else {
+      /*
+        # fixme, process admin commands.
+        if (strcmp(p,"# administrator command: Prepare;\n") == 0)
+        goto next;
+      */
+
+      // not every query has time metadata. Because only if the timestamp changes a new entry will get generated.
+      // this is why we have a field inside the QueryLogEntry to save the timestamp.
+      if (line.starts_with("# Time")) {
+        if (g_accurate_mode)
+          parse_time(line, current_timestamp);
+        continue;
+      }
+
+      // read whole metadata (except '# Time') and query
+      int num_sql_lines = 0;
+      boost::string_ref::size_type query_data_len = 0;
+      next_line = line;
       do {
-	if ((len= getline(&line, &buflen, input_file)) == -1)
-	{
-	  break;
-	}
+        if (!next_line.starts_with('#'))
+          ++num_sql_lines;
+        query_data_len += next_line.size();
+        next_line = readline(data, pos);
 
-	if (line[0] == '#')
-	{
-	  next_line= line;
-	  next_len= len;
-	  break;
-	}
-	tmp_entry->add_query_line(std::string(line));
-      } while(true);
+        // stop if we find a line starting with "# User@Host" or "# Time" because it signals start of new query
+      } while (!next_line.empty() && (!next_line.starts_with("# User@Host") && !next_line.starts_with("# Time")));
+      entries->setNumEntries(entries->getNumEntries() + 1);
+
+      if (num_sql_lines) {
+        if (g_accurate_mode && current_timestamp == QueryLogEntry::TimePoint()) {
+          std::cerr << "WARNING: did not find a timestamp for the first query. Disabling accurate mode." << std::endl;
+          g_accurate_mode = false;
+        }
+
+        // found a query, add it to the entries
+        boost::string_ref query_data(line.data(), query_data_len);
+        entries->entries.push_back(QueryLogEntry(query_data, current_timestamp));
+        entries->setNumQueries(entries->getNumQueries() + 1);
+      }
     }
-  next:
-    if (count > 100)
-    {
-      count= 0;
-      //      fseek(input_file,-len, SEEK_CUR);
-      break;
-    }
-    if (!next_line && ((len= getline(&line, &buflen, input_file)) == -1))
-    {
-      break;
-    }
-    next_line= NULL;
-    p= line;
   }
 
-  if (!tmp_entry->getQuery().empty())
-    entries->push_back(tmp_entry);
+  if (g_accurate_mode)
+    std::stable_sort(entries->entries.begin(), entries->entries.end());
 
-  free(line);
   return entries;
 }
 
+bool QueryLogEntry::operator <(const QueryLogEntry& right) const {
+  // for same connections we make sure that the follow the order in the query log
+  if (getThreadId() == right.getThreadId())
+    return data.data() < right.data.data();
+  return getStartTime() < right.getStartTime();
+}
 
 void QueryLogEntry::execute(DBThread *t)
 {
-  std::vector<std::string>::iterator it;
-  QueryResult r;
-
-  if(g_run_set_timestamp)
-  {
-    QueryResult expected_result;
-    QueryResult discarded_timestamp_result;
-    expected_result.setRowsSent(0);
-    expected_result.setRowsExamined(0);
-    expected_result.setError(0);
-    t->execute_query(set_timestamp_query, &discarded_timestamp_result,
-		     expected_result);
-  }
+  std::string query = getQuery(!g_run_set_timestamp);
 
   QueryResult expected_result;
-  expected_result.setRowsSent(rows_sent);
-  expected_result.setRowsExamined(rows_examined);
+  expected_result.setRowsSent(parseRowsSent());
+  expected_result.setRowsExamined(parseRowsExamined());
   expected_result.setError(0);
 
   boost::posix_time::time_duration expected_duration=
-    boost::posix_time::microseconds(long(query_time * 1000000));
+    boost::posix_time::microseconds(long(parseQueryTime() * 1000000));
   expected_result.setDuration(expected_duration);
+
+  if (g_accurate_mode) {
+    // UGLY: This requires that static var initalization is thread safe,
+    //       which is true for c++11 and gcc, clang even before c++11 but not for MSVC.
+    static Duration first_query_exec_offset = boost::chrono::system_clock::now() - getStartTime();
+
+    Duration time_diff = getStartTime() + first_query_exec_offset - boost::chrono::system_clock::now();
+
+    // update max time behind, it does this atomic:
+    //  g_max_behind_ns = std::max(g_max_behind_ns, -time_diff.count())
+    long long current_val = g_max_behind_ns;
+    long long new_value = -time_diff.count();
+    while (current_val < new_value &&
+           !g_max_behind_ns.compare_exchange_weak(current_val, new_value)) {
+      // nothing to do here - update is inside the while condition...
+    }
+
+    boost::this_thread::sleep_for(time_diff);
+  }
 
   boost::posix_time::ptime start_time;
   start_time= boost::posix_time::microsec_clock::universal_time();
 
+  QueryResult r;
   t->execute_query(query, &r, expected_result);
 
   boost::posix_time::ptime end_time;
@@ -233,138 +241,94 @@ void QueryLogEntry::execute(DBThread *t)
   }
 
   BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
-		percona_playback::PluginRegistry::singleton().report_plugins)
+                percona_playback::PluginRegistry::singleton().report_plugins)
   {
     pp.second->query_execution(getThreadId(),
-			       query,
-			       expected_result,
-			       r);
+                               query,
+                               expected_result,
+                               r);
   }
 }
 
-void QueryLogEntry::add_query_line(const std::string &s)
-{
-  const std::string timestamp_query("SET timestamp=");
-  if(!g_run_set_timestamp
-     && s.compare(0, timestamp_query.length(), timestamp_query) == 0)
-    set_timestamp_query= s;
-  else
-  {
-    //Append space insead of \r\n
-    std::string::const_iterator end = s.end() - 1;
-    if (s.length() >= 2 && *(s.end() - 2) == '\r')
-      --end;
-    //Remove initial spaces for best query viewing in reports
-    std::string::const_iterator begin;
-    for (begin = s.begin(); begin != end; ++begin)
-      if (*begin != ' ' && *begin != '\t')
-        break;
-    query.append(begin, end);
-    query.append(" ");
+std::string QueryLogEntry::getQuery(bool remove_timestamp) {
+  std::string ret;
+  boost::string_ref::size_type pos = 0;
+  bool found_non_comment_line = false;
+  for (boost::string_ref line = readline(data, pos); !line.empty(); line = readline(data, pos)) {
+    // we ignore the metadata but also make sure that we don't remove "# administrator command " strings
+    if (!found_non_comment_line && line.starts_with('#'))
+      continue;
+    found_non_comment_line = true;
+    if (remove_timestamp && line.starts_with("SET timestamp="))
+      continue;
+    boost::string_ref trimmed_line = trim(line);
+    if (trimmed_line.empty())
+      continue;
+    if (!ret.empty())
+      ret.push_back(' ');
+    ret.append(trimmed_line.begin(), trimmed_line.end());
   }
+  return ret;
 }
 
-bool QueryLogEntry::parse_metadata(const std::string &s)
-{
-  bool r= false;
-  {
-    size_t location= s.find("Thread_id: ");
-    if (location != std::string::npos)
-    {
-      thread_id = strtoull(s.c_str() + location + strlen("Thread_Id: "), NULL, 10);
-      r= true;
-    }
-  }
-  {
-    // starting from MySQL 5.6.2 (bug #53630) the thread id is included as "Id:"
-    size_t location= s.find("Id: ");
-    if (location != std::string::npos)
-    {
-      thread_id = strtoull(s.c_str() + location + strlen("Id: "), NULL, 10);
-      r= true;
-    }
-  }
+uint64_t QueryLogEntry::parseThreadId() const {
+  size_t location= data.find("Thread_id: ");
+  if (location != std::string::npos)
+    return strtoull(&data[location + strlen("Thread_Id: ")], NULL, 10);
 
-  {
-    size_t location= s.find("Rows_sent: ");
-    if (location != std::string::npos)
-    {
-      rows_sent = strtoull(s.c_str() + location + strlen("Rows_sent: "), NULL, 10);
-      r= true;
-    }
-  }
+  // starting from MySQL 5.6.2 (bug #53630) the thread id is included as "Id:"
+  location= data.find("Id: ");
+  if (location != std::string::npos)
+    return strtoull(&data[location + strlen("Id: ")], NULL, 10);
+  return 0;
+}
 
-  {
-    size_t location= s.find("Rows_Examined: ");
-    if (location != std::string::npos)
-    {
-      rows_examined = strtoull(s.c_str() + location + strlen("Rows_examined: "), NULL, 10);
-      r= true;
-    }
-  }
+uint64_t QueryLogEntry::parseRowsSent() const {
+  size_t location= data.find("Rows_sent: ");
+  if (location != std::string::npos)
+    return strtoull(&data[location + strlen("Rows_sent: ")], NULL, 10);
+  return 0;
+}
 
-  {
-    std::string qt_str("Query_time: ");
-    size_t location= s.find(qt_str);
-    if (location != std::string::npos)
-    {
-      query_time= strtod(s.c_str() + location + qt_str.length(), NULL);
-      r= true;
-    }
-  }
-/*
-  if (s[0] == '#' && strncmp(s.c_str(), "# administrator", strlen("# administrator")))
-  {
-    query.append(s);
-    r= true;
-  }
-*/
-  return r;
+uint64_t QueryLogEntry::parseRowsExamined() const {
+  size_t location= data.find("Rows_Examined: ");
+  if (location != std::string::npos)
+    return strtoull(&data[location + strlen("Rows_examined: ")], NULL, 10);
+  return 0;
+}
+
+double QueryLogEntry::parseQueryTime() const {
+  size_t location= data.find("Query_time: ");
+  if (location != std::string::npos)
+    return strtod(&data[location + strlen("Query_time: ")], NULL);
+  return 0.0;
+}
+
+QueryLogEntry::TimePoint QueryLogEntry::getStartTime() const {
+  assert(g_accurate_mode && "this values did not get computed");
+  return start_time;
 }
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
 
-void* dispatch (void *input_)
+static void LogReaderThread(boost::string_ref data, struct percona_playback_run_result *r)
 {
-    std::vector<boost::shared_ptr<QueryLogEntry> > *input= 
-      static_cast<std::vector<boost::shared_ptr<QueryLogEntry> >*>(input_);
-    for (unsigned int i=0; i< input->size(); i++)
-    {
-      //      usleep(10);
-      g_dispatcher_plugin->dispatch((*input)[i]);
-    }
-    delete input;
-    return NULL;
-}
-
-class DispatchQueriesFunc : public tbb::filter {
-public:
-  DispatchQueriesFunc() : tbb::filter(true) {};
-
-  void* operator() (void *input_)
-  {
-    return dispatch(input_);
-  }
-};
-
-static void LogReaderThread(FILE* input_file, unsigned int run_count, struct percona_playback_run_result *r)
-{
-  tbb::pipeline p;
-  tbb::atomic<uint64_t> entries;
-  tbb::atomic<uint64_t> queries;
-  entries=0;
-  queries=0;
-
-  ParseQueryLogFunc f2(input_file, run_count, &entries, &queries);
-  DispatchQueriesFunc f4;
-  p.add_filter(f2);
-  p.add_filter(f4);
-  p.run(2);
+  boost::shared_ptr<QueryLogEntries> entry_vec = getEntries(data);
+  g_dispatcher_plugin->dispatch(entry_vec);
 
   g_dispatcher_plugin->finish_all_and_wait();
 
-  r->n_log_entries= entries;
-  r->n_queries= queries;
+  r->n_log_entries= entry_vec->getNumEntries();
+  r->n_queries= entry_vec->getNumQueries();
+}
+
+void QueryLogEntries::setShutdownOnLastQueryOfConn() {
+  // automatically close threads after last request
+  boost::unordered_set<uint64_t> thread_ids;
+  for (Entries::reverse_iterator it = entries.rbegin(), end = entries.rend(); it != end; ++it) {
+    if (thread_ids.insert(it->getThreadId()).second)
+      it->set_shutdown();
+  }
 }
 
 class QueryLogPlugin : public percona_playback::InputPlugin
@@ -408,7 +372,12 @@ public:
         default_value(false)->
           zero_tokens(),
        _("Ensure that each query takes at least Query_time (from slow query "
-	 "log) to execute."))
+         "log) to execute."))
+      ("query-log-accurate-mode",
+       po::value<bool>(&g_accurate_mode)->
+        default_value(false)->
+          zero_tokens(),
+       _("Preserves pauses between queries."))
       ;
 
     return &options;
@@ -454,39 +423,82 @@ public:
     return 0;
   }
 
-  virtual void run(percona_playback_run_result  &result)
+  virtual void run(percona_playback_run_result &result)
   {
-    FILE* input_file;
-
     if (std_in)
     {
-      input_file = stdin;
+      // TODO: maybe we want to create a temp file in order to safe RAM...
+      const int block_size = 1024*32;
+      std::string data;
+      while (true) {
+        std::string::size_type old_size = data.size();
+        data.resize(old_size + block_size);
+        int num_read = fread(&data[old_size], 1, block_size, stdin);
+        if (num_read < block_size) {
+          data.resize(old_size + num_read);
+          break;
+        }
+      }
+      boost::thread log_reader_thread(LogReaderThread, data, &result);
+      log_reader_thread.join();
     }
     else
     {
-      input_file = fopen(file_name.c_str(),"r");
-      if (input_file == NULL)
-      {
+      // read only mmap slowlog
+      struct stat s;
+      int fd = open(file_name.c_str(), O_RDONLY);
+      if (fd == -1 || fstat(fd, &s) == -1) {
         fprintf(stderr,
-		_("ERROR: Error opening file '%s': %s"),
-		file_name.c_str(), strerror(errno));
-	return;
+          _("ERROR: Error opening file '%s': %s\n"),
+          file_name.c_str(), strerror(errno));
+        return;
       }
+      boost::string_ref data;
+      off_t size = s.st_size;
+      void* ptr = mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0);
+      if (ptr == MAP_FAILED) {
+        fprintf(stderr,
+          _("ERROR: Error mmaping file '%s': %s\n"),
+          file_name.c_str(), strerror(errno));
+        return;
+      }
+      data = boost::string_ref(static_cast<const char*>(ptr), size);
+      boost::thread log_reader_thread(LogReaderThread, data, &result);
+      log_reader_thread.join();
+
+      munmap(const_cast<char*>(data.data()), data.size());
+      close(fd);
     }
-
-    boost::thread log_reader_thread(LogReaderThread,
-				    input_file,
-				    read_count,
-				    &result);
-
-    log_reader_thread.join();
-    fclose(input_file);
   }
+};
+
+class QueryLogReportPlugin : public percona_playback::ReportPlugin {
+public:
+  QueryLogReportPlugin(std::string _name) : percona_playback::ReportPlugin(_name) {}
+  virtual void query_execution(const uint64_t thread_id,
+                               const std::string &query,
+                               const QueryResult &expected,
+                               const QueryResult &actual) {}
+
+  virtual void print_report() {
+    if (!g_accurate_mode)
+      return;
+
+    typedef boost::chrono::duration<int64_t, boost::milli> Milliseconds;
+
+    std::cout << _("Query log report\n----------------\n");
+    std::cout << _("Queries got delayed up to ");
+    std::cout << boost::chrono::duration_cast<Milliseconds>(boost::chrono::nanoseconds(g_max_behind_ns));
+    std::cout << _(" from the time they should have gotten executed. (smaller is better)");
+    std::cout << std::endl << std::endl << std::endl;
+  }
+
 };
 
 static void init(percona_playback::PluginRegistry&r)
 {
   r.add("query-log", new QueryLogPlugin("query-log"));
+  r.add("query-log-report", new QueryLogReportPlugin("query-log-report"));
 }
 
 PERCONA_PLAYBACK_PLUGIN(init);

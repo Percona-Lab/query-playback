@@ -21,53 +21,21 @@
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
 
-
-#include <tbb/pipeline.h>
-#include <tbb/tick_count.h>
-#include <tbb/task_scheduler_init.h>
-#include <tbb/tbb_allocator.h>
 #include <tbb/atomic.h>
-#include <tbb/concurrent_queue.h>
-#include <tbb/concurrent_hash_map.h>
 
 
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
 extern percona_playback::DispatcherPlugin *g_dispatcher_plugin;
 
-class DispatchGeneralQueries : public tbb::filter {
-    public:
-        DispatchGeneralQueries() : tbb::filter(true) {};
-
-        void* operator() (void *input_)
-        {
-            std::vector<boost::shared_ptr<GeneralLogEntry> > *input = static_cast<std::vector<boost::shared_ptr<GeneralLogEntry> >*>(input_);
-            for (unsigned int i=0; i< input->size(); i++)
-            {
-              g_dispatcher_plugin->dispatch((*input)[i]);
-            }
-            delete input;
-            return NULL;
-        }
-};
-
 static void GeneralLogReaderThread(FILE* input_file, unsigned int run_count, struct percona_playback_run_result *r)
 {
-  tbb::pipeline p;
-  tbb::atomic<uint64_t> entries;
-  tbb::atomic<uint64_t> queries;
-  entries = 0;
-  queries = 0;
-
-  ParseGeneralLog f2(input_file, run_count, &entries, &queries);
-  DispatchGeneralQueries f4;
-  p.add_filter(f2);
-  p.add_filter(f4);
-  p.run(2);
+  boost::shared_ptr<QueryEntries> entry_vec = ParseGeneralLog(input_file, run_count).getEntries();
+  g_dispatcher_plugin->dispatch(entry_vec);
 
   g_dispatcher_plugin->finish_all_and_wait();
 
-  r->n_log_entries = entries;
-  r->n_queries = queries;
+  r->n_log_entries = entry_vec->getNumEntries();
+  r->n_queries = entry_vec->getNumQueries();
 }
 
 
