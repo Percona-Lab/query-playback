@@ -28,8 +28,11 @@ enable_testing()
 set(MAJOR_VERSION 0)
 set(MINOR_VERSION 7)
 set(PATCH_VERSION 0)
+
+project("percona-playback")
+
 set(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}")
-set(PACKAGE "percona-playback")
+set(PACKAGE "${PROJECT_NAME}")
 set(BUGREPORT "https://github.com/Percona-Lab/query-playback")
 
 include_directories(${PROJECT_BINARY_DIR})
@@ -51,7 +54,7 @@ install(TARGETS percona-playback RUNTIME DESTINATION bin LIBRARY DESTINATION lib
 add_custom_target(check COMMAND ${CMAKE_BUILD_TOOL} test)
 
 # packaging metadata
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "tbb mysql")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libtbb2, libboost-dev, libmysqlclient18 | libmysqlclient20")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/Percona-Lab/query-playback")
 set(CPACK_DEBIAN_PACKAGE_SECTION "Applications/Databases")
 set(CPACK_PACKAGE_CONTACT "https://github.com/Percona-Lab/query-playback")
