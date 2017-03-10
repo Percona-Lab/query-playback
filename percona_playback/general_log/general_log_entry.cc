@@ -46,7 +46,8 @@ void GeneralLogEntry::execute(DBThread *t)
 
   BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp, percona_playback::PluginRegistry::singleton().report_plugins)
   {
-    pp.second->query_execution(getThreadId(), query, expected_result, r);
+    if (pp.second->active)
+      pp.second->query_execution(getThreadId(), query, expected_result, r);
   }
 }
 

@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -149,6 +150,26 @@ static void help(po::options_description &options_description)
     std::cerr << _("Selected dispatcher Plugin: ")
               << g_dispatcher_plugin->name
               << std::endl;
+
+    std::cerr << std::endl << _("Loaded Reporting Plugins: ");
+
+    BOOST_FOREACH(const PluginRegistry::ReportPluginPair &pp,
+                  PluginRegistry::singleton().report_plugins)
+    {
+      std::cerr << pp.first << " ";
+    }
+
+    std::cerr << std::endl;
+    std::cerr << std::endl;
+
+    std::cerr << _("Selected reporting Plugins: ");
+    BOOST_FOREACH(const PluginRegistry::ReportPluginPair &pp,
+                  PluginRegistry::singleton().report_plugins)
+    {
+      if (pp.second->active)
+        std::cerr << pp.first << " ";
+    }
+    std::cerr << std::endl;
 }
 
 int percona_playback_argv(percona_playback_st *the_percona_playback,
@@ -170,6 +191,7 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
     ("db-plugin", po::value<std::string>(), _("Database plugin"))
     ("input-plugin", po::value<std::string>(), _("Input plugin"))
     ("dispatcher-plugin", po::value<std::string>(), _("Dispatcher plugin"))
+    ("disable-reporting-plugin", po::value<std::vector<std::string> >(), _("Disable reporting plugin"))
     ("queue-depth", po::value<unsigned int>(),
      _("Queue depth for DB executor (thread). The larger this number the"
      " greater the played-back workload can deviate from the original workload"
@@ -281,6 +303,21 @@ int percona_playback_argv(percona_playback_st *the_percona_playback,
   }
   g_dispatcher_plugin->active= true;
 
+  if (vm.count("disable-reporting-plugin"))
+  {
+    std::vector<std::string> plugins = vm["disable-reporting-plugin"].as<std::vector<std::string> >();
+    for (std::vector<std::string>::iterator it = plugins.begin(), end = plugins.end(); it != end; ++it) {
+      PluginRegistry::ReportPluginMap::iterator plugin_it;
+      plugin_it = PluginRegistry::singleton().report_plugins.find(*it);
+      if (plugin_it == PluginRegistry::singleton().report_plugins.end())
+      {
+        fprintf(stderr, _("Invalid Reporting plugin: '%s'\n"), it->c_str());
+        return -1;
+      }
+      plugin_it->second->active = false;
+    }
+  }
+
   if (vm.count("help") || argc==1)
   {
     help(options_description);
@@ -349,7 +386,8 @@ struct percona_playback_run_result *percona_playback_run(const percona_playback_
   BOOST_FOREACH(const PluginRegistry::ReportPluginPair pp,
 		  PluginRegistry::singleton().report_plugins)
   {
-    pp.second->print_report();
+    if (pp.second->active)
+      pp.second->print_report();
   }
 
   return r;
