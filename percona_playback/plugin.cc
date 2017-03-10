@@ -25,7 +25,6 @@
 #include <percona_playback/plugin.h>
 #include <percona_playback/plugin_load_list.h>
 #include <percona_playback/tokenize.h>
-#include <percona_playback/gettext.h>
 
 /* plugin definition symbols */
 typedef percona_playback::plugin::definition plugin_builtin_list[];

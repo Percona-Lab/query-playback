@@ -16,7 +16,6 @@
 
 #include "percona_playback/plugin.h"
 #include "percona_playback/db_thread.h"
-#include <percona_playback/gettext.h>
 #include <boost/program_options.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/crc.hpp>

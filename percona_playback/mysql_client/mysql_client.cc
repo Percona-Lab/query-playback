@@ -16,7 +16,6 @@
 #include <percona_playback/plugin.h>
 #include <percona_playback/mysql_client/mysql_client.h>
 #include <percona_playback/query_result.h>
-#include <percona_playback/gettext.h>
 
 #include <boost/program_options.hpp>
 

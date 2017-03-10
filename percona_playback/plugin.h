@@ -27,6 +27,9 @@
 #include <percona_playback/visibility.h>
 #include <percona_playback/version.h>
 
+// we currently don't translate strings
+#define _(str) str
+
 namespace boost {
   namespace program_options {
     class options_description;
