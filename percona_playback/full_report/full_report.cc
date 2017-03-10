@@ -27,7 +27,6 @@
 #include <tbb/atomic.h>
 #include <percona_playback/plugin.h>
 #include <percona_playback/query_result.h>
-#include <percona_playback/gettext.h>
 
 class FullReportPlugin : public percona_playback::ReportPlugin
 {

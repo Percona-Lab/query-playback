@@ -19,16 +19,14 @@ The following packages and tools must be installed to compile *Playback* from so
 
 In Debian-based distributions, you need to: ::
 
-  # apt-get install debhelper autoconf automake libtool \
-  gettext intltool libpcap-dev libtbb-dev libmysqlclient-dev \ 
+  # apt-get install libtbb-dev libmysqlclient-dev \ 
   libboost-program-options-dev libboost-thread-dev libboost-regex-dev libboost-system-dev \
   libboost-chrono-dev \
   pkg-config cmake
 
 In ``RPM``-based distributions, you need to: ::
 
-  # yum install autoconf automake libtool gettext-devel \
-  libpcap-devel tbb-devel mysql mysql-devel intltool \
+  # yum install tbb-devel mysql mysql-devel \
   boost-program-options-devel boost-thread-devel boost-regex-devel boost-system-devel \
   libboost-chrono-dev \
   pkgconfig cmake

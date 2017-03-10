@@ -39,7 +39,6 @@
 #include <percona_playback/db_thread.h>
 #include <percona_playback/query_log/query_log.h>
 #include <percona_playback/query_result.h>
-#include <percona_playback/gettext.h>
 
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>

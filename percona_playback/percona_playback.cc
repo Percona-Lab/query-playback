@@ -33,7 +33,6 @@
 #include <boost/foreach.hpp>
 
 #include <percona_playback/plugin.h>
-#include <percona_playback/gettext.h>
 
 #include <vector>
 
