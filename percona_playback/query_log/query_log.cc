@@ -40,6 +40,7 @@
 #include <percona_playback/query_log/query_log.h>
 #include <percona_playback/query_result.h>
 
+#include <boost/atomic.hpp>
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -86,7 +87,8 @@ static bool parse_time(boost::string_ref s, QueryLogEntry::TimePoint& start_time
   long long msecs = 0;
   std::tm td;
   memset(&td, 0, sizeof(td));
-  int num_read = sscanf(s.to_string().c_str(), "# Time: %02d%02d%02d %2d:%02d:%02d.%06lld",
+  std::string line(s.begin(), s.end());
+  int num_read = sscanf(line.c_str(), "# Time: %02d%02d%02d %2d:%02d:%02d.%06lld",
                         &td.tm_year, &td.tm_mon, &td.tm_mday, &td.tm_hour, &td.tm_min, &td.tm_sec, &msecs);
   if (num_read < 6)
     return false;
