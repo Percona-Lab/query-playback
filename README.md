@@ -27,6 +27,11 @@ The core of Query Playback requires:
 The plugin that uses the MySQL client library needs:
  * libmysqlclient (MySQL Client Libraries)
 
+Install dependencies (CentOS 7)
+-------------------------------
+
+    yum -y install tbb tbb-devel cmake boost boost-devel
+
 Building
 --------
 
