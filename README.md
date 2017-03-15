@@ -20,7 +20,7 @@ You will need the 'development' packages for all of these (often suffixed by
 The core of Query Playback requires:
 
  * libtbb (Intel Threading Building Blocks)
- * Boost >= 1.52
+ * Boost >= 1.53
  * pkg-config
  * cmake >= 2.8.7
 
