@@ -45,11 +45,13 @@ public:
 
 private:
   boost::string_ref data; // query including metadata
+  mutable uint64_t thread_id; // we cache the thread id
   TimePoint start_time; // only valid if g_preserve_query_starttime is enabled
 
 public:
   QueryLogEntry(boost::string_ref data, TimePoint end_time)
-    : data(data), start_time(end_time - boost::chrono::microseconds((long)(parseQueryTime() * boost::micro::den))) {
+    : data(data), thread_id(0),
+      start_time(end_time - boost::chrono::microseconds((long)(parseQueryTime() * boost::micro::den))) {
   }
 
   virtual uint64_t getThreadId() const {

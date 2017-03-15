@@ -190,7 +190,7 @@ boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
 
 bool QueryLogEntry::operator <(const QueryLogEntry& right) const {
   // for same connections we make sure that the follow the order in the query log
-  if (getThreadId() == right.getThreadId())
+  if (parseThreadId() == right.parseThreadId())
     return data.data() < right.data.data();
   return getStartTime() < right.getStartTime();
 }
@@ -286,14 +286,22 @@ std::string QueryLogEntry::getQuery(bool remove_timestamp) {
 }
 
 uint64_t QueryLogEntry::parseThreadId() const {
+  // use cached thread id
+  if (thread_id)
+    return thread_id;
+
   size_t location= find(data, "Thread_id: ");
-  if (location != std::string::npos)
-    return strtoull(&data[location + strlen("Thread_Id: ")], NULL, 10);
+  if (location != std::string::npos) {
+    thread_id = strtoull(&data[location + strlen("Thread_Id: ")], NULL, 10);
+    return thread_id;
+  }
 
   // starting from MySQL 5.6.2 (bug #53630) the thread id is included as "Id:"
   location= find(data, "Id: ");
-  if (location != std::string::npos)
-    return strtoull(&data[location + strlen("Id: ")], NULL, 10);
+  if (location != std::string::npos) {
+     thread_id = strtoull(&data[location + strlen("Id: ")], NULL, 10);
+     return thread_id;
+  }
   return 0;
 }
 
