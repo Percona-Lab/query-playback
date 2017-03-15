@@ -57,6 +57,13 @@ static boost::atomic<long long> g_max_behind_ns;
 
 extern percona_playback::DispatcherPlugin *g_dispatcher_plugin;
 
+// workaround bug in boost 1.53 string_ref::find(string_ref)
+static boost::string_ref::size_type find(boost::string_ref str, boost::string_ref substr) {
+  boost::string_ref::const_iterator iter;
+  iter = std::search(str.cbegin(), str.cend(), substr.cbegin(), substr.cend());
+  return iter == str.cend() ? boost::string_ref::npos : std::distance(str.cbegin(), iter);
+}
+
 // returns next line starting from current position inside the data and updating it.
 // a empty string signals that the end is reached.
 static boost::string_ref readline(boost::string_ref data, boost::string_ref::size_type& pos) {
@@ -253,6 +260,10 @@ void QueryLogEntry::execute(DBThread *t)
   }
 }
 
+bool QueryLogEntry::is_quit() const {
+  return find(data, "\n# administrator command: Quit;") != boost::string_ref::npos;
+}
+
 std::string QueryLogEntry::getQuery(bool remove_timestamp) {
   std::string ret;
   boost::string_ref::size_type pos = 0;
@@ -275,33 +286,33 @@ std::string QueryLogEntry::getQuery(bool remove_timestamp) {
 }
 
 uint64_t QueryLogEntry::parseThreadId() const {
-  size_t location= data.find("Thread_id: ");
+  size_t location= find(data, "Thread_id: ");
   if (location != std::string::npos)
     return strtoull(&data[location + strlen("Thread_Id: ")], NULL, 10);
 
   // starting from MySQL 5.6.2 (bug #53630) the thread id is included as "Id:"
-  location= data.find("Id: ");
+  location= find(data, "Id: ");
   if (location != std::string::npos)
     return strtoull(&data[location + strlen("Id: ")], NULL, 10);
   return 0;
 }
 
 uint64_t QueryLogEntry::parseRowsSent() const {
-  size_t location= data.find("Rows_sent: ");
+  size_t location= find(data, "Rows_sent: ");
   if (location != std::string::npos)
     return strtoull(&data[location + strlen("Rows_sent: ")], NULL, 10);
   return 0;
 }
 
 uint64_t QueryLogEntry::parseRowsExamined() const {
-  size_t location= data.find("Rows_Examined: ");
+  size_t location= find(data, "Rows_Examined: ");
   if (location != std::string::npos)
     return strtoull(&data[location + strlen("Rows_examined: ")], NULL, 10);
   return 0;
 }
 
 double QueryLogEntry::parseQueryTime() const {
-  size_t location= data.find("Query_time: ");
+  size_t location= find(data, "Query_time: ");
   if (location != std::string::npos)
     return strtod(&data[location + strlen("Query_time: ")], NULL);
   return 0.0;

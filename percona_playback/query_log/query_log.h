@@ -58,10 +58,7 @@ public:
 
   virtual void execute(DBThread *t);
 
-  virtual bool is_quit() const
-  {
-    return data.find("\n# administrator command: Quit;") != boost::string_ref::npos;
-  }
+  virtual bool is_quit() const;
 
   uint64_t parseThreadId() const;
   uint64_t parseRowsSent() const;
