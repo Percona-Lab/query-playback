@@ -86,7 +86,7 @@ static boost::string_ref trim(boost::string_ref str, boost::string_ref chars = "
   return str.substr(start_pos, str.find_last_not_of(chars) + 1 - start_pos);
 }
 
-static bool parse_time(boost::string_ref s, QueryLogEntry::TimePoint& start_time) {
+static bool parse_time(boost::string_ref s, QueryLogData::TimePoint& start_time) {
   // Time can look like this
   //   # Time: 090402 9:23:36
   // or like this if microseconds granularity is configured.
@@ -113,7 +113,7 @@ static bool parse_time(boost::string_ref s, QueryLogEntry::TimePoint& start_time
 boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
   boost::shared_ptr<QueryLogEntries> entries = boost::make_shared<QueryLogEntries>();
 
-  QueryLogEntry::TimePoint current_timestamp;
+  QueryLogData::TimePoint current_timestamp;
   boost::string_ref::size_type pos = 0;
 
   boost::string_ref line, next_line;
@@ -147,7 +147,7 @@ boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
       */
 
       // not every query has time metadata. Because only if the timestamp changes a new entry will get generated.
-      // this is why we have a field inside the QueryLogEntry to save the timestamp.
+      // this is why we have a field inside the QueryLogData to save the timestamp.
       if (line.starts_with("# Time")) {
         if (g_accurate_mode)
           parse_time(line, current_timestamp);
@@ -169,14 +169,14 @@ boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
       entries->setNumEntries(entries->getNumEntries() + 1);
 
       if (num_sql_lines) {
-        if (g_accurate_mode && current_timestamp == QueryLogEntry::TimePoint()) {
+        if (g_accurate_mode && current_timestamp == QueryLogData::TimePoint()) {
           std::cerr << "WARNING: did not find a timestamp for the first query. Disabling accurate mode." << std::endl;
           g_accurate_mode = false;
         }
 
         // found a query, add it to the entries
         boost::string_ref query_data(line.data(), query_data_len);
-        entries->entries.push_back(QueryLogEntry(query_data, current_timestamp));
+        entries->entries.push_back(QueryLogData(query_data, current_timestamp));
         entries->setNumQueries(entries->getNumQueries() + 1);
       }
     }
@@ -188,14 +188,14 @@ boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
   return entries;
 }
 
-bool QueryLogEntry::operator <(const QueryLogEntry& right) const {
+bool QueryLogData::operator <(const QueryLogData& right) const {
   // for same connections we make sure that the follow the order in the query log
   if (parseThreadId() == right.parseThreadId())
     return data.data() < right.data.data();
   return getStartTime() < right.getStartTime();
 }
 
-void QueryLogEntry::execute(DBThread *t)
+void QueryLogData::execute(DBThread *t)
 {
   std::string query = getQuery(!g_run_set_timestamp);
 
@@ -248,7 +248,7 @@ void QueryLogEntry::execute(DBThread *t)
     usleep(us_sleep_time.total_microseconds());
   }
 
-  uint64_t thread_id = getThreadId();
+  uint64_t thread_id = parseThreadId();
   BOOST_FOREACH(const percona_playback::PluginRegistry::ReportPluginPair pp,
                 percona_playback::PluginRegistry::singleton().report_plugins)
   {
@@ -260,11 +260,11 @@ void QueryLogEntry::execute(DBThread *t)
   }
 }
 
-bool QueryLogEntry::is_quit() const {
+bool QueryLogData::is_quit() const {
   return find(data, "\n# administrator command: Quit;") != boost::string_ref::npos;
 }
 
-std::string QueryLogEntry::getQuery(bool remove_timestamp) {
+std::string QueryLogData::getQuery(bool remove_timestamp) {
   std::string ret;
   boost::string_ref::size_type pos = 0;
   bool found_non_comment_line = false;
@@ -285,7 +285,7 @@ std::string QueryLogEntry::getQuery(bool remove_timestamp) {
   return ret;
 }
 
-uint64_t QueryLogEntry::parseThreadId() const {
+uint64_t QueryLogData::parseThreadId() const {
   // use cached thread id
   if (thread_id)
     return thread_id;
@@ -305,28 +305,28 @@ uint64_t QueryLogEntry::parseThreadId() const {
   return 0;
 }
 
-uint64_t QueryLogEntry::parseRowsSent() const {
+uint64_t QueryLogData::parseRowsSent() const {
   size_t location= find(data, "Rows_sent: ");
   if (location != std::string::npos)
     return strtoull(&data[location + strlen("Rows_sent: ")], NULL, 10);
   return 0;
 }
 
-uint64_t QueryLogEntry::parseRowsExamined() const {
+uint64_t QueryLogData::parseRowsExamined() const {
   size_t location= find(data, "Rows_Examined: ");
   if (location != std::string::npos)
     return strtoull(&data[location + strlen("Rows_examined: ")], NULL, 10);
   return 0;
 }
 
-double QueryLogEntry::parseQueryTime() const {
+double QueryLogData::parseQueryTime() const {
   size_t location= find(data, "Query_time: ");
   if (location != std::string::npos)
     return strtod(&data[location + strlen("Query_time: ")], NULL);
   return 0.0;
 }
 
-QueryLogEntry::TimePoint QueryLogEntry::getStartTime() const {
+QueryLogData::TimePoint QueryLogData::getStartTime() const {
   assert(g_accurate_mode && "this values did not get computed");
   return start_time;
 }
@@ -348,8 +348,8 @@ void QueryLogEntries::setShutdownOnLastQueryOfConn() {
   // automatically close threads after last request
   boost::unordered_set<uint64_t> thread_ids;
   for (Entries::reverse_iterator it = entries.rbegin(), end = entries.rend(); it != end; ++it) {
-    if (thread_ids.insert(it->getThreadId()).second)
-      it->set_shutdown();
+    if (thread_ids.insert(it->parseThreadId()).second)
+      last_query_of_conn.insert(it->data.data());
   }
 }
 
