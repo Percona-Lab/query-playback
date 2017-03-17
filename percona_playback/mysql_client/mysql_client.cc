@@ -150,9 +150,8 @@ public:
          vm.count("mysql-port")))
     {
       fprintf(stderr,
-              gettext("libmysqlclient plugin is not selected, "
-                      "you shouldn't use this plugin-related "
-                      "command line options\n"));
+              "libmysqlclient plugin is not selected, you shouldn't use this plugin-related command line options\n");
+
       return -1;
     }
 

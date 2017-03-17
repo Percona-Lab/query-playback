@@ -14,6 +14,7 @@
  * END LICENSE */
 
 #include "config.h"
+#include "util.h"
 
 #include <iostream>
 #include <cstdio>
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
 {
   (void)argc; (void)argv;
 
-  fprintf(stderr, "Working dir: %s\n\n", get_current_dir_name());
+  fprintf_curr_working_dir();
 
   percona_playback_st *the_percona_playback= percona_playback_create("test_Percona Playback");
   assert(the_percona_playback);

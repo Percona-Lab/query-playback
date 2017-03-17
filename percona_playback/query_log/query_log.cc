@@ -29,7 +29,11 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/io.h>
+#ifdef __APPLE__
+        #include <sys/uio.h>
+#else
+        #include <sys/io.h>
+#endif
 #include <sys/mman.h>
 
 #include <tbb/atomic.h>
