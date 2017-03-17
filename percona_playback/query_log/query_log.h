@@ -26,6 +26,7 @@
 #include <boost/chrono.hpp>
 #include <boost/utility/string_ref.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/unordered_set.hpp>
 
 PERCONA_PLAYBACK_API
 int run_query_log(const std::string &log_file, unsigned int read_count, struct percona_playback_run_result *r);
@@ -37,28 +38,29 @@ extern "C"
 
 class DBThread;
 
-class QueryLogEntry : public QueryEntry
-{
+// This class represents a query inside the slowlog.
+// Because we keep all query data in memory it's very important that the per query overhead is small.
+// This is why we split QueryLogData from QueryLogEntry. We try to keep all queries as long as possible
+// as QueryLogData and only create a QueryLogEntry when neccessary.
+// This saves about 16 bytes per query (8 bytes (vptr) + 1 byte (shutdown bool) + 7 bytes alignment)
+// -> total size per query is 32 bytes (on a 64bit system).
+class QueryLogData {
 public:
   typedef boost::chrono::duration<int64_t, boost::nano> Duration;
   typedef boost::chrono::system_clock::time_point TimePoint;
 
-private:
   boost::string_ref data; // query including metadata
+  mutable uint64_t thread_id; // we cache the thread id
   TimePoint start_time; // only valid if g_preserve_query_starttime is enabled
 
 public:
-  QueryLogEntry(boost::string_ref data, TimePoint end_time)
-    : data(data), start_time(end_time - boost::chrono::microseconds((long)(parseQueryTime() * boost::micro::den))) {
+  QueryLogData(boost::string_ref data, TimePoint end_time)
+    : data(data), thread_id(0),
+      start_time(end_time - boost::chrono::microseconds((long)(parseQueryTime() * boost::micro::den))) {
   }
 
-  virtual uint64_t getThreadId() const {
-    return parseThreadId();
-  }
-
-  virtual void execute(DBThread *t);
-
-  virtual bool is_quit() const;
+  void execute(DBThread *t);
+  bool is_quit() const;
 
   uint64_t parseThreadId() const;
   uint64_t parseRowsSent() const;
@@ -70,25 +72,47 @@ public:
 
   std::string getQuery(bool remove_timestamp);
 
+  bool operator <(const QueryLogData& second) const;
+};
+
+class QueryLogEntry : public QueryEntry
+{
+private:
+  QueryLogData data;
+
+public:
+  QueryLogEntry(QueryLogData data) : data(data) {}
+
+  virtual uint64_t getThreadId() const { return data.parseThreadId(); }
+
+  virtual void execute(DBThread *t) { data.execute(t); }
+
+  virtual bool is_quit() const { return data.is_quit(); }
+
+  std::string getQuery(bool remove_timestamp) { return data.getQuery(remove_timestamp); }
+
   void display()
   {
     std::cerr << "    " << getQuery(true) << std::endl;
   }
-
-  bool operator <(const QueryLogEntry& second) const;
 };
 
 
 class QueryLogEntries : public QueryEntries {
 public:
-  typedef std::deque<QueryLogEntry> Entries;
+  typedef std::deque<QueryLogData> Entries;
   Entries entries;
+  // keep track which query is the last one of each connection
+  boost::unordered_set<const char*> last_query_of_conn;
 
   boost::shared_ptr<QueryEntry> popEntry() {
     boost::shared_ptr<QueryEntry> entry;
     if (!entries.empty()) {
-      entry = boost::make_shared<QueryLogEntry>(entries.front());
+      QueryLogData data = entries.front();
+      entry = boost::make_shared<QueryLogEntry>(data);
       entries.pop_front();
+      if (last_query_of_conn.count(data.data.data()))
+        entry->set_shutdown();
     }
     return entry;
   }
