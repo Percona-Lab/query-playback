@@ -24,7 +24,6 @@ class MySQLDBThread : public DBThread
  private:
   MYSQL handle;
   MySQLOptions *options;
-  static const unsigned max_err_num = 10;
 
  public:
   MySQLDBThread(uint64_t _thread_id, MySQLOptions *opt) :

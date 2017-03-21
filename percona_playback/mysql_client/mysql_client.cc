@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -31,7 +32,8 @@ public:
     password(""),
     schema("test"),
     socket("/var/lib/mysql/mysql.sock"),
-    port(3306)
+    port(3306),
+    max_retries(9)
   {
   }
 
@@ -41,6 +43,7 @@ public:
   std::string schema;
   std::string socket;
   unsigned int port;
+  unsigned int max_retries;
 };
 
 bool MySQLDBThread::connect()
@@ -71,16 +74,17 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
 				  const QueryResult &)
 {
   int mr;
-  for(unsigned i = 0; i < max_err_num; ++i)
+  for(unsigned i = 0; i < options->max_retries + 1; ++i)
   {
     mr= mysql_real_query(&handle, query.c_str(), query.length());
     r->setError(mr);
     if(mr != 0)
     {
       fprintf(stderr,
-	      "Error during query: %s, number of tries %u\n",
+              "Error during query: %s, number of tries %u of %u\n",
 	      mysql_error(&handle),
-	      i);
+	      i + 1,
+	      options->max_retries + 1);
       disconnect();
       connect_and_init_session();
     }
@@ -135,6 +139,7 @@ public:
     ("mysql-schema", po::value<std::string>(), _("MySQL Schema to connect to"))
     ("mysql-socket", po::value<std::string>(), _("MySQL Socket to connect to when mysql-host=localhost"))
     ("mysql-port", po::value<unsigned int>(), _("MySQL port number"))
+    ("mysql-max-retries", po::value<unsigned int>(), _("How often should we retry a query which returned an error"))
     ;
 
     return &mysql_options;
@@ -198,6 +203,11 @@ public:
     if (vm.count("mysql-port"))
     {
       options.port= vm["mysql-port"].as<unsigned int>();
+    }
+
+    if (vm.count("mysql-max-retries"))
+    {
+      options.max_retries= vm["mysql-max-retries"].as<unsigned int>();
     }
 
     return 0;
