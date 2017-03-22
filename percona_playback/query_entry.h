@@ -39,6 +39,15 @@ public:
   virtual void execute(DBThread *t)= 0;
 };
 
+class FinishEntry : public QueryEntry
+{
+public:
+  FinishEntry() : QueryEntry (true) {}
+  virtual bool is_quit() const { return false; }
+  virtual uint64_t getThreadId() const { return 0; }
+  virtual void execute(DBThread *) {}
+};
+
 class QueryEntries {
 private:
   uint64_t num_entries, num_queries;
