@@ -78,15 +78,6 @@ void ThreadPoolDispatcher::dispatch(QueryEntriesPtr query_entries)
   }
 }
 
-class FinishEntry : public QueryEntry
-{
-public:
-  FinishEntry() : QueryEntry (true) {}
-  virtual bool is_quit() const { return false; }
-  virtual uint64_t getThreadId() const { return 0; }
-  virtual void execute(DBThread *) {}
-};
-
 void ThreadPoolDispatcher::finish_all_and_wait()
 {
   QueryEntryPtr shutdown_command(new FinishEntry);

@@ -18,7 +18,9 @@
 #include <percona_playback/mysql_client/mysql_client.h>
 #include <percona_playback/query_result.h>
 
+#include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 
 #include <stdio.h>
 namespace po= boost::program_options;
@@ -44,7 +46,12 @@ public:
   std::string socket;
   unsigned int port;
   unsigned int max_retries;
+  boost::regex filter_error_regex;
 };
+
+bool MySQLDBThread::should_print_error(const char* error) {
+  return options->filter_error_regex.empty() || !boost::regex_search(error, options->filter_error_regex);
+}
 
 bool MySQLDBThread::connect()
 {
@@ -58,8 +65,10 @@ bool MySQLDBThread::connect()
 		          options->socket.c_str(),
 		          CLIENT_MULTI_STATEMENTS))
   {
-    fprintf(stderr, "Can't connect to server: %s\n",
-	    mysql_error(&handle));
+    ++num_connect_errors;
+    if (should_print_error(mysql_error(&handle)))
+      fprintf(stderr, "Can't connect to server: %s\n",
+              mysql_error(&handle));
     return false;
   }
   return true;
@@ -80,11 +89,12 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
     r->setError(mr);
     if(mr != 0)
     {
-      fprintf(stderr,
-              "Error during query: %s, number of tries %u of %u\n",
-	      mysql_error(&handle),
-	      i + 1,
-	      options->max_retries + 1);
+      if (should_print_error(mysql_error(&handle)))
+        fprintf(stderr,
+                "Error during query: %s, number of tries %u of %u\n",
+                mysql_error(&handle),
+                i + 1,
+                options->max_retries + 1);
       disconnect();
       connect_and_init_session();
     }
@@ -118,6 +128,15 @@ void MySQLDBThread::run()
   mysql_thread_end();
 }
 
+bool MySQLDBThread::test_connect(MySQLOptions* opt) {
+  boost::shared_ptr<MySQLDBThread> thread = boost::make_shared<MySQLDBThread>(0, opt);
+  thread->queries->set_capacity(1);
+  thread->queries->push(boost::make_shared<FinishEntry>());
+  thread->start_thread();
+  thread->join();
+  return thread->num_connect_errors == 0;
+}
+
 class MySQLDBClientPlugin : public percona_playback::DBClientPlugin
 {
 private:
@@ -140,6 +159,10 @@ public:
     ("mysql-socket", po::value<std::string>(), _("MySQL Socket to connect to when mysql-host=localhost"))
     ("mysql-port", po::value<unsigned int>(), _("MySQL port number"))
     ("mysql-max-retries", po::value<unsigned int>(), _("How often should we retry a query which returned an error"))
+    ("mysql-filter-error", po::value<std::string>(), _("Don't print error messages which contain the specified regex"
+                                                       "(use \".*\" to suppress all errors)"))
+    ("mysql-test-connect", po::value<bool>(), _("Per default we do a test connection to the MySQL server to check"
+                                                " if the connection settings are correct and exit if it fails"))
     ;
 
     return &mysql_options;
@@ -208,6 +231,24 @@ public:
     if (vm.count("mysql-max-retries"))
     {
       options.max_retries= vm["mysql-max-retries"].as<unsigned int>();
+    }
+
+    if (vm.count("mysql-filter-error") && !vm["mysql-filter-error"].as<std::string>().empty())
+    {
+      options.filter_error_regex = boost::regex(vm["mysql-filter-error"].as<std::string>());
+    }
+
+    bool test_connect = true;
+    if (vm.count("mysql-test-connect"))
+    {
+      test_connect= vm["mysql-test-connect"].as<bool>();
+    }
+    if (test_connect && !MySQLDBThread::test_connect(&options))
+    {
+      fprintf(stderr, "Exiting because '--mysql-test-connect' is enabled\n"
+                      "\tuse '--mysql-test-connect=off' to disable the check\n");
+      fflush(stderr);
+      exit(EXIT_FAILURE);
     }
 
     return 0;
