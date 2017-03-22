@@ -1,4 +1,5 @@
 /* BEGIN LICENSE
+ * Copyright (c) 2017 Dropbox, Inc.
  * Copyright (C) 2011-2013 Percona Ireland Ltd.
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2, as published
@@ -38,4 +39,7 @@ class MySQLDBThread : public DBThread
   void execute_query(const std::string &query, QueryResult *r,
 		     const QueryResult &expected_result);
   void run();
+
+ private:
+  bool should_print_error(const char* error);
 };

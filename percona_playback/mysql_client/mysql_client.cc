@@ -19,6 +19,7 @@
 #include <percona_playback/query_result.h>
 
 #include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 
 #include <stdio.h>
 namespace po= boost::program_options;
@@ -44,7 +45,12 @@ public:
   std::string socket;
   unsigned int port;
   unsigned int max_retries;
+  boost::regex filter_error_regex;
 };
+
+bool MySQLDBThread::should_print_error(const char* error) {
+  return options->filter_error_regex.empty() || !boost::regex_search(error, options->filter_error_regex);
+}
 
 bool MySQLDBThread::connect()
 {
@@ -58,8 +64,9 @@ bool MySQLDBThread::connect()
 		          options->socket.c_str(),
 		          CLIENT_MULTI_STATEMENTS))
   {
-    fprintf(stderr, "Can't connect to server: %s\n",
-	    mysql_error(&handle));
+    if (should_print_error(mysql_error(&handle)))
+      fprintf(stderr, "Can't connect to server: %s\n",
+              mysql_error(&handle));
     return false;
   }
   return true;
@@ -80,11 +87,12 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
     r->setError(mr);
     if(mr != 0)
     {
-      fprintf(stderr,
-              "Error during query: %s, number of tries %u of %u\n",
-	      mysql_error(&handle),
-	      i + 1,
-	      options->max_retries + 1);
+      if (should_print_error(mysql_error(&handle)))
+        fprintf(stderr,
+                "Error during query: %s, number of tries %u of %u\n",
+                mysql_error(&handle),
+                i + 1,
+                options->max_retries + 1);
       disconnect();
       connect_and_init_session();
     }
@@ -140,6 +148,8 @@ public:
     ("mysql-socket", po::value<std::string>(), _("MySQL Socket to connect to when mysql-host=localhost"))
     ("mysql-port", po::value<unsigned int>(), _("MySQL port number"))
     ("mysql-max-retries", po::value<unsigned int>(), _("How often should we retry a query which returned an error"))
+    ("mysql-filter-error", po::value<std::string>(), _("Don't print error messages which contain the specified regex"
+                                                       "(use \".*\" to suppress all errors)"))
     ;
 
     return &mysql_options;
@@ -208,6 +218,11 @@ public:
     if (vm.count("mysql-max-retries"))
     {
       options.max_retries= vm["mysql-max-retries"].as<unsigned int>();
+    }
+
+    if (vm.count("mysql-filter-error") && !vm["mysql-filter-error"].as<std::string>().empty())
+    {
+      options.filter_error_regex = boost::regex(vm["mysql-filter-error"].as<std::string>());
     }
 
     return 0;
