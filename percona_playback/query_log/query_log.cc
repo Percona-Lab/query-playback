@@ -56,6 +56,7 @@ namespace po= boost::program_options;
 static bool g_run_set_timestamp;
 static bool g_preserve_query_time;
 static bool g_accurate_mode;
+static bool g_disable_sorting;
 
 static boost::atomic<long long> g_max_behind_ns;
 
@@ -153,8 +154,7 @@ boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
       // not every query has time metadata. Because only if the timestamp changes a new entry will get generated.
       // this is why we have a field inside the QueryLogData to save the timestamp.
       if (line.starts_with("# Time")) {
-        if (g_accurate_mode)
-          parse_time(line, current_timestamp);
+        parse_time(line, current_timestamp);
         continue;
       }
 
@@ -186,7 +186,7 @@ boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
     }
   }
 
-  if (g_accurate_mode)
+  if (!g_disable_sorting || g_accurate_mode)
     std::stable_sort(entries->entries.begin(), entries->entries.end());
 
   return entries;
@@ -330,11 +330,6 @@ double QueryLogData::parseQueryTime() const {
   return 0.0;
 }
 
-QueryLogData::TimePoint QueryLogData::getStartTime() const {
-  assert(g_accurate_mode && "this values did not get computed");
-  return start_time;
-}
-
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
 
 static void LogReaderThread(boost::string_ref data, struct percona_playback_run_result *r)
@@ -404,6 +399,13 @@ public:
         default_value(false)->
           zero_tokens(),
        _("Preserves pauses between queries."))
+      ("query-log-disable-sorting",
+       po::value<bool>(&g_disable_sorting)->
+        default_value(false)->
+          zero_tokens(),
+       _("Disables the sorting of queries based on time (and InnoDB TRX ID). "
+         "Instead replays queries in the order they appear in the log. "
+         "Ignored in accurate mode which always does the sorting."))
       ;
 
     return &options;

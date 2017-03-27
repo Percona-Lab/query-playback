@@ -51,7 +51,7 @@ public:
 
   boost::string_ref data; // query including metadata
   mutable uint64_t thread_id; // we cache the thread id
-  TimePoint start_time; // only valid if g_preserve_query_starttime is enabled
+  TimePoint start_time;
 
 public:
   QueryLogData(boost::string_ref data, TimePoint end_time)
@@ -67,8 +67,7 @@ public:
   uint64_t parseRowsExamined() const;
   double parseQueryTime() const;
 
-  // only valid if g_preserve_query_starttime is enabled
-  TimePoint getStartTime() const;
+  TimePoint getStartTime() const { return start_time; }
 
   std::string getQuery(bool remove_timestamp);
 
