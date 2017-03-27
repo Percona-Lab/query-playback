@@ -57,6 +57,7 @@ static bool g_run_set_timestamp;
 static bool g_preserve_query_time;
 static bool g_accurate_mode;
 static bool g_disable_sorting;
+static bool g_use_innodb_trx_id;
 
 static boost::atomic<long long> g_max_behind_ns;
 
@@ -196,6 +197,14 @@ bool QueryLogData::operator <(const QueryLogData& right) const {
   // for same connections we make sure that the follow the order in the query log
   if (parseThreadId() == right.parseThreadId())
     return data.data() < right.data.data();
+
+  if (g_use_innodb_trx_id) {
+    uint64_t id_left = parseInnoDBTrxId();
+    uint64_t id_right = right.parseInnoDBTrxId();
+    if (id_left && id_right)
+      return id_left < id_right;
+  }
+
   return getStartTime() < right.getStartTime();
 }
 
@@ -330,6 +339,19 @@ double QueryLogData::parseQueryTime() const {
   return 0.0;
 }
 
+uint64_t QueryLogData::parseInnoDBTrxId() const {
+  // use cached innodb trx id
+  if (innodb_trx_id != -1)
+    return innodb_trx_id;
+
+  innodb_trx_id = 0;
+  size_t location= find(data, "InnoDB_trx_id: ");
+  if (location != std::string::npos) {
+    innodb_trx_id = strtoull(&data[location + strlen("InnoDB_trx_id: ")], NULL, 16 /* hex number */);
+  }
+  return innodb_trx_id;
+}
+
 extern percona_playback::DBClientPlugin *g_dbclient_plugin;
 
 static void LogReaderThread(boost::string_ref data, struct percona_playback_run_result *r)
@@ -406,6 +428,10 @@ public:
        _("Disables the sorting of queries based on time (and InnoDB TRX ID). "
          "Instead replays queries in the order they appear in the log. "
          "Ignored in accurate mode which always does the sorting."))
+      ("query-log-use-innodb-trx-id",
+       po::value<bool>(&g_use_innodb_trx_id)->
+        default_value(true),
+       _("Uses the InnoDB Transaction Id to sort queries for improved accuracy. (Default: on)"))
       ;
 
     return &options;
