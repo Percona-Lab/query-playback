@@ -52,13 +52,11 @@ public:
   boost::string_ref data; // query including metadata
   mutable uint64_t thread_id; // we cache the thread id
   TimePoint start_time;
-  mutable uint64_t innodb_trx_id;
 
 public:
   QueryLogData(boost::string_ref data, TimePoint end_time)
     : data(data), thread_id(0),
-      start_time(end_time - boost::chrono::microseconds((long)(parseQueryTime() * boost::micro::den))),
-      innodb_trx_id(-1) {
+      start_time(end_time - boost::chrono::microseconds((long)(parseQueryTime() * boost::micro::den))) {
   }
 
   void execute(DBThread *t);
@@ -68,7 +66,6 @@ public:
   uint64_t parseRowsSent() const;
   uint64_t parseRowsExamined() const;
   double parseQueryTime() const;
-  uint64_t parseInnoDBTrxId() const;
 
   TimePoint getStartTime() const { return start_time; }
 
