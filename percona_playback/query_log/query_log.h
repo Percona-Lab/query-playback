@@ -68,6 +68,7 @@ public:
   double parseQueryTime() const;
 
   TimePoint getStartTime() const { return start_time; }
+  void setStartTime(TimePoint tp) { start_time = tp; }
 
   std::string getQuery(bool remove_timestamp);
 

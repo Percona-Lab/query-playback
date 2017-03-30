@@ -49,6 +49,7 @@
 #include <boost/program_options.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 
 namespace po= boost::program_options;
@@ -189,7 +190,23 @@ boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
   std::cerr << _(" Finished reading log entries") << std::endl;
   if (!g_disable_sorting || g_accurate_mode) {
     std::cerr << _(" Start sorting log entries") << std::endl;
+
+    // adjust the start time so that inside every connection the start times of each query is the same as the previous
+    // one or later but never sooner than the previous query.
+    // This could happen because of inaccuraccies in the slowlog and would result in the
+    // execution of queries in the wrong order because of the sorting we do.
+    boost::unordered_map<uint64_t, QueryLogData::TimePoint> last_timestamp_of_conn;
+    for (QueryLogEntries::Entries::iterator it=entries->entries.begin(), end=entries->entries.end(); it != end; ++it) {
+      QueryLogData::TimePoint& tp = last_timestamp_of_conn[it->parseThreadId()];
+      if (it->getStartTime() < tp)
+        it->setStartTime(tp);
+      else
+        tp = it->getStartTime();
+    }
+
+    // sort the queries by start time
     std::stable_sort(entries->entries.begin(), entries->entries.end());
+
     std::cerr << _(" Finished sorting log entries") << std::endl;
   }
   std::cerr << _(" Finished preprocessing - starting playback...") << std::endl;
@@ -198,9 +215,6 @@ boost::shared_ptr<QueryLogEntries> getEntries(boost::string_ref data)  {
 }
 
 bool QueryLogData::operator <(const QueryLogData& right) const {
-  // for same connections we make sure that the follow the order in the query log
-  if (parseThreadId() == right.parseThreadId())
-    return data.data() < right.data.data();
   return getStartTime() < right.getStartTime();
 }
 
