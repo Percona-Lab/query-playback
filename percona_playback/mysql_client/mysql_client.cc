@@ -55,33 +55,62 @@ bool MySQLDBThread::should_print_error(const char* error) {
 
 bool MySQLDBThread::connect()
 {
-  mysql_init(&handle);
-  if (!mysql_real_connect(&handle,
-			  options->host.c_str(),
-			  options->user.c_str(),
-		          options->password.c_str(),
-		          options->schema.c_str(),
-		          options->port,
-		          options->socket.c_str(),
-		          CLIENT_MULTI_STATEMENTS))
-  {
-    ++num_connect_errors;
-    if (should_print_error(mysql_error(&handle)))
-      fprintf(stderr, "Can't connect to server: %s\n",
-              mysql_error(&handle));
+  bool had_too_many_connections;
+  int num_tries;
+  num_tries = 0;
+  do {
+    num_tries++;
+    mysql_init(&handle);
+    had_too_many_connections = false;
+    if (!mysql_real_connect(&handle,
+          options->host.c_str(),
+          options->user.c_str(),
+                options->password.c_str(),
+                options->schema.c_str(),
+                options->port,
+                options->socket.c_str(),
+                CLIENT_MULTI_STATEMENTS))
+    {
+      ++num_connect_errors;
+      if (should_print_error(mysql_error(&handle)))
+        fprintf(stderr, "Can't connect to server: %s\n",
+                mysql_error(&handle));
+      if (mysql_errno(&handle) == 1203)
+        had_too_many_connections = true;
+    }
+    /* Continue attempting to connect until we exceed max_retries,
+       so long as the error is too_many_connections, sleeping
+       incremental amounts to give time for server to catch up */
+  } while (had_too_many_connections == true
+            && num_tries < options->max_retries
+            && usleep(1000000 * num_tries));
+  if ( *mysql_error(&handle) ) {
+    have_connected = false;
     return false;
   }
+  have_connected = true;
   return true;
 }
 
 void MySQLDBThread::disconnect()
 {
-  mysql_close(&handle);
+  /* We must not attempt a mysql_close if we haven't connected */
+  if ( have_connected ) {
+    mysql_close(&handle);
+  }
+  have_connected = false;
 }
 
 void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
-				  const QueryResult &)
+          const QueryResult &)
 {
+  /* We delay connecting until we actually execute queries. If query time
+     is being preserved, this prevents us from connecting and just sleeping
+     around until it's time to run queries */
+  if ( !have_connected ) {
+    connect_and_init_session();
+  }
+
   int mr;
   for(unsigned i = 0; i < options->max_retries + 1; ++i)
   {
@@ -89,12 +118,17 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
     r->setError(mr);
     if(mr != 0)
     {
-      if (should_print_error(mysql_error(&handle)))
+      if (should_print_error(mysql_error(&handle))) {
         fprintf(stderr,
                 "Error during query: %s, number of tries %u of %u\n",
                 mysql_error(&handle),
                 i + 1,
                 options->max_retries + 1);
+      }
+      /* If we have 'too many connections' error, sleep num_tries * 1s */
+      if (mysql_errno(&handle) == 1203) {
+        usleep(1000000 * i);
+      }
       disconnect();
       connect_and_init_session();
     }
@@ -109,10 +143,10 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
         mysql_res= mysql_store_result(&handle);
 
         if (mysql_res != NULL)
-	{
+        {
           r->setRowsSent(mysql_num_rows(mysql_res));
           mysql_free_result(mysql_res);
-	}
+        }
 
       } while(!mysql_next_result(&handle));
 
@@ -123,6 +157,8 @@ void MySQLDBThread::execute_query(const std::string &query, QueryResult *r,
 
 void MySQLDBThread::run()
 {
+  /* Make sure have_connected is initialized */
+  have_connected = false;
   mysql_thread_init();
   DBThread::run();
   mysql_thread_end();
