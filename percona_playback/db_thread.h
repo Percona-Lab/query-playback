@@ -54,12 +54,12 @@ public:
 
   virtual ~DBThread() {}
 
-  bool join()
+  bool nonblocking_join()
   {
       return thread.try_join_for(boost::chrono::milliseconds(1));
   }
 
-  void blocking_join()
+  void join()
   {
       thread.join();
   }
