@@ -36,7 +36,10 @@ void DBThread::init_session()
 
 void DBThread::run()
 {
-  connect_and_init_session();
+  /* Do not connect to the database yet... we might have to sleep
+     before running queries, lets not hog a connection if we don't have
+     to. execute() will now connect for us if we are not connected */
+  // connect_and_init_session();
 
   QueryEntryPtr query;
   do
@@ -58,7 +61,7 @@ void DBThread::run()
   return;
 }
 
-void 
+void
 DBThread::start_thread()
 {
   assert(!thread.joinable());
