@@ -18,6 +18,7 @@
 
 #include <memory>
 #include "percona_playback/visibility.h"
+#include <boost/chrono.hpp>
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <tbb/concurrent_queue.h>
@@ -53,9 +54,14 @@ public:
 
   virtual ~DBThread() {}
 
+  bool nonblocking_join()
+  {
+      return thread.try_join_for(boost::chrono::milliseconds(1));
+  }
+
   void join()
   {
-    thread.join();
+      thread.join();
   }
 
   bool connect_and_init_session()

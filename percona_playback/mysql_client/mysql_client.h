@@ -26,6 +26,8 @@ class MySQLDBThread : public DBThread
   MYSQL handle;
   MySQLOptions *options;
   int num_connect_errors;
+  bool have_connected;
+
 
  public:
   MySQLDBThread(uint64_t _thread_id, MySQLOptions *opt) :
