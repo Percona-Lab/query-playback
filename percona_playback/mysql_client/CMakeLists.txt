@@ -28,7 +28,7 @@ find_file(MYSQL_INC "mysql.h" PATH_SUFFIXES "mysql")
 get_filename_component(MYSQL_INC ${MYSQL_INC} PATH)
 include_directories(${MYSQL_INC})
 
-find_library(MYSQL_LIB "mysqlclient_r" PATH_SUFFIXES "mysql")
+find_library(MYSQL_LIB "mysqlclient" PATH_SUFFIXES "mysql")
 
 add_library(mysql_client mysql_client.cc)
 target_link_libraries(mysql_client ${MYSQL_LIB} crypto ssl)
