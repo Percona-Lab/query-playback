@@ -8,6 +8,15 @@ Query Playback is a tool for replaying the load of one database server to anothe
 
 see `./bin/percona-playback --help` for details
 
+Docker
+------------------
+
+Build docker:   `docker build -t replay -f Dockerfile ../`
+
+Run docker:   `docker run -it --entrypoint=/bin/bash --name replay -d replay`
+
+Login docker:  `docker exec -it replay bash`
+
 Build Dependencies
 ------------------
 Query Playback is mostly comprised of plugins, some of which have their
