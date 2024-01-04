@@ -61,6 +61,22 @@ bool MySQLDBThread::connect()
   do {
     num_tries++;
     mysql_init(&handle);
+    // Set a timeout. for various operations
+    uint32_t mysql_connect_timeout = 300;
+    uint32_t mysql_timeout = 5;
+    if (mysql_options(&handle, MYSQL_OPT_CONNECT_TIMEOUT, &mysql_connect_timeout)) {
+      fprintf(stderr, "Failed to set MYSQL_OPT_CONNECT_TIMEOUT");
+      abort();
+    }
+    if (mysql_options(&handle, MYSQL_OPT_READ_TIMEOUT, &mysql_timeout)) {
+      fprintf(stderr, "Failed to set MYSQL_OPT_READ_TIMEOUT");
+      abort();
+    }
+    if (mysql_options(&handle, MYSQL_OPT_WRITE_TIMEOUT, &mysql_timeout)) {
+      fprintf(stderr, "Failed to set MYSQL_OPT_WRITE_TIMEOUT");
+      abort();
+    }
+
     had_too_many_connections = false;
     if (!mysql_real_connect(&handle,
           options->host.c_str(),
