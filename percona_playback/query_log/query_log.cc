@@ -94,22 +94,24 @@ static boost::string_ref trim(boost::string_ref str, boost::string_ref chars = "
 
 static bool parse_time(boost::string_ref s, QueryLogData::TimePoint& start_time) {
   // Time can look like this
-  //   # Time: 090402 9:23:36
-  // or like this if microseconds granularity is configured.
-  //   # Time: 090402 9:23:36.123456
+  // # Time: 2023-10-19T19:07:56.494508Z
   long long msecs = 0;
   std::tm td;
   memset(&td, 0, sizeof(td));
   std::string line(s.begin(), s.end());
-  int num_read = sscanf(line.c_str(), "# Time: %02d%02d%02d %2d:%02d:%02d.%06lld",
+  int num_read = sscanf(line.c_str(), "# Time: %04d-%02d-%02dT%2d:%02d:%02d.%06lldZ",
                         &td.tm_year, &td.tm_mon, &td.tm_mday, &td.tm_hour, &td.tm_min, &td.tm_sec, &msecs);
-  if (num_read < 6)
+  if (num_read < 7) {
+    printf("Failed to parse ts\n");
     return false;
+  }
 
   // months [0, 11]
   td.tm_mon -= 1;
   // years since 1900
-  td.tm_year += td.tm_year < 70 ? 100 : 0;
+  td.tm_year -= 1900;
+
+//  std::cout << std::asctime(&td) << " " << msecs << std::flush;
   start_time = boost::chrono::system_clock::from_time_t(std::mktime(&td));
   start_time += boost::chrono::microseconds(msecs);
 
